@@ -11660,18 +11660,27 @@ function renderTake(err, val) {
   setAccent(null); show('hub');
   const res = PID ? LS.get(utResKey(), []) : [], cur = PID ? LS.get(utCurKey(), null) : null;
   $('#hub').innerHTML = nav('take') + `<div class="page take-page"><div class="gate-brand">${SVG(IC.cap)}<span>${BRAND}</span></div><h1 class="display">Take a test</h1>
-    <p class="lead">Type the test code your teacher gave you, or paste the test link.</p>
+    <p class="lead">Enter your name, your email, and your teacher’s email, then the test code your teacher gave you.</p>
     ${cur && cur.unit ? `<div class="resume card"><p><b>Test in progress:</b> ${esc(cur.title)}</p><div class="row"><button class="btn primary" id="tkRes">Resume</button></div></div>` : ''}
-    <section class="panel"><form id="tkF" autocomplete="off"><label>Test code<input id="tkIn" class="tk-in" maxlength="400" value="${esc(val || '')}" placeholder="XXXX-XXXX-XXXX-XXX" spellcheck="false" autocapitalize="characters"></label>
+    <section class="panel"><form id="tkF" autocomplete="on"><label>Your full name<input id="tkName" maxlength="60" autocomplete="name" value="${esc(LS.get(`ap.${PID}.ut.name`, '') || '')}" placeholder="First and last name"></label>
+      <label>Your email<input id="tkMail" type="email" maxlength="80" autocomplete="email" value="${esc(myEmail() || '')}" placeholder="you@school.org"></label>
+      <label>Your teacher’s email<input id="tkTo" type="email" maxlength="80" value="${esc((LS.get(`ap.${PID}.teacher`, null) || {}).e || '')}" placeholder="teacher@school.org"></label>
+      <label>Test code<input id="tkIn" class="tk-in" maxlength="400" autocomplete="off" value="${esc(val || '')}" placeholder="XXXX-XXXX-XXXX-XXX" spellcheck="false" autocapitalize="characters"></label>
       <button class="btn primary big" type="submit">Open test</button><div class="err" id="tkErr" role="alert">${err ? esc(err) : ''}</div></form></section>
     ${res.length ? `<p class="small"><a href="#unit-tests">Your submitted tests on this device (${res.length})</a></p>` : ''}
     ${MODE === 'gate' ? `<p class="small muted">Have an Educator Hub account? <a href="#home">Sign in</a> to practice, see your history, and more.</p>` : ''}</div>`;
-  $('#tkF').onsubmit = e => { e.preventDefault(); const v = $('#tkIn').value.trim();
+  $('#tkF').onsubmit = e => { e.preventDefault(); const v = $('#tkIn').value.trim(), nm = $('#tkName').value.trim().replace(/\s+/g, ' '), em = normEmail($('#tkMail').value);
+    const bad = (m, el) => { $('#tkErr').textContent = m; $(el).focus(); };
+    if (nm.length < 3 || !/\s/.test(nm)) return bad('Enter your first and last name so your teacher can match your results.', '#tkName');
+    if (!isEmail(em)) return bad('Enter your email address.', '#tkMail');
+    const to = normEmail($('#tkTo').value); if (!isEmail(to)) return bad('Enter your teacher’s email address so you can send them your results.', '#tkTo');
+    if (!v) return bad('Enter the test code from your teacher.', '#tkIn');
+    LS.set(`ap.${PID}.ut.name`, nm); LS.set('ap.testonly.email', em); LS.set(`ap.${PID}.teacher`, { e: to, r: '' });
     const sc = utShortParse(v); if (sc && sc.stale) return renderTake('This code is from an older version of the question bank. Ask your teacher for the test link instead.', v);
     const p = utParse(v); if (!p) return renderTake('That code doesn’t look right. Check each letter and number and try again.', v);
     if (MODE === 'gate' && !p.ut.o) return renderTake('This test needs you to sign in first. Sign in with your Educator Hub account, or ask your teacher for a code that works without one.', v);
     go('ut-' + p.code); };
-  formFix('#tkF'); $('#tkIn').focus();
+  formFix('#tkF'); (!$('#tkName').value ? $('#tkName') : !$('#tkMail').value ? $('#tkMail') : !$('#tkTo').value ? $('#tkTo') : $('#tkIn')).focus();
   if ($('#tkRes')) $('#tkRes').onclick = () => { T = cur; X = BY_ID[T.testId]; enterExam(); };
 }
 function renderTestOnly(h) {
