@@ -780,7 +780,7 @@ svg.perf .axt { font-size: 10.5px; fill: var(--muted); font-family: var(--font-u
 .selfscore.rub { display: block; }
 .rubck { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 6px; }
 .rubck label { display: grid; grid-template-columns: 20px 46px minmax(0, 1fr); gap: 8px; align-items: start; font-size: 14px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); cursor: pointer; }
-.rubck .pt { font-weight: 700; font-family: var(--font-mono); font-size: 12.5px; color: var(--accent); }
+.rubck .rpt { font-weight: 700; font-family: var(--font-mono); font-size: 12.5px; color: var(--accent); }
 .autotag { display: inline-block; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 1px 6px; border-radius: 4px; background: var(--good-soft); color: var(--good); }
 table.rubric { width: 100%; border-collapse: collapse; font-size: 14px; }
 table.rubric th, table.rubric td { border-bottom: 1px solid var(--line); padding: 8px; text-align: left; vertical-align: top; }
@@ -832,7 +832,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .sb-steps { margin: 0; padding-left: 22px; display: grid; gap: 14px; font-size: 14px; }
 .sb-steps li { padding-left: 4px; }
 .sb-steps li::marker { font-weight: 800; color: var(--ember); }
-.sb-steps li > b { display: block; margin-bottom: 6px; }
+.sb-steps li > b.sb-h { display: block; margin-bottom: 6px; }
 .sb-steps .btn[data-sb="sent"] { margin-left: 8px; vertical-align: middle; }
 .sb-btns { margin: 8px 0 6px; gap: 10px; }
 .sb-to { max-width: 520px; } .sb-to input { font-family: var(--font-ui); font-size: 14px; }
@@ -895,6 +895,41 @@ input[type="date"] { padding: 9px 11px; border-radius: 8px; border: 1px solid va
 .coach-tab:hover { background: var(--ember); border-color: var(--ember); }
 @media (max-width: 1020px) { .lab { grid-template-columns: minmax(0, 1fr); gap: 16px; } .lab-lib { padding: 14px; border-bottom: 0; } }
 .exam-plan { display: grid; gap: 4px; padding: 12px 14px; border-radius: 10px; background: var(--accent-soft); border: 1px solid var(--line); font-size: 13.5px; } .exam-plan span { color: var(--muted); font-size: 13px; }
+
+/* alignment pass */
+.mode { min-width: 0; }
+.opt { min-width: 0; } .opt select { flex: 1 1 200px; min-width: 0; max-width: 100%; } .opt .btn { max-width: 100%; white-space: normal; text-align: center; min-height: 40px; height: auto; padding-block: 8px; }
+.utlist { padding-left: 0; list-style: none; counter-reset: utn; }
+.utlist li { display: grid; grid-template-columns: 26px 64px minmax(0, 1fr) auto; gap: 10px; align-items: baseline; counter-increment: utn; }
+.utlist li::before { content: counter(utn) "."; color: var(--muted); font-size: 13px; text-align: right; }
+.utlist li > span { margin-right: 0; min-width: 0; }
+.utlist .linkbtn { float: none; justify-self: end; white-space: nowrap; }
+@media (max-width: 560px) { .utlist li { grid-template-columns: 22px minmax(0, 1fr) auto; } .utlist li .u-n { grid-column: 2; } .utlist li .ut-stem { grid-column: 2 / 4; grid-row: 2; } .utlist li .linkbtn { grid-column: 3; grid-row: 1; } }
+/* dashboard sections size themselves by the main column's width (it shares the row with the right-hand rail) */
+.dash-main { container-type: inline-size; container-name: dmain; }
+@container dmain (max-width: 900px) {
+  .dash-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .dash-row > :first-child { grid-column: 1 / -1; }
+  .minis { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}
+@container dmain (max-width: 760px) {
+  .subjs { grid-template-columns: minmax(0, 1fr); }
+  .subj-card > p { min-height: 0; }
+}
+@container dmain (max-width: 560px) {
+  .dash-row, .minis { grid-template-columns: minmax(0, 1fr); }
+}
+.improve li > span { min-width: 0; overflow-wrap: anywhere; }
+.mode .opt > * { min-width: 0; }
+.mode .opt select { flex: 1 1 100%; width: 100%; }
+.hist td:last-child, .hist td:nth-last-child(2) { white-space: nowrap; }
+@media (max-width: 600px) { .cpanel { max-height: none; padding: 14px 14px; } }
+
+@media (max-width: 1020px) { .modes { grid-template-columns: minmax(0, 1fr); gap: 16px; } .mode, .mode + .mode { padding: 22px; border-left: 0; } }
+@media (max-width: 700px) { .tablewrap > table.hist, .tablewrap > table.adm { min-width: 560px; } }
+@media (max-width: 560px) { .card-h:not(.sm) { flex-wrap: wrap; } .card-h:not(.sm) .more { margin-left: 0; order: 3; flex-basis: 100%; } }
+
+.paper-sel { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.paper-sel select { padding: 6px 8px; font-size: 13px; }
 
 </style>
 </head><body>
@@ -6567,6 +6602,10 @@ const initials = n => { const w = String(n || '').replace(/@.*/, '').replace(/[^
 const prettyName = n => { const s = String(n || ''); if (!s.includes('@')) return s; const w = s.replace(/@.*/, '').replace(/[0-9]+/g, ' ').split(/[._\-+\s]+/).filter(Boolean); return w.length ? w.map(p => p[0].toUpperCase() + p.slice(1)).join(' ') : s.replace(/@.*/, ''); };
 const meName = () => { const m = me(); return m ? prettyName(m.name) : ''; };
 const roleName = () => MODE === 'owner' ? (ADMIN_ROLE === 'editor' ? 'Teacher · editor' : 'Teacher') : isTeacher() ? 'Teacher' : 'Student';
+/* the red dot shows only for notifications the viewer hasn't opened yet */
+const noteKey = n => n.t + '|' + (n.href || '');
+const seenKey = () => `ap.${PID || 'anon'}.notes.seen`;
+const unseenNotes = () => { const seen = new Set(LS.get(seenKey(), [])); return notes().filter(n => !seen.has(noteKey(n))); };
 function notes() {
   const out = [];
   if (me()) TESTS.forEach(x => { const c = loadCur(x); if (c) out.push({ ic: 'resume', href: '#' + x.id, t: `${c.practice ? 'Practice set' : 'Test'} in progress`, s: x.subject + ' · ' + c.ans.filter(a => a.length).length + ' of ' + c.items.length + ' answered' }); });
@@ -6577,7 +6616,7 @@ function notes() {
   return out;
 }
 function nav(active) {
-  const cur = navKey(active), owner = MODE === 'owner', nNotes = me() ? notes().length : 0;
+  const cur = navKey(active), owner = MODE === 'owner', nNotes = me() ? notes().length : 0, nNew = me() ? unseenNotes().length : 0;
   const link = ([k, l, ic]) => `<a href="#${k}" ${cur === k ? 'aria-current="page"' : ''}>${SVG(IC[ic])}<span>${l}</span></a>`;
   const side = `<aside class="side" id="side" aria-label="Main menu">
     <a class="side-brand" href="#home" aria-label="${BRAND} home"><span class="sb-ic">${SVG(IC.cap)}</span><span><b>${BRAND}</b><small>Practice · Improve · Succeed</small></span></a>
@@ -6590,7 +6629,7 @@ function nav(active) {
   const top = `<header class="topbar"><button class="tb-icon menu-btn" id="menuBtn" aria-label="Open menu" aria-controls="side" aria-expanded="false">${SVG(IC.menu)}</button><a class="tb-brand" href="#home">${BRAND}</a><span class="spacer"></span>
     ${owner && ROOM ? `<a class="live-pill ${liveCount() ? '' : 'zero'}" id="livePill" href="#admin" title="People on the site right now (only you can see this)"><i></i> ${liveCount()}</a>` : ''}
     ${MODE === 'owner' || MODE === 'member' ? `<button class="tb-icon" id="fbBtn" title="Report a problem or send a suggestion" aria-label="Send feedback">${SVG(IC.help)}</button>` : ''}
-    ${me() ? `<div class="bell-wrap"><button class="tb-icon" id="bellBtn" aria-label="Notifications${nNotes ? ' (' + nNotes + ')' : ''}" aria-expanded="false">${SVG(IC.bell)}${nNotes ? '<i class="dot"></i>' : ''}</button><div class="pop" id="bellPop" hidden></div></div>
+    ${me() ? `<div class="bell-wrap"><button class="tb-icon" id="bellBtn" aria-label="Notifications${nNotes ? ' (' + nNotes + ')' : ''}" aria-expanded="false">${SVG(IC.bell)}${nNew ? '<i class="dot"></i>' : ''}</button><div class="pop" id="bellPop" hidden></div></div>
     <button class="who" id="whoBtn" aria-label="Account: ${esc(meName())}"><span class="av">${esc(initials(meName()))}</span><span class="who-t"><b>${esc(meName())}</b><small>${roleName()}</small></span>${SVG(IC.down)}</button>` : ''}</header>`;
   return (PERSIST ? '' : `<div class="memnote" role="status">This browser view is blocking saved data, so your scores last only until you close this page. To keep your progress, open the page in a regular (not private) browser window.</div>`) + side + top;
 }
@@ -6610,7 +6649,8 @@ function bindNav() {
   const bb = $('#bellBtn'), pop = $('#bellPop');
   if (bb && pop) bb.onclick = e => { e.stopPropagation(); const open = pop.hidden; const ns = notes();
     pop.innerHTML = `<div class="pop-h">Notifications</div>${ns.length ? ns.map(n => `<${n.href ? `a href="${n.href}"` : 'div'} class="pop-i">${SVG(IC[n.ic])}<span><b>${esc(n.t)}</b><small>${esc(n.s)}</small></span></${n.href ? 'a' : 'div'}>`).join('') : '<p class="pop-e">You’re all caught up.</p>'}`;
-    pop.hidden = !open; bb.setAttribute('aria-expanded', open); };
+    pop.hidden = !open; bb.setAttribute('aria-expanded', open);
+    if (open) { LS.set(seenKey(), ns.map(noteKey)); const dot = bb.querySelector('.dot'); if (dot) dot.remove(); bb.setAttribute('aria-label', 'Notifications'); } };
 }
 document.addEventListener('click', e => { const p = document.getElementById('bellPop'); if (p && !p.hidden && !e.target.closest('.bell-wrap')) { p.hidden = true; const b = document.getElementById('bellBtn'); if (b) b.setAttribute('aria-expanded', 'false'); } if (document.body.classList.contains('side-open') && !e.target.closest('.side') && !e.target.closest('#menuBtn')) document.body.classList.remove('side-open'); });
 
@@ -7458,7 +7498,7 @@ function renderResults(rec, fresh) {
         ${rec.ap ? `<div class="apline">${apBadge(rec.ap.score, 'lg')}<div><b>Estimated AP score: ${rec.ap.score}</b><span class="small muted">${AP_WORD[rec.ap.score]} · composite ${rec.ap.comp}% · a rough estimate, not an official score</span></div></div>` : rec.mode === 'full' && !rec.practice && t && !t.done ? '<p class="small notice" style="margin:0 0 10px">Score your free-response answers below to see your estimated AP score (1–5).</p>' : ''}
         <p class="muted" style="margin:0 0 14px">${rec.practice ? 'Practice mode · ' : ''}Time ${rec.practice ? 'spent' : 'used'}: <span class="mono">${fmtDur(rec.used)}</span>. ${msg}</p>
         ${rec.practice ? sumSW() : ''}
-        <div class="row"><button class="btn primary" id="againB">${rec.mode === 'calc' ? 'New calculation set' : rec.practice ? 'New practice set' : rec.mode === 'full' ? 'Take a new simulation' : 'Same unit again'}</button>${weakest ? `<button class="btn" id="drillW">Practice Unit ${weakest.k}: ${esc(weakest.short)}</button>` : ''}<a class="btn" href="#${x.id}">Back to ${esc(x.subject)}</a><button class="btn quiet" id="scPdf">${SVG(IC.dl)} Score card (PDF)</button></div></div>`;
+        <div class="row"><button class="btn primary" id="againB">${rec.mode === 'calc' ? 'New calculation set' : rec.practice ? 'New practice set' : rec.mode === 'full' ? 'Take a new simulation' : 'Same unit again'}</button>${weakest ? `<button class="btn" id="drillW">Practice Unit ${weakest.k}: ${esc(weakest.short)}</button>` : ''}<a class="btn" href="#${x.id}">Back to ${esc(x.subject)}</a><button class="btn quiet" id="scPdf">${SVG(IC.dl)} Score card (PDF)</button>${paperSel()}</div></div>`;
   };
   const icon = (q, i) => { if (isCR(q)) { const v = rec.cr && rec.cr.sc[i]; return `<span class="ic cr ${v == null ? 'un' : ''}">${v == null ? '?' : v}</span>`; }
     const a = rec.ans[i]; return !a.length ? '<span class="ic skip">○</span>' : isRight(q, a) ? '<span class="ic ok">✓</span>' : '<span class="ic no">✕</span>'; };
@@ -7482,7 +7522,7 @@ function renderResults(rec, fresh) {
       <div class="crq">${fmtPrompt(q.stem)}</div>
       <div class="crans"><div class="lbl">Your response</div><div class="txt">${a[0] ? esc(a[0]) : '<i>No response</i>'}</div></div>
       ${rc ? `<div class="selfscore rub"><p style="margin:0 0 8px"><b>Score it like an AP reader.</b> Check each point your answer earns. Points marked <span class="autotag">auto</span> were detected automatically; confirm or uncheck them.</p>
-        <ul class="rubck">${rc.map((r, j) => `<li><label><input type="checkbox" data-rk="${i}" data-rj="${j}" ${r.on ? 'checked' : ''}><span class="pt">${r.pts} pt${r.pts > 1 ? 's' : ''}</span><span>${F(esc(r.t))}${r.auto ? ' <span class="autotag">auto</span>' : ''}</span></label></li>`).join('')}</ul>
+        <ul class="rubck">${rc.map((r, j) => `<li><label><input type="checkbox" data-rk="${i}" data-rj="${j}" ${r.on ? 'checked' : ''}><span class="rpt">${r.pts} pt${r.pts > 1 ? 's' : ''}</span><span>${F(esc(r.t))}${r.auto ? ' <span class="autotag">auto</span>' : ''}</span></label></li>`).join('')}</ul>
         <div class="row"><button class="btn primary" data-rsave="${i}">${v == null ? 'Save score' : 'Update score'}</button><span class="small muted" id="rsum-${i}">${rc.filter(r => r.on).reduce((s, r) => s + r.pts, 0)} of ${q.max} points checked</span></div></div>`
       : `<div class="selfscore"><span>Compare your response with the scoring guide and the sample, then choose your score:</span>${[...Array(q.max + 1).keys()].map(n => `<button class="chip" data-ss="${i}" data-v="${n}" aria-pressed="${v === n}">${n}</button>`).join('')}</div>`}</article>`; };
   const draw = () => {
@@ -8147,7 +8187,7 @@ function pdfLib() {
   return PDF_P;
 }
 const scopeCss = (css, scope) => css.replace(/(^|\})\s*([^{}@]+)\{/g, (m, b, sels) => b + sels.split(',').map(s => s.trim() === 'body' ? scope : scope + ' ' + s.trim()).join(',') + '{');
-const SC_CSS = `.sc{font:10.5pt/1.45 Arial,Helvetica,sans-serif;color:#111}.sc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border-bottom:3px solid #13284a;padding-bottom:10px;margin-bottom:14px}.sc-brand{font:700 10pt Arial;color:#13284a;letter-spacing:.06em;text-transform:uppercase}.sc-top h1{font:700 18pt Arial;margin:4px 0 2px;color:#0b1730}.sc-top p{margin:0;color:#444}.sc-who{text-align:right;font-size:10pt;color:#333}.sc-who b{font-size:12pt;color:#000}.sc-kpis{display:flex;gap:10px;margin:0 0 14px}.sc-k{flex:1;border:1.5px solid #d5dbe7;border-radius:10px;padding:10px 12px}.sc-k small{display:block;color:#555;font-size:8.5pt;text-transform:uppercase;letter-spacing:.05em}.sc-k b{display:block;font-size:20pt;color:#0b1730;margin-top:2px}.sc-k span{font-size:9pt;color:#555}.sc-ap{display:inline-block;width:30px;height:30px;line-height:30px;text-align:center;border-radius:50%;background:#13284a;color:#fff;font:700 15pt Arial;vertical-align:middle;margin-right:6px}.sc h2{font:700 11.5pt Arial;margin:16px 0 6px;color:#13284a}.sc table{width:100%;border-collapse:collapse;font-size:9.5pt}.sc th{background:#eef2f8;text-align:left}.sc td,.sc th{border:1px solid #c9d1df;padding:4px 7px;vertical-align:top}.sc-bar{height:8px;background:#e8ecf3;border-radius:4px;overflow:hidden;min-width:120px}.sc-bar i{display:block;height:100%;background:#2a9a55}.sc-bar i.mid{background:#d99a1c}.sc-bar i.lo{background:#d0443c}.sc .ok{color:#1d7a40;font-weight:700}.sc .no{color:#b4322b;font-weight:700}.sc-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}.sc-cell{border:1px solid #c9d1df;border-radius:5px;padding:3px 0;text-align:center;font-size:8.5pt}.sc-cell b{display:block;font-size:8pt;color:#666;font-weight:400}.sc-cell.ok{background:#e9f6ee}.sc-cell.no{background:#fbeceb}.sc-frq{border:1px solid #d5dbe7;border-radius:8px;padding:8px 10px;margin:8px 0;break-inside:avoid;page-break-inside:avoid}.sc-frq pre{white-space:pre-wrap;font:9.5pt/1.4 Georgia,serif;margin:6px 0;background:#f7f8fb;padding:6px 8px;border-radius:6px}.sc-frq ul{margin:4px 0 0;padding-left:4px;list-style:none;font-size:9pt}.sc-frq li.on{color:#1d7a40}.sc-frq li.off{color:#777}.sc-foot{margin-top:16px;border-top:1px solid #ccd;padding-top:8px;font-size:8pt;color:#555;word-break:break-all}.sc-note{font-size:9pt;color:#555;margin:6px 0 0}.ws-q{break-inside:avoid;page-break-inside:avoid;margin:0 0 10px;border:1px solid #c9d1df;border-radius:8px;padding:8px 10px}.ws-q .ws-n{font:700 10pt Arial;color:#13284a}.ws-work{height:1.55in;border:1px dashed #b8c1d1;border-radius:6px;margin:6px 0 4px;position:relative}.ws-work span{position:absolute;left:8px;top:4px;font:8pt Arial;color:#99a}.ws-ans{font:10pt Arial}.ws-key td:first-child{width:28px}`;
+const SC_CSS = `.pp,.sc{overflow-wrap:anywhere}.pp table{max-width:100%}.ws-q,.ws-key{max-width:100%}.sc{font:10.5pt/1.45 Arial,Helvetica,sans-serif;color:#111}.sc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border-bottom:3px solid #13284a;padding-bottom:10px;margin-bottom:14px}.sc-brand{font:700 10pt Arial;color:#13284a;letter-spacing:.06em;text-transform:uppercase}.sc-top h1{font:700 18pt Arial;margin:4px 0 2px;color:#0b1730}.sc-top p{margin:0;color:#444}.sc-who{text-align:right;font-size:10pt;color:#333}.sc-who b{font-size:12pt;color:#000}.sc-kpis{display:flex;gap:10px;margin:0 0 14px}.sc-k{flex:1;border:1.5px solid #d5dbe7;border-radius:10px;padding:10px 12px}.sc-k small{display:block;color:#555;font-size:8.5pt;text-transform:uppercase;letter-spacing:.05em}.sc-k b{display:block;font-size:20pt;color:#0b1730;margin-top:2px}.sc-k span{font-size:9pt;color:#555}.sc-ap{display:inline-block;width:30px;height:30px;line-height:30px;text-align:center;border-radius:50%;background:#13284a;color:#fff;font:700 15pt Arial;vertical-align:middle;margin-right:6px}.sc h2{font:700 11.5pt Arial;margin:16px 0 6px;color:#13284a}.sc table{width:100%;border-collapse:collapse;font-size:9.5pt}.sc th{background:#eef2f8;text-align:left}.sc td,.sc th{border:1px solid #c9d1df;padding:4px 7px;vertical-align:top}.sc-bar{height:8px;background:#e8ecf3;border-radius:4px;overflow:hidden;min-width:120px}.sc-bar i{display:block;height:100%;background:#2a9a55}.sc-bar i.mid{background:#d99a1c}.sc-bar i.lo{background:#d0443c}.sc .ok{color:#1d7a40;font-weight:700}.sc .no{color:#b4322b;font-weight:700}.sc-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}.sc-cell{border:1px solid #c9d1df;border-radius:5px;padding:3px 0;text-align:center;font-size:8.5pt}.sc-cell b{display:block;font-size:8pt;color:#666;font-weight:400}.sc-cell.ok{background:#e9f6ee}.sc-cell.no{background:#fbeceb}.sc-frq{border:1px solid #d5dbe7;border-radius:8px;padding:8px 10px;margin:8px 0;break-inside:avoid;page-break-inside:avoid}.sc-frq pre{white-space:pre-wrap;font:9.5pt/1.4 Georgia,serif;margin:6px 0;background:#f7f8fb;padding:6px 8px;border-radius:6px}.sc-frq ul{margin:4px 0 0;padding-left:4px;list-style:none;font-size:9pt}.sc-frq li.on{color:#1d7a40}.sc-frq li.off{color:#777}.sc-foot{margin-top:16px;border-top:1px solid #ccd;padding-top:8px;font-size:8pt;color:#555;word-break:break-all}.sc-note{font-size:9pt;color:#555;margin:6px 0 0}.ws-q{break-inside:avoid;page-break-inside:avoid;margin:0 0 10px;border:1px solid #c9d1df;border-radius:8px;padding:8px 10px}.ws-q .ws-n{font:700 10pt Arial;color:#13284a}.ws-work{height:1.55in;border:1px dashed #b8c1d1;border-radius:6px;margin:6px 0 4px;position:relative}.ws-work span{position:absolute;left:8px;top:4px;font:8pt Arial;color:#99a}.ws-ans{font:10pt Arial}.ws-key td:first-child{width:34px}.pp-key td:first-child,.pp-key td.ans,.pp-key th{white-space:nowrap;overflow-wrap:normal}`;
 /* Lay the content out into whole pages ourselves, so a question always stays together with its answer choices
    (and a table row, a free-response prompt, a worksheet problem or a score-card block never splits), then draw each
    page separately into the PDF. Lists and tables that continue onto a new page are reopened there (numbering and
@@ -8193,27 +8233,34 @@ function pdfPaginate(src, limit) {
   }
   return pages.filter(p => p.childNodes.length);
 }
+/* paper size for every PDF: A4 or US Letter (default from the browser's language; A4 outside the US/Canada/Mexico/Philippines) */
+const PAPER = { a4: { w: 8.27, h: 11.69, label: 'A4' }, letter: { w: 8.5, h: 11, label: 'Letter' } };
+const paperDefault = () => { try { return /^(en-US|en-CA|es-MX|fil|en-PH)/i.test(navigator.language || '') ? 'letter' : 'a4'; } catch (e) { return 'a4'; } };
+const paperKind = () => { const p = LS.get('ap.paper', null); return PAPER[p] ? p : paperDefault(); };
+const paperSel = () => `<label class="paper-sel">Paper <select data-paper aria-label="Paper size">${Object.entries(PAPER).map(([k, v]) => `<option value="${k}" ${k === paperKind() ? 'selected' : ''}>${v.label}</option>`).join('')}</select></label>`;
+document.addEventListener('change', e => { if (e.target && e.target.matches && e.target.matches('[data-paper]')) { LS.set('ap.paper', e.target.value); $$('[data-paper]').forEach(s => { s.value = e.target.value; }); } });
 async function makePdf(pagesHTML, filename, btn) {
   const lbl = btn ? btn.innerHTML : ''; if (btn) { btn.disabled = true; btn.textContent = 'Making PDF…'; }
   let host = null, sy = null;
   try {
     const lib = await pdfLib();
-    host = document.createElement('div'); host.className = 'pdf-host';
+    const PK = paperKind(), PP = PAPER[PK], M = [0.45, 0.45, 0.5, 0.45];
+    host = document.createElement('div'); host.className = 'pdf-host'; host.style.width = (PP.w - M[1] - M[3]).toFixed(2) + 'in';
     host.innerHTML = `<style>${scopeCss(PRINT_CSS + SC_CSS + '.pp{padding:0;max-width:none}', '.pdfdoc')}.pdfpage{background:#fff;display:flow-root}</style><div class="pdfdoc">${pagesHTML}</div>`;
     document.body.appendChild(host);
     /* html2canvas draws relative to the scroll position, so render from the top and restore afterwards */
     sy = window.scrollY; window.scrollTo(0, 0);
-    const M = [0.45, 0.45, 0.5, 0.45], W = host.querySelector('.pdfdoc').getBoundingClientRect().width;
-    const limit = Math.floor(W * (11 - M[0] - M[2]) / (8.5 - M[1] - M[3]) * 0.99);
+    const W = host.querySelector('.pdfdoc').getBoundingClientRect().width;
+    const limit = Math.floor(W * (PP.h - M[0] - M[2]) / (PP.w - M[1] - M[3]) * 0.99);
     const pages = pdfPaginate(host.querySelector('.pdfdoc'), limit);
     /* writing-line pages must not run even a pixel past the page, or a sliver spills onto an extra page: measure and trim */
-    { const hard = Math.floor(W * (11 - M[0] - M[2]) / (8.5 - M[1] - M[3])) - 3, box = document.createElement('div'); host.appendChild(box);
+    { const hard = Math.floor(W * (PP.h - M[0] - M[2]) / (PP.w - M[1] - M[3])) - 3, box = document.createElement('div'); host.appendChild(box);
       for (const pg of pages) { box.appendChild(pg); let lines = [...pg.querySelectorAll('.pp-lines i')];
         while (lines.length > 1 && pg.getBoundingClientRect().height > hard) { lines.pop().remove(); }
         box.removeChild(pg); }
       box.remove(); }
     const opt = { margin: M, filename, image: { type: 'jpeg', quality: 0.88 }, html2canvas: { scale: 1.7, backgroundColor: '#ffffff', logging: false, scrollX: 0, scrollY: 0 },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }, pagebreak: { mode: [] } };
+      jsPDF: { unit: 'in', format: PK === 'a4' ? 'a4' : 'letter', orientation: 'portrait' }, pagebreak: { mode: [] } };
     let w = lib().set(opt).from(pages[0]).toPdf();
     for (const pg of pages.slice(1)) w = w.get('pdf').then(pdf => { pdf.addPage(); }).from(pg).toContainer().toCanvas().toPdf();
     const blob = await w.outputPdf('blob');
@@ -8260,11 +8307,11 @@ function sendBoxHTML(o) {
   return `<h2>${SVG(IC.mail)} Send your results to your teacher</h2>${autoLine}
     <p class="small" style="margin:0 0 12px">${o.lead || 'Your teacher needs a copy of these results. Follow the three steps below.'}</p>
     <ol class="sb-steps">
-      <li><b>Check your teacher’s school email address.</b>${o.editable ? `<div class="copyline sb-to"><input type="email" data-sb="to" value="${esc(o.to)}" placeholder="teacher@school.org" aria-label="Teacher's school email"><button class="btn quiet" data-sb="setto">Use this address</button></div>` : `<div class="sb-addr">${esc(o.to)}</div>`}</li>
-      <li><b>Send the email.</b> ${relay ? 'Send it automatically, or open' : 'Open'} it in your email with everything filled in, then press <b>Send</b>. Use your school email account if you have one, so your teacher knows it’s you.
+      <li><b class="sb-h">Check your teacher’s school email address.</b>${o.editable ? `<div class="copyline sb-to"><input type="email" data-sb="to" value="${esc(o.to)}" placeholder="teacher@school.org" aria-label="Teacher's school email"><button class="btn quiet" data-sb="setto">Use this address</button></div>` : `<div class="sb-addr">${esc(o.to)}</div>`}</li>
+      <li><b class="sb-h">Send the email.</b> ${relay ? 'Send it automatically, or open' : 'Open'} it in your email with everything filled in, then press <b>Send</b>. Use your school email account if you have one, so your teacher knows it’s you.
         <div class="row sb-btns">${relay ? `<button class="btn primary" data-sb="auto">${SVG(IC.send)} Send automatically</button>` : ''}<a class="btn ${relay ? '' : 'primary'}" href="${gmailHref(o.to, m)}" target="_blank" rel="noopener">Open in Gmail</a><a class="btn" href="${mailtoHref(o.to, m)}" target="_blank" rel="noopener">Open in my email app</a><button class="btn quiet" data-sb="copy">Copy results</button><span class="copied" data-sb="msg" aria-live="polite"></span></div>
         <span class="small muted">No email window? Use <b>Copy results</b>, then paste into a new email to ${esc(o.to || 'your teacher')}.</span></li>
-      <li><b>Confirm it was sent.</b> Check your Sent folder first.${o.unlock ? ' ' + o.unlock : ''} <button class="btn primary" data-sb="sent">I sent my results</button></li></ol>
+      <li><b class="sb-h">Confirm it was sent.</b> Check your Sent folder first.${o.unlock ? ' ' + o.unlock : ''} <button class="btn primary" data-sb="sent">I sent my results</button></li></ol>
     <details class="sb-prev"><summary class="small">Preview the email</summary><pre class="cm-body">${esc('To: ' + o.to + '\nSubject: ' + m.subject + '\n\n' + m.body)}</pre></details>`;
 }
 function bindSendBox(root, o, cb) {
@@ -8352,7 +8399,7 @@ function renderUtNew() {
   const shownF = fp.concat(fpAll.filter(c => st.fsel.includes(c.id) && !fp.includes(c)));
   const draftHTML = d ? (() => { const ut = d.ut, items = utItems(ut), code = utCode(ut), nf = ut.f.length;
     return `<section class="card" style="margin-top:18px" id="utDraft"><div class="card-h sm"><h3>${esc(ut.n)}</h3><span class="small muted">${utMcq(items).length} multiple choice${nf ? ' + ' + nf + ' free response' : ''} · ${ut.m ? ut.m + ' min' : 'no time limit'}</span></div>
-      <div class="row ut-acts"><button class="btn primary" id="utSave">${d.saved ? '✓ Saved' : 'Save test'}</button><a class="btn" href="#assign" id="utAssign">${SVG(IC.assign)} Assign to students</a>${pdfBtn('utPdfBoth', 'PDF: test + answer key')}${pdfBtn('utPdfTest', 'PDF: test only')}${pdfBtn('utPdfSheet', 'PDF: answer sheet')}${IN_VIEWER ? '' : '<button class="btn quiet" data-utp="test">Print test</button><button class="btn quiet" data-utp="key">Print key</button>'}<button class="btn quiet" data-utdl="1">${SVG(IC.print)} Printable web page</button><button class="btn quiet" id="utTry">Preview as a student</button></div>
+      <div class="row ut-acts"><button class="btn primary" id="utSave">${d.saved ? '✓ Saved' : 'Save test'}</button><a class="btn" href="#assign" id="utAssign">${SVG(IC.assign)} Assign to students</a>${pdfBtn('utPdfBoth', 'PDF: test + answer key')}${pdfBtn('utPdfTest', 'PDF: test only')}${pdfBtn('utPdfSheet', 'PDF: answer sheet')}${paperSel()}${IN_VIEWER ? '' : '<button class="btn quiet" data-utp="test">Print test</button><button class="btn quiet" data-utp="key">Print key</button>'}<button class="btn quiet" data-utdl="1">${SVG(IC.print)} Printable web page</button><button class="btn quiet" id="utTry">Preview as a student</button></div>
       <div class="share"><label class="small">Your website address (where students open the site)<div class="copyline"><input id="utSite" value="${esc(siteBase())}" spellcheck="false"><button class="btn quiet" id="utSiteB">Update link</button></div></label><label class="small">Student link<div class="copyline"><input readonly value="${esc(utLink(code))}" id="utLinkIn"><button class="btn" data-copy="#utLinkIn">Copy link</button></div></label>
         <label class="small">Or share the test code (students paste it on the Unit Tests page)<div class="copyline"><input readonly value="${esc(code)}" id="utCodeIn"><button class="btn" data-copy="#utCodeIn">Copy code</button></div></label><span class="copied" id="utCopied" aria-live="polite"></span></div>
       <ol class="utlist">${items.map((q, i) => `<li><span class="u-n ${q.type === 'cr' ? 'frq' : ''}">${q.type === 'cr' ? 'FRQ' : 'Unit ' + q.cat}</span><span class="ut-stem">${q.type === 'cr' ? `<b>${esc(CASES[q.caseId].title)}</b> <span class="muted">· ${esc(frqLabel(CASES[q.caseId]))} · ${q.max} pts</span>` : F(String(q.stem).replace(/<table[\s\S]*?<\/table>/g, '[table]').replace(/<[^>]+>/g, ' ').slice(0, 170))}${q.type !== 'cr' && String(q.stem).length > 170 ? '…' : ''}</span>${q.type === 'cr' ? `<button class="linkbtn sm" data-frm="${q.caseId}" style="color:var(--bad)">Remove</button>` : `<button class="linkbtn sm" data-swap="${i}">Replace</button>`}</li>`).join('')}</ol></section>`; })() : '';
@@ -8611,7 +8658,7 @@ async function renderUtResult(idx, fresh) {
     <div class="crumb"><a href="#unit-tests">Unit Tests</a> / ${esc(r.ut.n)}</div>
     <section class="panel score">${ring(r.pct)}<div><div class="eyebrow">${esc(r.ut.n)} · ${fmtDate(r.date)}${r.auto ? ' · time ran out' : ''}</div><h1>Multiple choice: ${r.correct} of ${r.n} correct</h1>
       <p class="muted" style="margin:0 0 10px">${fr ? `Your ${fr} free-response answer${fr > 1 ? 's are' : ' is'} scored by your teacher. ` : ''}Time used: <span class="mono">${fmtDur(r.used)}</span>.</p>
-      <div class="row">${pdfBtn('utScPdf', 'Download score card (PDF)')}</div></div></section>
+      <div class="row">${pdfBtn('utScPdf', 'Download score card (PDF)')}${paperSel()}</div></div></section>
     <section class="card sendbox ${r.sent ? 'done' : ''}" id="sendBox" style="margin-top:18px">${sendBoxHTML({ to: m.to, mail: m, sent: r.sent, auto: r.autoSt, site: r.site, relay: r.ut.r, unlock: r.ut.a === 'send' ? 'Your answers and explanations unlock after you confirm.' : '' })}</section>
     <section style="margin-top:18px">${reveal() ? `<h2 class="ch">Answers and explanations</h2>${utReviewHTML(r)}` : r.sent ? '<div class="card empty">Your teacher will go over the answers in class.</div>' : `<div class="card empty">${r.ut.a === 'send' ? 'Answers and explanations unlock after you send your results.' : 'Your teacher will go over the answers in class after everyone has taken the test.'}</div>`}</section>
     ${foot()}</div>`;
@@ -8759,7 +8806,7 @@ function renderUtCheck() {
       <div class="utc-k"><div><small>Multiple choice (recalculated)</small><b>${r.c}/${r.n} · ${r.n ? Math.round(r.c / r.n * 100) : 0}%</b></div>${tt.fq.length ? `<div><small>Free response${tt.confirmed ? '' : ' (auto, confirm below)'}</small><b>${tt.fp}/${tt.fm}</b></div>${r.n ? `<div><small>Combined (50/50)</small><b>${tt.comb}%</b></div>` : ''}` : ''}</div>
       ${tt.fq.map((f, k) => `<div class="utc-frq"><h4>Free response ${k + 1}: ${esc(CASES[f.o.q.caseId] ? CASES[f.o.q.caseId].title : '')} <span class="muted">(${f.max} points)</span></h4>
         <div class="crans"><div class="lbl">Student response</div><div class="txt">${f.o.text == null ? '<i>This result came from an older version; the answer is in the email.</i>' : f.o.text ? esc(f.o.text) : '<i>No answer</i>'}</div></div>
-        ${f.P && f.P.rubric ? `<ul class="rubck">${f.P.rubric.map((rb, j) => `<li><label><input type="checkbox" data-uk="${ri}|${f.i}|${j}" ${f.on[j] ? 'checked' : ''}><span class="pt">${rb.pts} pt${rb.pts > 1 ? 's' : ''}</span><span>${F(esc(rb.t))}${f.auto[j] ? ' <span class="autotag">auto</span>' : ''}</span></label></li>`).join('')}</ul>
+        ${f.P && f.P.rubric ? `<ul class="rubck">${f.P.rubric.map((rb, j) => `<li><label><input type="checkbox" data-uk="${ri}|${f.i}|${j}" ${f.on[j] ? 'checked' : ''}><span class="rpt">${rb.pts} pt${rb.pts > 1 ? 's' : ''}</span><span>${F(esc(rb.t))}${f.auto[j] ? ' <span class="autotag">auto</span>' : ''}</span></label></li>`).join('')}</ul>
         <div class="row"><b>${f.pts} / ${f.max} points</b>${f.confirmed ? '<span class="st-on small">✓ confirmed</span>' : `<button class="btn sm primary" data-ukc="${ri}|${f.i}">Confirm score</button><span class="small muted">Points marked auto were detected automatically. Check and adjust them.</span>`}</div>` : ''}</div>`).join('')}
       <details style="margin-top:10px"><summary class="small">Question-by-question</summary><div class="tablewrap"><table class="hist"><thead><tr><th>#</th><th>Unit</th><th>Student</th><th>Key</th><th></th></tr></thead><tbody>${r.rows.map((o, i) => `<tr><td>${i + 1}</td><td>${o.cr ? 'FRQ' : esc(o.q.cat)}</td><td class="mono">${o.cr ? (o.a === '-' ? 'blank' : 'written') : esc(o.a)}</td><td class="mono">${o.cr ? 'see above' : esc(o.want)}</td><td>${o.cr ? '' : o.ok ? '<span class="st-on">✓</span>' : '<span class="st-off">✕</span>'}</td></tr>`).join('')}</tbody></table></div></details></section>`;
   };
@@ -8767,7 +8814,7 @@ function renderUtCheck() {
       const tt = r.ut ? utcTotals(r) : null; return `<tr><td>${esc(r.d.nm)}</td><td>${r.ut ? esc(r.ut.n) : '—'}</td><td class="mono">${r.ut ? `${r.c}/${r.n}` : '—'}</td><td class="mono">${tt && tt.fq.length ? `${tt.fp}/${tt.fm}` : ''}</td><td class="mono">${tt ? tt.comb + '%' : '—'}</td><td>${r.sigOk ? '<span class="st-on">valid</span>' : '<span class="st-off">edited?</span>'}</td></tr>`; }).join('')}</tbody></table></div></section>` : '';
   $('#hub').innerHTML = nav('ut-check') + `<div class="page">${pageHead('Teacher Tools', 'Check results', 'Paste result emails from unit tests and exam simulations. Unit test scores are recalculated from the student’s actual answers, you score free response with the scoring guide, and the check code shows whether results were edited.')}
     <section class="card"><textarea id="utcIn" class="crin" style="min-height:170px" placeholder="Paste result emails here (you can paste several at once)">${esc(UTC.text)}</textarea>
-      <div class="row" style="margin-top:10px"><button class="btn primary" id="utcGo">Check results</button>${MODE === 'owner' && DB ? `<button class="btn" id="utcLoad">Load results submitted on this site</button>` : ''}<button class="btn quiet" id="utcClr">Clear</button>${good.length ? `<span style="flex:1"></span>${pdfBtn('utcPdfAll', good.length > 1 ? `All ${good.length} score cards (PDF)` : 'Score card (PDF)')}` : ''}</div><div class="small muted" id="utcMsg" role="status" style="margin-top:6px"></div></section>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="utcGo">Check results</button>${MODE === 'owner' && DB ? `<button class="btn" id="utcLoad">Load results submitted on this site</button>` : ''}<button class="btn quiet" id="utcClr">Clear</button>${good.length ? `<span style="flex:1"></span>${paperSel()}${pdfBtn('utcPdfAll', good.length > 1 ? `All ${good.length} score cards (PDF)` : 'Score card (PDF)')}` : ''}</div><div class="small muted" id="utcMsg" role="status" style="margin-top:6px"></div></section>
     ${out && !out.length ? '<div class="card empty" style="margin-top:18px">No result blocks found. Paste the whole email, including the line that starts with APUT or APEX.</div>' : ''}
     ${summary}
     <div style="margin-top:18px;display:grid;gap:14px">${(out || []).map(card).join('')}</div>
@@ -9015,7 +9062,7 @@ function renderCalc() {
       <div class="row2"><label>Problems<select id="cpN">${[5, 10, 15, 20].map(n => `<option ${n === CP.n ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
         <label>Calculator<select id="cpCalc"><option value="off" ${CP.nocalc ? 'selected' : ''}>Off: work by hand</option><option value="on" ${CP.nocalc ? '' : 'selected'}>On: built-in calculator allowed</option></select></label></div>
       <p class="small muted" style="margin:0">Type just the number. Answers within 2% count, so normal rounding is fine. Scientific notation works: 2.3e-5 or 2.3 × 10^-5. The unit is shown next to the answer box. Reference sheets stay available.</p>
-      <div class="row"><button class="btn primary big" id="cpGo" ${units.length ? '' : 'disabled'}>${SVG(IC.calc)} Start practice</button>${units.length ? pdfBtn('cpPdf', 'Worksheet + key (PDF)') : ''}</div><div class="err" id="cpErr" role="alert"></div>
+      <div class="row"><button class="btn primary big" id="cpGo" ${units.length ? '' : 'disabled'}>${SVG(IC.calc)} Start practice</button>${units.length ? pdfBtn('cpPdf', 'Worksheet + key (PDF)') + paperSel() : ''}</div><div class="err" id="cpErr" role="alert"></div>
     </section>
     <section class="card"><h3 class="ch">How to practice by hand</h3><ol class="small" style="line-height:1.7;padding-left:18px;margin:0">
       <li>Write the given values with units, and the quantity you need.</li><li>Pick the equation from the reference sheet and solve for the unknown <i>before</i> plugging in numbers.</li><li>Substitute with units, and cancel units as you go.</li><li>Estimate first (powers of ten), then calculate. Does the size and sign make sense?</li><li>Round to the right number of significant figures at the end only.</li></ol>
