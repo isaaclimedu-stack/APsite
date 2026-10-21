@@ -8145,23 +8145,61 @@ function pdfLib() {
 }
 const scopeCss = (css, scope) => css.replace(/(^|\})\s*([^{}@]+)\{/g, (m, b, sels) => b + sels.split(',').map(s => s.trim() === 'body' ? scope : scope + ' ' + s.trim()).join(',') + '{');
 const SC_CSS = `.sc{font:10.5pt/1.45 Arial,Helvetica,sans-serif;color:#111}.sc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border-bottom:3px solid #13284a;padding-bottom:10px;margin-bottom:14px}.sc-brand{font:700 10pt Arial;color:#13284a;letter-spacing:.06em;text-transform:uppercase}.sc-top h1{font:700 18pt Arial;margin:4px 0 2px;color:#0b1730}.sc-top p{margin:0;color:#444}.sc-who{text-align:right;font-size:10pt;color:#333}.sc-who b{font-size:12pt;color:#000}.sc-kpis{display:flex;gap:10px;margin:0 0 14px}.sc-k{flex:1;border:1.5px solid #d5dbe7;border-radius:10px;padding:10px 12px}.sc-k small{display:block;color:#555;font-size:8.5pt;text-transform:uppercase;letter-spacing:.05em}.sc-k b{display:block;font-size:20pt;color:#0b1730;margin-top:2px}.sc-k span{font-size:9pt;color:#555}.sc-ap{display:inline-block;width:30px;height:30px;line-height:30px;text-align:center;border-radius:50%;background:#13284a;color:#fff;font:700 15pt Arial;vertical-align:middle;margin-right:6px}.sc h2{font:700 11.5pt Arial;margin:16px 0 6px;color:#13284a}.sc table{width:100%;border-collapse:collapse;font-size:9.5pt}.sc th{background:#eef2f8;text-align:left}.sc td,.sc th{border:1px solid #c9d1df;padding:4px 7px;vertical-align:top}.sc-bar{height:8px;background:#e8ecf3;border-radius:4px;overflow:hidden;min-width:120px}.sc-bar i{display:block;height:100%;background:#2a9a55}.sc-bar i.mid{background:#d99a1c}.sc-bar i.lo{background:#d0443c}.sc .ok{color:#1d7a40;font-weight:700}.sc .no{color:#b4322b;font-weight:700}.sc-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}.sc-cell{border:1px solid #c9d1df;border-radius:5px;padding:3px 0;text-align:center;font-size:8.5pt}.sc-cell b{display:block;font-size:8pt;color:#666;font-weight:400}.sc-cell.ok{background:#e9f6ee}.sc-cell.no{background:#fbeceb}.sc-frq{border:1px solid #d5dbe7;border-radius:8px;padding:8px 10px;margin:8px 0;break-inside:avoid;page-break-inside:avoid}.sc-frq pre{white-space:pre-wrap;font:9.5pt/1.4 Georgia,serif;margin:6px 0;background:#f7f8fb;padding:6px 8px;border-radius:6px}.sc-frq ul{margin:4px 0 0;padding-left:4px;list-style:none;font-size:9pt}.sc-frq li.on{color:#1d7a40}.sc-frq li.off{color:#777}.sc-foot{margin-top:16px;border-top:1px solid #ccd;padding-top:8px;font-size:8pt;color:#555;word-break:break-all}.sc-note{font-size:9pt;color:#555;margin:6px 0 0}.ws-q{break-inside:avoid;page-break-inside:avoid;margin:0 0 10px;border:1px solid #c9d1df;border-radius:8px;padding:8px 10px}.ws-q .ws-n{font:700 10pt Arial;color:#13284a}.ws-work{height:1.55in;border:1px dashed #b8c1d1;border-radius:6px;margin:6px 0 4px;position:relative}.ws-work span{position:absolute;left:8px;top:4px;font:8pt Arial;color:#99a}.ws-ans{font:10pt Arial}.ws-key td:first-child{width:28px}`;
+/* Lay the content out into whole pages ourselves, so a question always stays together with its answer choices
+   (and a table row, a free-response prompt, a worksheet problem or a score-card block never splits), then draw each
+   page separately into the PDF. Lists and tables that continue onto a new page are reopened there (numbering and
+   table headers carry over); a 'pb' class starts a new page. */
+const PDF_SPLIT = '.pp, ol.pp-q, table, tbody, section.pp-frq, .pp-lines, .sc';
+function pdfPaginate(src, limit) {
+  const units = []; let brk = false;
+  const walk = (el, path) => { for (const ch of el.children) { if (ch.tagName === 'STYLE' || ch.tagName === 'THEAD') continue;
+    if (ch.classList.contains('pb')) brk = true;
+    if (ch.matches(PDF_SPLIT) || el === src) walk(ch, path.concat(ch)); else { units.push({ el: ch, path, brk }); brk = false; } } };
+  walk(src, []);
+  const cs = el => getComputedStyle(el), px = v => parseFloat(v) || 0;
+  const outerH = el => { const st = cs(el); return el.getBoundingClientRect().height + px(st.marginTop) + px(st.marginBottom); };
+  const openCost = el => { const st = cs(el); let c = px(st.paddingTop) + px(st.paddingBottom) + px(st.borderTopWidth) + px(st.borderBottomWidth); if (el.tagName !== 'DIV' || el.matches('.pp-lines')) c += px(st.marginTop); if (el.tagName === 'TABLE' && el.tHead) c += el.tHead.getBoundingClientRect().height; return c; };
+  units.forEach(u => { u.h = outerH(u.el); });
+  const pages = []; let page, used, open;
+  const fresh = () => { page = document.createElement('div'); page.className = 'pdfdoc pdfpage'; pages.push(page); used = 0; open = []; };
+  fresh();
+  for (const u of units) {
+    let k = 0; while (k < open.length && k < u.path.length && open[k].orig === u.path[k]) k++;
+    const need = u.path.slice(k).reduce((s, o) => s + openCost(o), 0);
+    if (used > 0 && (u.brk || used + need + u.h > limit)) { fresh(); k = 0; }
+    open = open.slice(0, k);
+    for (let i = k; i < u.path.length; i++) { const o = u.path[i], c = o.cloneNode(false); c.classList.remove('pb');
+      if (o.tagName === 'TABLE' && o.tHead) c.appendChild(o.tHead.cloneNode(true));
+      if (o.matches('ol.pp-q')) c.setAttribute('start', [...o.children].indexOf(u.path[i + 1] || u.el) + 1);
+      (i ? open[i - 1].clone : page).appendChild(c); open.push({ orig: o, clone: c }); used += openCost(o); }
+    const node = u.el.cloneNode(true); node.classList && node.classList.remove('pb');
+    (open.length ? open[open.length - 1].clone : page).appendChild(node); used += u.h;
+  }
+  return pages.filter(p => p.childNodes.length);
+}
 async function makePdf(pagesHTML, filename, btn) {
   const lbl = btn ? btn.innerHTML : ''; if (btn) { btn.disabled = true; btn.textContent = 'Making PDF…'; }
   let host = null, sy = null;
   try {
     const lib = await pdfLib();
     host = document.createElement('div'); host.className = 'pdf-host';
-    host.innerHTML = `<style>${scopeCss(PRINT_CSS + SC_CSS, '.pdfdoc')}</style><div class="pdfdoc">${pagesHTML}</div>`;
+    host.innerHTML = `<style>${scopeCss(PRINT_CSS + SC_CSS + '.pp{padding:0;max-width:none}.pdfpage{background:#fff}', '.pdfdoc')}</style><div class="pdfdoc">${pagesHTML}</div>`;
     document.body.appendChild(host);
     /* html2canvas draws relative to the scroll position, so render from the top and restore afterwards */
     sy = window.scrollY; window.scrollTo(0, 0);
-    const blob = await lib().set({ margin: [0.45, 0.45, 0.5, 0.45], filename, image: { type: 'jpeg', quality: 0.88 },
-      html2canvas: { scale: 1.7, backgroundColor: '#ffffff', logging: false, scrollX: 0, scrollY: 0 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
-      pagebreak: { mode: ['css', 'legacy'], avoid: ['.pp-q > li', '.sc-frq', '.ws-q', 'tr', '.avoid'] } }).from(host.querySelector('.pdfdoc')).outputPdf('blob');
+    const M = [0.45, 0.45, 0.5, 0.45], W = host.querySelector('.pdfdoc').getBoundingClientRect().width;
+    const limit = Math.floor(W * (11 - M[0] - M[2]) / (8.5 - M[1] - M[3]) * 0.99);
+    const pages = pdfPaginate(host.querySelector('.pdfdoc'), limit);
+    const opt = { margin: M, filename, image: { type: 'jpeg', quality: 0.88 }, html2canvas: { scale: 1.7, backgroundColor: '#ffffff', logging: false, scrollX: 0, scrollY: 0 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }, pagebreak: { mode: [] } };
+    let w = lib().set(opt).from(pages[0]).toPdf();
+    for (const pg of pages.slice(1)) w = w.get('pdf').then(pdf => { pdf.addPage(); }).from(pg).toContainer().toCanvas().toPdf();
+    const blob = await w.outputPdf('blob');
     await saveFile(filename, blob, 'application/pdf');
   } catch (e) {
+    console.error(e);
     confirmBox('Couldn’t make the PDF', 'The PDF maker loads from the internet the first time you use it. Check your connection and try again.', 'OK', () => {});
-  } finally { if (host) host.remove(); if (sy != null) window.scrollTo(0, sy); if (btn) { btn.disabled = false; btn.innerHTML = lbl; } }
+  } finally { if (host) host.remove(); document.querySelectorAll('.html2pdf__overlay').forEach(o => o.remove()); if (sy != null) window.scrollTo(0, sy); if (btn) { btn.disabled = false; btn.innerHTML = lbl; } }
 }
 const pdfBtn = (id, label) => `<button class="btn" id="${id}">${SVG(IC.dl)} ${label}</button>`;
 
@@ -8278,7 +8316,7 @@ function renderUtNew() {
   const shownF = fp.concat(fpAll.filter(c => st.fsel.includes(c.id) && !fp.includes(c)));
   const draftHTML = d ? (() => { const ut = d.ut, items = utItems(ut), code = utCode(ut), nf = ut.f.length;
     return `<section class="card" style="margin-top:18px" id="utDraft"><div class="card-h sm"><h3>${esc(ut.n)}</h3><span class="small muted">${utMcq(items).length} multiple choice${nf ? ' + ' + nf + ' free response' : ''} · ${ut.m ? ut.m + ' min' : 'no time limit'}</span></div>
-      <div class="row ut-acts"><button class="btn primary" id="utSave">${d.saved ? '✓ Saved' : 'Save test'}</button><a class="btn" href="#assign" id="utAssign">${SVG(IC.assign)} Assign to students</a>${pdfBtn('utPdfBoth', 'PDF: test + answer key')}${pdfBtn('utPdfTest', 'PDF: test only')}${IN_VIEWER ? '' : '<button class="btn quiet" data-utp="test">Print test</button><button class="btn quiet" data-utp="key">Print key</button>'}<button class="btn quiet" data-utdl="1">${SVG(IC.print)} Printable web page</button><button class="btn quiet" id="utTry">Preview as a student</button></div>
+      <div class="row ut-acts"><button class="btn primary" id="utSave">${d.saved ? '✓ Saved' : 'Save test'}</button><a class="btn" href="#assign" id="utAssign">${SVG(IC.assign)} Assign to students</a>${pdfBtn('utPdfBoth', 'PDF: test + answer key')}${pdfBtn('utPdfTest', 'PDF: test only')}${pdfBtn('utPdfSheet', 'PDF: answer sheet')}${IN_VIEWER ? '' : '<button class="btn quiet" data-utp="test">Print test</button><button class="btn quiet" data-utp="key">Print key</button>'}<button class="btn quiet" data-utdl="1">${SVG(IC.print)} Printable web page</button><button class="btn quiet" id="utTry">Preview as a student</button></div>
       <div class="share"><label class="small">Your website address (where students open the site)<div class="copyline"><input id="utSite" value="${esc(siteBase())}" spellcheck="false"><button class="btn quiet" id="utSiteB">Update link</button></div></label><label class="small">Student link<div class="copyline"><input readonly value="${esc(utLink(code))}" id="utLinkIn"><button class="btn" data-copy="#utLinkIn">Copy link</button></div></label>
         <label class="small">Or share the test code (students paste it on the Unit Tests page)<div class="copyline"><input readonly value="${esc(code)}" id="utCodeIn"><button class="btn" data-copy="#utCodeIn">Copy code</button></div></label><span class="copied" id="utCopied" aria-live="polite"></span></div>
       <ol class="utlist">${items.map((q, i) => `<li><span class="u-n ${q.type === 'cr' ? 'frq' : ''}">${q.type === 'cr' ? 'FRQ' : 'Unit ' + q.cat}</span><span class="ut-stem">${q.type === 'cr' ? `<b>${esc(CASES[q.caseId].title)}</b> <span class="muted">· ${esc(frqLabel(CASES[q.caseId]))} · ${q.max} pts</span>` : F(String(q.stem).replace(/<table[\s\S]*?<\/table>/g, '[table]').replace(/<[^>]+>/g, ' ').slice(0, 170))}${q.type !== 'cr' && String(q.stem).length > 170 ? '…' : ''}</span>${q.type === 'cr' ? `<button class="linkbtn sm" data-frm="${q.caseId}" style="color:var(--bad)">Remove</button>` : `<button class="linkbtn sm" data-swap="${i}">Replace</button>`}</li>`).join('')}</ol></section>`; })() : '';
@@ -8336,6 +8374,7 @@ function bindUtDraft(d, redraw) {
   $$('[data-utdl]').forEach(b => b.onclick = () => utDownload(ut));
   $('#utPdfBoth').onclick = () => utPdf(ut, 'both', $('#utPdfBoth'));
   $('#utPdfTest').onclick = () => utPdf(ut, 'test', $('#utPdfTest'));
+  $('#utPdfSheet').onclick = () => utPdf(ut, 'sheet', $('#utPdfSheet'));
   $('#utTry').onclick = () => go('ut-' + code);
   if ($('#utSiteB')) $('#utSiteB').onclick = () => { const v = $('#utSite').value.trim(); if (/^https?:\/\/\S+$/.test(v)) { LS.set('ap.admin.siteurl', v.replace(/\/+$/, '')); redraw(); } else $('#utCopied').textContent = 'Enter the full address, starting with https://'; };
   $$('[data-swap]').forEach(b => b.onclick = () => { const i = +b.dataset.swap, x = BY_ID[ut.t], old = x.bank.find(q => q.id === ut.q[i]); if (!old) return;
@@ -8351,15 +8390,30 @@ function utPaper(ut, key) {
   if (key) return head + `<p class="pp-i">${mc.length} multiple-choice questions${fr.length ? ` and ${fr.length} free-response question${fr.length > 1 ? 's' : ''}` : ''}. Answer letters match the printed test and the online version of this test.</p>
     ${mc.length ? `<table class="pp-key"><thead><tr><th>#</th><th>Answer</th><th>Unit</th><th>Why</th></tr></thead><tbody>${mc.map((q, i) => `<tr><td>${i + 1}</td><td class="ans">${q.correct.map(j => LETTERS[j]).join(', ')}</td><td>${esc(q.cat)}</td><td>${F(q.expl)}</td></tr>`).join('')}</tbody></table>` : ''}
     ${fr.map((q, i) => { const c = CASES[q.caseId], p = promptOf(q); return `<section class="pp-frq ${i || mc.length ? 'pb' : ''}"><h2>Free response ${i + 1}: ${esc(c.title)} (${c.max} points)</h2><table class="pp-key"><thead><tr><th>Pts</th><th>Earned for</th></tr></thead><tbody>${(p.rubric || []).map(r => `<tr><td>${r.pts}</td><td>${F(esc(r.t))}</td></tr>`).join('')}</tbody></table><h3>Sample response</h3><div class="pp-sample">${F(paraHTML(esc(p.sample)))}</div></section>`; }).join('')}`;
-  return head + `<p class="pp-i">${ut.m ? `Time: ${ut.m} minutes. ` : ''}${mc.length ? 'For each multiple-choice question, circle the best answer' + (mc.some(q => q.k > 1) ? ' (some questions ask for TWO answers)' : '') + '. ' : ''}${fr.length ? 'Answer free-response questions in the space provided; show your work and include units.' : ''}${x.tools.length ? ' A calculator and the course reference sheet are allowed.' : ''}</p>
+  return head + `<p class="pp-i">${ut.m ? `Time: ${ut.m} minutes. ` : ''}${mc.length ? 'Mark each multiple-choice answer on the answer sheet at the end of the test by circling or filling in one letter' + (mc.some(q => q.k > 1) ? ' (two letters where a question asks for TWO answers)' : '') + '. ' : ''}${fr.length ? 'Answer free-response questions in the space provided; show your work and include units.' : ''}${x.tools.length ? ' A calculator and the course reference sheet are allowed.' : ''}</p>
     <ol class="pp-q">${mc.map(q => `<li>${q.psg && PASSAGES[q.psg] ? `<div class="pp-psg">${psgHTML(PASSAGES[q.psg], true)}</div>` : ''}<div class="pp-stem">${F(q.stem)}</div><ol class="pp-ch">${q.choices.map((c, j) => `<li><b>${LETTERS[j]}.</b> ${F(c)}</li>`).join('')}</ol></li>`).join('')}</ol>
     ${fr.map((q, i) => { const c = CASES[q.caseId]; return `<section class="pp-frq ${i || mc.length ? 'pb' : ''}"><h2>Free response ${i + 1} (${c.max} points)</h2><h3>${esc(c.title)}</h3>${F(paraHTML(c.intro))}${c.docs.map(dd => `<h4>${esc(dd.t)}</h4>${F(dd.h)}`).join('')}<div class="pp-prompt">${fmtPrompt(q.stem)}</div><div class="pp-lines">${'<i></i>'.repeat(14)}</div></section>`; }).join('')}`;
 }
-const PRINT_CSS = `body{font:12pt/1.45 Georgia,"Times New Roman",serif;color:#000;margin:0}.pp{max-width:7.2in;margin:0 auto;padding:.3in 0}.pp-h{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:12px}.pp-h h1{font:700 17pt Arial,sans-serif;margin:0}.pp-h p{margin:2px 0;font:10.5pt Arial,sans-serif}.pp-meta{text-align:right;font:10.5pt Arial,sans-serif}.pp-i{font:10pt Arial,sans-serif;margin:0 0 14px}.pp-q>li{margin:0 0 16px;break-inside:avoid;page-break-inside:avoid}.pp-ch{list-style:none;padding-left:14px;margin:6px 0 0}.pp-ch li{margin:3px 0}table{border-collapse:collapse;margin:6px 0;font-size:10.5pt}td,th{border:1px solid #666;padding:3px 7px;text-align:left;vertical-align:top}.pp-key td.ans{font:700 12pt Arial,sans-serif;text-align:center}.pp-key{width:100%}.pp-frq{margin-top:18px}.pp-frq h2{font:700 13pt Arial,sans-serif;margin:0 0 4px}.pp-frq h3,.pp-frq h4{font:700 11pt Arial,sans-serif;margin:8px 0 4px}.pb{break-before:page;page-break-before:always}.pp-lines i{display:block;border-bottom:1px solid #999;height:26px}.pp-psg{border:1px solid #999;padding:6px 10px;margin-bottom:6px;font-size:10.5pt}.pp-sample{border-left:3px solid #999;padding-left:10px}sub,sup{font-size:.72em;line-height:0}.nuc{display:inline-flex;flex-direction:column;font-size:.7em;line-height:1;vertical-align:middle;text-align:right;margin-right:1px}aside{border:0}`;
-function utDoc(ut) { return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(ut.n)}</title><style>${PRINT_CSS}</style></head><body><div class="pp">${utPaper(ut, false)}</div><div class="pp pb">${utPaper(ut, true)}</div></body></html>`; }
+/* bubble answer sheet: students circle or fill in their letters; the key version has the correct bubbles filled for grading */
+function utSheet(ut, key) {
+  const x = BY_ID[ut.t], items = utItems(ut), mc = utMcq(items), fr = items.filter(q => q.type === 'cr'), n = mc.length;
+  if (!n && !fr.length) return '';
+  const nCol = n > 40 ? 3 : n > 15 ? 2 : 1, per = Math.ceil(n / nCol) || 1;
+  const row = (q, i) => `<div class="as-row"><b>${i + 1}</b>${q.choices.map((c, j) => `<span class="bub ${key && q.correct.includes(j) ? 'on' : ''}">${LETTERS[j]}</span>`).join('')}${q.k > 1 ? '<em>pick TWO</em>' : ''}</div>`;
+  const cols = [...Array(nCol).keys()].map(c => `<div class="as-col">${mc.slice(c * per, (c + 1) * per).map((q, k) => row(q, c * per + k)).join('')}</div>`).join('');
+  const frPts = fr.reduce((s, q) => s + q.max, 0);
+  return `<header class="pp-h"><div><h1>${key ? 'Answer sheet key' : 'Answer sheet'}</h1><p>${esc(ut.n)} · ${esc(x.subject)}</p></div><div class="pp-meta">${key ? '<b>ANSWER KEY</b><p>Lay this over a student’s sheet to grade.</p>' : `<p>Name ______________________________</p><p>Date _____________ Period _______</p>`}</div></header>
+    ${n ? `<p class="pp-i">${key ? 'Filled circles are the correct answers.' : 'Circle or fill in ONE letter for each question' + (mc.some(q => q.k > 1) ? ' (TWO letters where marked)' : '') + '. If you change an answer, cross out the old mark clearly.'}</p><div class="as-grid">${cols}</div>` : ''}
+    ${fr.length ? `<p class="pp-i" style="margin-top:14px">Free response: answer on the lined pages of the test (${fr.length} question${fr.length > 1 ? 's' : ''}, ${frPts} points).</p>` : ''}
+    <table class="as-score"><tr>${n ? `<td>Multiple choice<br><b>_____ / ${n}</b></td>` : ''}${fr.length ? fr.map((q, i) => `<td>Free response ${i + 1}<br><b>_____ / ${q.max}</b></td>`).join('') : ''}<td>Total<br><b>_____ / ${n + frPts}</b></td></tr></table>`;
+}
+const PRINT_CSS = `body{font:12pt/1.45 Georgia,"Times New Roman",serif;color:#000;margin:0}.pp{max-width:7.2in;margin:0 auto;padding:.3in 0}.pp-h{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:12px}.pp-h h1{font:700 17pt Arial,sans-serif;margin:0}.pp-h p{margin:2px 0;font:10.5pt Arial,sans-serif}.pp-meta{text-align:right;font:10.5pt Arial,sans-serif}.pp-i{font:10pt Arial,sans-serif;margin:0 0 14px}.pp-q>li{margin:0 0 16px;break-inside:avoid;page-break-inside:avoid}.pp-ch{list-style:none;padding-left:14px;margin:6px 0 0}.pp-ch li{margin:3px 0}table{border-collapse:collapse;margin:6px 0;font-size:10.5pt}td,th{border:1px solid #666;padding:3px 7px;text-align:left;vertical-align:top}.pp-key td.ans{font:700 12pt Arial,sans-serif;text-align:center}.pp-key{width:100%}.pp-frq{margin-top:18px}.pp-frq h2{font:700 13pt Arial,sans-serif;margin:0 0 4px}.pp-frq h3,.pp-frq h4{font:700 11pt Arial,sans-serif;margin:8px 0 4px}.pb{break-before:page;page-break-before:always}.pp-lines i{display:block;border-bottom:1px solid #999;height:26px}.pp-psg{border:1px solid #999;padding:6px 10px;margin-bottom:6px;font-size:10.5pt}.pp-sample{border-left:3px solid #999;padding-left:10px}sub,sup{font-size:.72em;line-height:0}.as-grid{display:flex;gap:28px;align-items:flex-start}.as-col{flex:1;min-width:0}.as-row{display:flex;align-items:center;gap:7px;margin:0 0 8px;break-inside:avoid;page-break-inside:avoid;font:10pt Arial,sans-serif}.as-row b{width:24px;text-align:right;margin-right:4px}.as-row em{font-size:8pt;color:#444}.bub{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;width:22px;height:22px;line-height:1;padding-top:1px;border:1.3px solid #000;border-radius:50%;font:8.5pt/1 Arial,sans-serif}.bub.on{background:#000;color:#fff}.as-score{margin-top:18px;width:100%}.as-score td{text-align:center;font:10pt Arial,sans-serif;padding:8px}.as-score b{display:inline-block;margin-top:6px;font-size:12pt}.pp-prompt{break-inside:avoid;page-break-inside:avoid}.nuc{display:inline-flex;flex-direction:column;font-size:.7em;line-height:1;vertical-align:middle;text-align:right;margin-right:1px}aside{border:0}`;
+const utPages = (ut, which) => { const T = `<div class="pp">${utPaper(ut, false)}</div><div class="pp pb">${utSheet(ut, false)}</div>`, K = `<div class="pp pb">${utPaper(ut, true)}</div><div class="pp pb">${utSheet(ut, true)}</div>`;
+  return which === 'sheet' ? `<div class="pp">${utSheet(ut, false)}</div>` : which === 'key' ? K.replace('pp pb', 'pp') : which === 'test' ? T : T + K; };
+function utDoc(ut) { return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(ut.n)}</title><style>${PRINT_CSS}</style></head><body>${utPages(ut, 'both')}</body></html>`; }
 function utPrint(ut, key) {
   let root = document.getElementById('print-root'); if (!root) { root = document.createElement('div'); root.id = 'print-root'; document.body.appendChild(root); }
-  root.innerHTML = `<style>@media print{${PRINT_CSS.replace(/body\{/, '#print-root{')}}</style><div class="pp">${utPaper(ut, key)}</div>`;
+  root.innerHTML = `<style>@media print{${PRINT_CSS.replace(/body\{/, '#print-root{')}}</style>${utPages(ut, key ? 'key' : 'test')}`;
   document.body.classList.add('printing');
   const done = () => { document.body.classList.remove('printing'); };
   try { window.addEventListener('afterprint', done, { once: true }); window.print(); setTimeout(done, 1500); }
@@ -8367,8 +8421,7 @@ function utPrint(ut, key) {
 }
 function utDownload(ut) { saveFile(fileSafe(ut.n) + '.html', utDoc(ut), 'text/html'); }
 function utPdf(ut, which, btn) {
-  const pages = which === 'key' ? `<div class="pp">${utPaper(ut, true)}</div>` : which === 'test' ? `<div class="pp">${utPaper(ut, false)}</div>` : `<div class="pp">${utPaper(ut, false)}</div><div class="pp pb">${utPaper(ut, true)}</div>`;
-  makePdf(pages, fileSafe(ut.n) + (which === 'key' ? '-Answer-Key' : which === 'test' ? '' : '-with-Key') + '.pdf', btn);
+  makePdf(utPages(ut, which), fileSafe(ut.n) + (which === 'key' ? '-Answer-Key' : which === 'sheet' ? '-Answer-Sheet' : which === 'test' ? '' : '-with-Key') + '.pdf', btn);
 }
 
 /* ── students: open, take, submit ── */
