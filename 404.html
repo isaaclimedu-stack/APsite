@@ -894,6 +894,7 @@ input[type="date"] { padding: 9px 11px; border-radius: 8px; border: 1px solid va
 .coach-tab .ico { width: 16px; height: 16px; transform: rotate(90deg); }
 .coach-tab:hover { background: var(--ember); border-color: var(--ember); }
 @media (max-width: 1020px) { .lab { grid-template-columns: minmax(0, 1fr); gap: 16px; } .lab-lib { padding: 14px; border-bottom: 0; } }
+.exam-plan { display: grid; gap: 4px; padding: 12px 14px; border-radius: 10px; background: var(--accent-soft); border: 1px solid var(--line); font-size: 13.5px; } .exam-plan span { color: var(--muted); font-size: 13px; }
 
 </style>
 </head><body>
@@ -968,6 +969,8 @@ function num(stem, val, ds, fmt, expl, pad = true) {
     if (set.length >= 4) break; if (!isFinite(d)) continue;
     const s = fmt(d); if (seen.has(s)) continue; seen.add(s); set.push({ v: d, s });
   }
+  /* rare cases (an answer of zero, values that round alike) can leave fewer than four choices: add nearby values */
+  for (const d of [val + 1, val - 1, val + 2, val - 2, -val, val + 5, val - 5]) { if (set.length >= 4) break; if (!isFinite(d)) continue; const s = fmt(d); if (seen.has(s)) continue; seen.add(s); set.push({ v: d, s }); }
   set.sort((a, b) => a.v - b.v);
   return { stem, choices: set.map(x => x.s), correct: [set.findIndex(x => x.s === cs)], expl, ordered: true, val, cs };
 }
@@ -6259,7 +6262,7 @@ function liveBoxHTML() {
     const dup = pr.a && new Set(LIVE.filter(q => (q.presence || {}).a === pr.a).map(q => q.by || q.peer)).size > 1;
     return `<span class="chip-s"><b>${esc(nm)}</b>${p.guest ? ' (guest)' : ''}${em ? ' · using ' + esc(em) : ''} · ${pr.s === 'test' ? 'taking a test' + (pr.t ? ' (' + esc(pr.t) + ')' : '') : 'browsing'}${dup ? ' <span class="st-off">⚠ same access used by more than one account right now</span>' : ''}</span>`; }).join('')}</div>`;
 }
-const OWNER_EMAIL = 'admin@comma-ltd.com', SITE_URL = 'https://ap.comma-ltd.com';
+const OWNER_EMAIL = 'admin@comma-ltd.com', SITE_URL = 'https://scholarlab.net';
 const testsIn = k => TESTS.filter(t => t.area === k).sort((a, b) => (a.order || 0) - (b.order || 0) || a.subject.localeCompare(b.subject));
 
 /* ── text rendering ── */
@@ -8154,7 +8157,7 @@ function pdfPaginate(src, limit) {
   const units = []; let brk = false;
   const walk = (el, path) => { for (const ch of el.children) { if (ch.tagName === 'STYLE' || ch.tagName === 'THEAD') continue;
     if (ch.classList.contains('pb')) brk = true;
-    if (ch.matches(PDF_SPLIT) || el === src) walk(ch, path.concat(ch)); else { units.push({ el: ch, path, brk }); brk = false; } } };
+    if ((ch.matches(PDF_SPLIT) && !ch.matches('.pp-fill')) || el === src) walk(ch, path.concat(ch)); else { units.push({ el: ch, path, brk }); brk = false; } } };
   walk(src, []);
   const cs = el => getComputedStyle(el), px = v => parseFloat(v) || 0;
   const outerH = el => { const st = cs(el); return el.getBoundingClientRect().height + px(st.marginTop) + px(st.marginBottom); };
@@ -8162,18 +8165,31 @@ function pdfPaginate(src, limit) {
   units.forEach(u => { u.h = outerH(u.el); });
   const pages = []; let page, used, open;
   const fresh = () => { page = document.createElement('div'); page.className = 'pdfdoc pdfpage'; pages.push(page); used = 0; open = []; };
-  fresh();
-  for (const u of units) {
-    let k = 0; while (k < open.length && k < u.path.length && open[k].orig === u.path[k]) k++;
-    const need = u.path.slice(k).reduce((s, o) => s + openCost(o), 0);
-    if (used > 0 && (u.brk || used + need + u.h > limit)) { fresh(); k = 0; }
-    open = open.slice(0, k);
+  const openPath = (u, k) => { open = open.slice(0, k);
     for (let i = k; i < u.path.length; i++) { const o = u.path[i], c = o.cloneNode(false); c.classList.remove('pb');
       if (o.tagName === 'TABLE' && o.tHead) c.appendChild(o.tHead.cloneNode(true));
       if (o.matches('ol.pp-q')) c.setAttribute('start', [...o.children].indexOf(u.path[i + 1] || u.el) + 1);
-      (i ? open[i - 1].clone : page).appendChild(c); open.push({ orig: o, clone: c }); used += openCost(o); }
+      (i ? open[i - 1].clone : page).appendChild(c); open.push({ orig: o, clone: c }); used += openCost(o); } };
+  const sharedK = u => { let k = 0; while (k < open.length && k < u.path.length && open[k].orig === u.path[k]) k++; return k; };
+  const target = () => open.length ? open[open.length - 1].clone : page;
+  fresh();
+  for (const u of units) {
+    let k = sharedK(u);
+    const need = u.path.slice(k).reduce((s, o) => s + openCost(o), 0);
+    if (u.el.matches('.pp-fill')) {
+      /* writing lines fill the rest of the page; if only a few would fit, they fill it and a full lined page follows */
+      const LH = 28, min = +u.el.dataset.min || 12, lines = n => { const d = document.createElement('div'); d.className = 'pp-lines'; d.innerHTML = '<i></i>'.repeat(n); target().appendChild(d); used += n * LH; };
+      if (u.brk && used > 0) { fresh(); k = 0; }
+      openPath(u, k);
+      let n = Math.floor((limit - used - 6) / LH);
+      if (n >= 3) lines(n); else n = 0;
+      if (n < min) { fresh(); openPath(u, 0); lines(Math.floor((limit - used - 6) / LH)); }
+      continue;
+    }
+    if (used > 0 && (u.brk || used + need + u.h > limit)) { fresh(); k = 0; }
+    openPath(u, k);
     const node = u.el.cloneNode(true); node.classList && node.classList.remove('pb');
-    (open.length ? open[open.length - 1].clone : page).appendChild(node); used += u.h;
+    target().appendChild(node); used += u.h;
   }
   return pages.filter(p => p.childNodes.length);
 }
@@ -8183,13 +8199,19 @@ async function makePdf(pagesHTML, filename, btn) {
   try {
     const lib = await pdfLib();
     host = document.createElement('div'); host.className = 'pdf-host';
-    host.innerHTML = `<style>${scopeCss(PRINT_CSS + SC_CSS + '.pp{padding:0;max-width:none}.pdfpage{background:#fff}', '.pdfdoc')}</style><div class="pdfdoc">${pagesHTML}</div>`;
+    host.innerHTML = `<style>${scopeCss(PRINT_CSS + SC_CSS + '.pp{padding:0;max-width:none}', '.pdfdoc')}.pdfpage{background:#fff;display:flow-root}</style><div class="pdfdoc">${pagesHTML}</div>`;
     document.body.appendChild(host);
     /* html2canvas draws relative to the scroll position, so render from the top and restore afterwards */
     sy = window.scrollY; window.scrollTo(0, 0);
     const M = [0.45, 0.45, 0.5, 0.45], W = host.querySelector('.pdfdoc').getBoundingClientRect().width;
     const limit = Math.floor(W * (11 - M[0] - M[2]) / (8.5 - M[1] - M[3]) * 0.99);
     const pages = pdfPaginate(host.querySelector('.pdfdoc'), limit);
+    /* writing-line pages must not run even a pixel past the page, or a sliver spills onto an extra page: measure and trim */
+    { const hard = Math.floor(W * (11 - M[0] - M[2]) / (8.5 - M[1] - M[3])) - 3, box = document.createElement('div'); host.appendChild(box);
+      for (const pg of pages) { box.appendChild(pg); let lines = [...pg.querySelectorAll('.pp-lines i')];
+        while (lines.length > 1 && pg.getBoundingClientRect().height > hard) { lines.pop().remove(); }
+        box.removeChild(pg); }
+      box.remove(); }
     const opt = { margin: M, filename, image: { type: 'jpeg', quality: 0.88 }, html2canvas: { scale: 1.7, backgroundColor: '#ffffff', logging: false, scrollX: 0, scrollY: 0 },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }, pagebreak: { mode: [] } };
     let w = lib().set(opt).from(pages[0]).toPdf();
@@ -8270,7 +8292,7 @@ function utParse(raw) {
 const utCurKey = () => `ap.${PID}.ut.current.v1`, utResKey = () => `ap.${PID}.ut.results.v1`, UT_MINE = 'ap.ut.mine.v1';
 const siteBase = () => String(LS.get('ap.admin.siteurl', SITE_URL)).replace(/\/+$/, '');
 const utLink = code => siteBase() + '/#ut-' + code;
-const utUnits = ut => { const x = BY_ID[ut.t]; if (ut.k === 'exam') return ['Full AP exam simulation']; return [...new Set(ut.u)].map(k => x.CAT[k] ? `Unit ${k}: ${x.CAT[k].short}` : '').filter(Boolean); };
+const utUnits = ut => { const x = BY_ID[ut.t]; if (ut.k === 'exam') return ['Full AP exam simulation']; if (ut.ex) return [ut.ex === 'full' ? 'Full-length AP exam' : 'Half-length AP exam']; return [...new Set(ut.u)].map(k => x.CAT[k] ? `Unit ${k}: ${x.CAT[k].short}` : '').filter(Boolean); };
 function utItems(ut) {
   const x = BY_ID[ut.t], r = rng(ut.s), byId = Object.fromEntries(x.bank.map(b => [b.id, b]));
   const items = ut.q.map(id => byId[id]).filter(Boolean).map(b => {
@@ -8290,7 +8312,20 @@ const frqUnits = c => c.units && c.units.length ? 'Unit' + (c.units.length > 1 ?
 
 /* ── teacher: create, save, print ── */
 let UTB = null; /* draft being built */
-function utDefaultTitle(x, units) { return `${x.subject} · ${units.length === 1 ? 'Unit ' + units[0] : 'Units ' + units.join(', ')} Test`; }
+/* full- and half-length printed exams: multiple choice spread by the AP unit weightings, free response in the official mix */
+function examPlan(x, kind) {
+  const f = kind === 'full' ? 1 : 0.5, cats = srCatsOf(x), rows = cats.map(c => [c.k, Math.round(c.n * f)]);
+  const target = Math.round(x.nSR * f); let diff = target - rows.reduce((s, r) => s + r[1], 0);
+  const order = cats.map((c, i) => i).sort((a, b) => cats[b].n - cats[a].n); let i = 0;
+  while (diff) { const r = rows[order[i++ % order.length]]; if (diff > 0) { r[1]++; diff--; } else if (r[1] > 0) { r[1]--; diff++; } }
+  const groups = x.cr ? x.cr.groups : [], fr = groups.map(g => [g.band, f === 1 ? g.cases : Math.floor(g.cases / 2)]);
+  if (f < 1 && groups.length) { const total = Math.max(1, Math.round(groups.reduce((s, g) => s + g.cases, 0) / 2)); let have = fr.reduce((s, r) => s + r[1], 0);
+    const pool = R.shuf(groups.map((g, j) => j).filter(j => fr[j][1] < groups[j].cases)); while (have < total && pool.length) { fr[pool.shift()][1]++; have++; } }
+  const mcMin = Math.round((x.srMinutes || x.minutes) * f), frMin = Math.round((x.minutes - (x.srMinutes || x.minutes)) * f);
+  return { rows, fr, nMc: target, nFr: fr.reduce((s, r) => s + r[1], 0), mcMin, frMin, minutes: mcMin + frMin };
+}
+const examLabel = kind => kind === 'full' ? 'Full-Length Practice Exam' : kind === 'half' ? 'Half-Length Practice Exam' : 'Unit Test';
+function utDefaultTitle(x, units, kind) { if (kind && kind !== 'unit') return `${x.subject} · ${examLabel(kind)}`; return `${x.subject} · ${units.length === 1 ? 'Unit ' + units[0] : 'Units ' + units.join(', ')} Test`; }
 function utDraw(x, units, nMcq, mix, avoid) {
   const pool = x.bank.filter(b => units.includes(b.cat) && !(avoid || []).includes(b.id));
   const want2 = Math.round(nMcq * (mix === 'hard' ? 0.75 : mix === 'easy' ? 0 : 0.3));
@@ -8305,12 +8340,13 @@ function renderUtNew() {
   if (!isTeacher()) return renderUnitTests();
   setAccent(null); show('hub');
   const mine = LS.get(UT_MINE, []);
-  const st = UTB || (UTB = { t: TESTS[0].id, u: [srCatsOf(TESTS[0])[0].k], n: 20, mix: 'std', fsel: [], fall: false, m: null, e: teacherDefaultEmail(), a: 'send', title: '', draft: null });
+  const st = UTB || (UTB = { t: TESTS[0].id, u: [srCatsOf(TESTS[0])[0].k], n: 20, kind: 'unit', mix: 'std', fsel: [], fall: false, m: null, e: teacherDefaultEmail(), a: 'send', title: '', draft: null });
   const x = BY_ID[st.t]; setAccent(x);
   const avail = x.bank.filter(b => st.u.includes(b.cat)).length;
   const fp = frqPool(x, st.fall ? [] : st.u), fpAll = frqPool(x, []);
   st.fsel = st.fsel.filter(id => CASES[id] && fpAll.includes(CASES[id]));
-  const autoMin = Math.round(st.n * x.secPer / 60 + st.fsel.reduce((s, id) => s + frqMin(x, CASES[id]), 0));
+  const exam = st.kind && st.kind !== 'unit' ? examPlan(x, st.kind) : null;
+  const autoMin = exam ? exam.minutes : Math.round(st.n * x.secPer / 60 + st.fsel.reduce((s, id) => s + frqMin(x, CASES[id]), 0));
   const d = st.draft;
   const frqRow = c => `<label class="chk frq-opt"><input type="checkbox" data-utf="${c.id}" ${st.fsel.includes(c.id) ? 'checked' : ''}><span><b>${esc(c.title)}</b><small>${esc(frqLabel(c))} · ${c.max} points · ${esc(frqUnits(c))} · about ${frqMin(x, c)} min</small></span></label>`;
   const shownF = fp.concat(fpAll.filter(c => st.fsel.includes(c.id) && !fp.includes(c)));
@@ -8323,15 +8359,18 @@ function renderUtNew() {
   $('#hub').innerHTML = nav('ut-new') + `<div class="page">${pageHead('Teacher Tools', 'Create a unit test', 'Build a fixed test from the question bank, with multiple-choice and free-response questions. Students get no feedback while testing, and their results are sent to you when they finish.')}
     <div class="ut-grid"><section class="card ut-form">
       <label>Course<select id="utT">${TESTS.map(t => `<option value="${t.id}" ${t.id === st.t ? 'selected' : ''}>${esc(t.subject)}</option>`).join('')}</select></label>
+      <label>Test type<select id="utK"><option value="unit" ${st.kind === 'unit' ? 'selected' : ''}>Unit test (choose the units)</option><option value="half" ${st.kind === 'half' ? 'selected' : ''}>Half-length AP exam (all units)</option><option value="full" ${st.kind === 'full' ? 'selected' : ''}>Full-length AP exam (all units)</option></select></label>
+      ${exam ? `<div class="exam-plan"><b>${esc(examLabel(st.kind))}: ${exam.nMc} multiple choice + ${exam.nFr} free response</b><span>Section I: ${exam.nMc} questions, ${exam.mcMin} min · Section II: ${exam.nFr} questions, ${exam.frMin} min</span><span>Multiple-choice questions are spread across all units by the AP exam weightings; free response follows the AP question types.</span></div>
+      <label>Difficulty<select id="utMix"><option value="std" ${st.mix === 'std' ? 'selected' : ''}>Like the AP exam</option><option value="hard" ${st.mix === 'hard' ? 'selected' : ''}>Harder (mostly multi-step)</option><option value="easy" ${st.mix === 'easy' ? 'selected' : ''}>Core concepts only</option></select></label>` : `
       <fieldset><legend>Units</legend><div class="ucks">${srCatsOf(x).map(c => `<label class="chk"><input type="checkbox" data-utu="${c.k}" ${st.u.includes(c.k) ? 'checked' : ''}> Unit ${c.k}: ${esc(c.short)}</label>`).join('')}</div><p class="small muted" style="margin:6px 0 0">${avail} multiple-choice questions in the chosen units.</p></fieldset>
       <div class="row2"><label>Multiple-choice questions<input type="number" id="utN" min="0" max="${Math.max(5, Math.min(60, avail))}" value="${st.n}"></label>
         <label>Difficulty<select id="utMix"><option value="std" ${st.mix === 'std' ? 'selected' : ''}>Like the AP exam</option><option value="hard" ${st.mix === 'hard' ? 'selected' : ''}>Harder (mostly multi-step)</option><option value="easy" ${st.mix === 'easy' ? 'selected' : ''}>Core concepts only</option></select></label></div>
       <fieldset class="frqpick"><legend>Free-response questions <span class="muted">(${st.fsel.length} chosen)</span></legend>
         ${shownF.length ? `<div class="frq-list">${shownF.map(frqRow).join('')}</div>` : '<p class="small muted" style="margin:0">No free-response questions for these units yet. Show all units to choose one.</p>'}
         <div class="row" style="margin-top:8px"><button class="linkbtn sm" id="utFAll" type="button">${st.fall ? 'Show only the chosen units' : `Show all ${x.subject} free-response questions (${fpAll.length})`}</button>${fp.length ? `<button class="linkbtn sm" id="utFPick" type="button">Pick ${Math.min(2, fp.length)} for me</button>` : ''}${st.fsel.length ? '<button class="linkbtn sm" id="utFNone" type="button">Clear</button>' : ''}</div>
-        <p class="small muted" style="margin:6px 0 0">Students type their answers. You score them with the scoring guide in Check Results (points are pre-checked automatically for you to confirm).</p></fieldset>
+        <p class="small muted" style="margin:6px 0 0">Students type their answers. You score them with the scoring guide in Check Results (points are pre-checked automatically for you to confirm).</p></fieldset>`}
       <div class="row2"><label>Time limit (minutes, 0 = none)<input type="number" id="utM" min="0" max="240" value="${st.m == null ? autoMin : st.m}"></label>
-        <label>Title<input id="utTitle" maxlength="80" value="${esc(st.title || utDefaultTitle(x, st.u))}"></label></div>
+        <label>Title<input id="utTitle" maxlength="80" value="${esc(st.title || utDefaultTitle(x, st.u, st.kind))}"></label></div>
       <label>Send results to (your school email)<input id="utE" type="email" value="${esc(st.e)}"></label>
       <label>After a student sends results<select id="utA"><option value="send" ${st.a === 'send' ? 'selected' : ''}>Show them the answers and explanations</option><option value="never" ${st.a === 'never' ? 'selected' : ''}>Keep answers hidden (I’ll go over them in class)</option></select></label>
       <p class="small muted" style="margin:0">When students finish, their results page opens an email to this address with their results filled in.</p>
@@ -8342,7 +8381,7 @@ function renderUtNew() {
     </section></div>
     ${draftHTML}
     ${foot()}</div>`;
-  const upd = () => { st.t = $('#utT').value; st.n = Math.max(0, +$('#utN').value || 0); st.mix = $('#utMix').value; st.m = $('#utM').value === '' ? null : Math.max(0, +$('#utM').value); st.title = $('#utTitle').value.trim(); st.e = $('#utE').value.trim(); st.a = $('#utA').value; };
+  const upd = () => { st.t = $('#utT').value; if ($('#utN')) st.n = Math.max(0, +$('#utN').value || 0); st.mix = $('#utMix').value; st.m = $('#utM').value === '' ? null : Math.max(0, +$('#utM').value); st.title = $('#utTitle').value.trim(); st.e = $('#utE').value.trim(); st.a = $('#utA').value; };
   const redo = (keepY) => { const y = window.scrollY; renderUtNew(); bindNav(); if (keepY) window.scrollTo(0, y); };
   $('#utT').onchange = () => { upd(); const nx = BY_ID[st.t]; st.u = [srCatsOf(nx)[0].k]; st.title = ''; st.m = null; st.fsel = []; st.fall = false; redo(); };
   $$('[data-utu]').forEach(c => c.onchange = () => { upd(); const k = c.dataset.utu; st.u = c.checked ? [...new Set(st.u.concat(k))] : st.u.filter(u => u !== k); st.u.sort((p, q) => srCatsOf(x).findIndex(c => c.k === p) - srCatsOf(x).findIndex(c => c.k === q)); if (!st.title || st.title.endsWith(' Test')) st.title = ''; st.m = null; redo(true); });
@@ -8350,9 +8389,17 @@ function renderUtNew() {
   if ($('#utFAll')) $('#utFAll').onclick = () => { upd(); st.fall = !st.fall; redo(true); };
   if ($('#utFPick')) $('#utFPick').onclick = () => { upd(); st.fsel = R.shuf(fp.slice()).slice(0, Math.min(2, fp.length)).map(c => c.id); st.m = null; redo(true); };
   if ($('#utFNone')) $('#utFNone').onclick = () => { upd(); st.fsel = []; st.m = null; redo(true); };
-  $('#utN').onchange = () => { upd(); st.m = null; redo(true); };
+  if ($('#utN')) $('#utN').onchange = () => { upd(); st.m = null; redo(true); };
+  $('#utK').onchange = () => { upd(); st.kind = $('#utK').value; st.title = ''; st.m = null; redo(true); };
   ['#utMix', '#utM', '#utTitle', '#utE', '#utA'].forEach(s => $(s).onchange = upd);
   $('#utGen').onclick = () => { upd();
+    if (exam) {
+      if (!isEmail(st.e)) return $('#utErr').textContent = 'Enter the email address where students should send results.';
+      LS.set('ap.ut.email', normEmail(st.e));
+      const q = exam.rows.flatMap(([k, n]) => n ? utDraw(x, [k], Math.min(n, x.bank.filter(b => b.cat === k).length), st.mix) : []);
+      const f = exam.fr.flatMap(([band, n]) => R.shuf(Object.values(CASES).filter(c => c.band === band)).slice(0, n).map(c => c.id));
+      st.draft = { ut: { v: 1, ex: st.kind, n: st.title || utDefaultTitle(x, [], st.kind), t: x.id, u: srCatsOf(x).map(c => c.k), q, f, m: st.m == null ? autoMin : st.m, e: normEmail(st.e), a: st.a, s: Math.floor(Math.random() * 2 ** 31), d: new Date().toISOString().slice(0, 10) }, saved: false };
+      redo(); const el = $('#utDraft'); if (el) el.scrollIntoView({ block: 'start' }); return; }
     if (!st.u.length) return $('#utErr').textContent = 'Choose at least one unit.';
     if (!st.n && !st.fsel.length) return $('#utErr').textContent = 'Add some multiple-choice or free-response questions.';
     if (!isEmail(st.e)) return $('#utErr').textContent = 'Enter the email address where students should send results.';
@@ -8361,7 +8408,7 @@ function renderUtNew() {
     st.draft = { ut: { v: 1, n: st.title || utDefaultTitle(x, st.u), t: x.id, u: st.u, q: utDraw(x, st.u, n, st.mix), f: st.fsel.slice(), m: st.m == null ? autoMin : st.m, e: normEmail(st.e), a: st.a, s: Math.floor(Math.random() * 2 ** 31), d: new Date().toISOString().slice(0, 10) }, saved: false };
     redo(); const el = $('#utDraft'); if (el) el.scrollIntoView({ block: 'start' }); };
   if (d) bindUtDraft(d, () => redo(true));
-  $$('[data-open]').forEach(b => b.onclick = () => { const m = LS.get(UT_MINE, [])[+b.dataset.open]; const p = utParse(m.code); if (!p) return; st.t = p.ut.t; st.u = p.ut.u; st.fsel = p.ut.f.slice(); st.draft = { ut: p.ut, saved: true }; redo(); const el = $('#utDraft'); if (el) el.scrollIntoView({ block: 'start' }); });
+  $$('[data-open]').forEach(b => b.onclick = () => { const m = LS.get(UT_MINE, [])[+b.dataset.open]; const p = utParse(m.code); if (!p) return; st.t = p.ut.t; st.u = p.ut.u; st.kind = p.ut.ex || 'unit'; st.fsel = p.ut.f.slice(); st.draft = { ut: p.ut, saved: true }; redo(); const el = $('#utDraft'); if (el) el.scrollIntoView({ block: 'start' }); });
   $$('[data-del]').forEach(b => b.onclick = () => confirmBox('Delete this saved test?', 'It is removed from your list. Students who already have the link or code can still take it.', 'Delete', () => { const l = LS.get(UT_MINE, []); l.splice(+b.dataset.del, 1); LS.set(UT_MINE, l); redo(true); }));
 }
 function utSaveMine(ut) { const code = utCode(ut), l = LS.get(UT_MINE, []); if (!l.some(m => m.code === code)) l.push({ code, date: new Date().toISOString() }); LS.set(UT_MINE, l); return code; }
@@ -8386,13 +8433,30 @@ function bindUtDraft(d, redraw) {
 /* ── printing & PDF ── */
 function utPaper(ut, key) {
   const x = BY_ID[ut.t], items = utItems(ut), mc = utMcq(items), fr = items.filter(q => q.type === 'cr');
-  const head = `<header class="pp-h"><div><h1>${esc(ut.n)}</h1><p>${esc(x.subject)} · ${utUnits(ut).map(esc).join(' · ')}</p></div><div class="pp-meta">${key ? '<b>ANSWER KEY</b>' : `<p>Name ______________________________</p><p>Date _____________ Period _______</p>`}</div></header>`;
+  const head = `<header class="pp-h"><div><h1>${esc(ut.n)}</h1><p>${esc(x.subject)} · ${utUnits(ut).map(esc).join(' · ')}</p></div><div class="pp-meta">${key ? '<b>ANSWER KEY</b>' : ''}</div></header>`;
   if (key) return head + `<p class="pp-i">${mc.length} multiple-choice questions${fr.length ? ` and ${fr.length} free-response question${fr.length > 1 ? 's' : ''}` : ''}. Answer letters match the printed test and the online version of this test.</p>
     ${mc.length ? `<table class="pp-key"><thead><tr><th>#</th><th>Answer</th><th>Unit</th><th>Why</th></tr></thead><tbody>${mc.map((q, i) => `<tr><td>${i + 1}</td><td class="ans">${q.correct.map(j => LETTERS[j]).join(', ')}</td><td>${esc(q.cat)}</td><td>${F(q.expl)}</td></tr>`).join('')}</tbody></table>` : ''}
     ${fr.map((q, i) => { const c = CASES[q.caseId], p = promptOf(q); return `<section class="pp-frq ${i || mc.length ? 'pb' : ''}"><h2>Free response ${i + 1}: ${esc(c.title)} (${c.max} points)</h2><table class="pp-key"><thead><tr><th>Pts</th><th>Earned for</th></tr></thead><tbody>${(p.rubric || []).map(r => `<tr><td>${r.pts}</td><td>${F(esc(r.t))}</td></tr>`).join('')}</tbody></table><h3>Sample response</h3><div class="pp-sample">${F(paraHTML(esc(p.sample)))}</div></section>`; }).join('')}`;
   return head + `<p class="pp-i">${ut.m ? `Time: ${ut.m} minutes. ` : ''}${mc.length ? 'Mark each multiple-choice answer on the answer sheet at the end of the test by circling or filling in one letter' + (mc.some(q => q.k > 1) ? ' (two letters where a question asks for TWO answers)' : '') + '. ' : ''}${fr.length ? 'Answer free-response questions in the space provided; show your work and include units.' : ''}${x.tools.length ? ' A calculator and the course reference sheet are allowed.' : ''}</p>
     <ol class="pp-q">${mc.map(q => `<li>${q.psg && PASSAGES[q.psg] ? `<div class="pp-psg">${psgHTML(PASSAGES[q.psg], true)}</div>` : ''}<div class="pp-stem">${F(q.stem)}</div><ol class="pp-ch">${q.choices.map((c, j) => `<li><b>${LETTERS[j]}.</b> ${F(c)}</li>`).join('')}</ol></li>`).join('')}</ol>
-    ${fr.map((q, i) => { const c = CASES[q.caseId]; return `<section class="pp-frq ${i || mc.length ? 'pb' : ''}"><h2>Free response ${i + 1} (${c.max} points)</h2><h3>${esc(c.title)}</h3>${F(paraHTML(c.intro))}${c.docs.map(dd => `<h4>${esc(dd.t)}</h4>${F(dd.h)}`).join('')}<div class="pp-prompt">${fmtPrompt(q.stem)}</div><div class="pp-lines">${'<i></i>'.repeat(14)}</div></section>`; }).join('')}`;
+    ${fr.map((q, i) => { const c = CASES[q.caseId]; return `<section class="pp-frq ${i || mc.length ? 'pb' : ''}"><h2>Free response ${i + 1} (${c.max} points)</h2><h3>${esc(c.title)}</h3>${F(paraHTML(c.intro))}${c.docs.map(dd => `<h4>${esc(dd.t)}</h4>${F(dd.h)}`).join('')}<div class="pp-prompt">${fmtPrompt(q.stem)}</div><div class="pp-lines pp-fill" data-min="${c.max >= 8 ? 20 : 12}">${'<i></i>'.repeat(14)}</div></section>`; }).join('')}`;
+}
+/* cover page: name, date and class lines, with the units covered (or the exam's sections) in the middle */
+function utCover(ut) {
+  const x = BY_ID[ut.t], items = utItems(ut), mc = utMcq(items).length, frs = items.filter(q => q.type === 'cr'), fr = frs.length, frPts = frs.reduce((s, q) => s + q.max, 0);
+  const ex = ut.ex ? examPlan(x, ut.ex) : null;
+  const center = ex ? `<h2>${esc(examLabel(ut.ex))}</h2><table class="cv-sec"><thead><tr><th>Section</th><th>Questions</th><th>Time</th><th>Score weight</th></tr></thead><tbody>
+      <tr><td>I. Multiple choice</td><td>${mc}</td><td>${ex.mcMin} min</td><td>50%</td></tr><tr><td>II. Free response</td><td>${fr}</td><td>${ex.frMin} min</td><td>50%</td></tr>
+      <tr><td><b>Total</b></td><td><b>${mc + fr}</b></td><td><b>${ut.m || ex.minutes} min</b></td><td></td></tr></tbody></table>
+      <p>Covers all ${srCatsOf(x).length} units of ${esc(x.subject)}, weighted like the AP exam.</p>`
+    : `<h2>Units covered</h2><ul class="cv-units">${[...new Set(ut.u)].filter(k => x.CAT[k]).map(k => `<li>Unit ${esc(k)}: ${esc(x.CAT[k].name)}</li>`).join('')}</ul>
+      <p>${mc} multiple choice${fr ? ` · ${fr} free response (${frPts} points)` : ''} · ${ut.m ? ut.m + ' minutes' : 'no time limit'}</p>`;
+  return `<div class="cv">
+    <div class="cv-head"><span>${esc(BRAND)}</span><span>${esc(examLabel(ut.ex))}</span></div>
+    <div class="cv-title"><p class="cv-course">${esc(x.subject)}</p><h1>${esc(String(ut.n).startsWith(x.subject + ' · ') ? ut.n.slice(x.subject.length + 3) : ut.n)}</h1></div>
+    <div class="cv-fields"><div><span>Name</span><i></i></div><div><span>Date</span><i></i></div><div><span>Class / Period</span><i></i></div></div>
+    <div class="cv-box">${center}</div>
+    <div class="cv-inst"><b>Instructions</b><ul><li>Write your name, the date, and your class above.</li>${mc ? '<li>Mark each multiple-choice answer on the answer sheet at the back of this booklet.</li>' : ''}${fr ? '<li>Answer free-response questions on the lined pages. Show your work and include units.</li>' : ''}${x.tools.length ? '<li>A calculator and the course reference sheet are allowed.</li>' : ''}<li>Do not turn the page until you are told to begin.</li></ul></div></div>`;
 }
 /* bubble answer sheet: students circle or fill in their letters; the key version has the correct bubbles filled for grading */
 function utSheet(ut, key) {
@@ -8407,8 +8471,8 @@ function utSheet(ut, key) {
     ${fr.length ? `<p class="pp-i" style="margin-top:14px">Free response: answer on the lined pages of the test (${fr.length} question${fr.length > 1 ? 's' : ''}, ${frPts} points).</p>` : ''}
     <table class="as-score"><tr>${n ? `<td>Multiple choice<br><b>_____ / ${n}</b></td>` : ''}${fr.length ? fr.map((q, i) => `<td>Free response ${i + 1}<br><b>_____ / ${q.max}</b></td>`).join('') : ''}<td>Total<br><b>_____ / ${n + frPts}</b></td></tr></table>`;
 }
-const PRINT_CSS = `body{font:12pt/1.45 Georgia,"Times New Roman",serif;color:#000;margin:0}.pp{max-width:7.2in;margin:0 auto;padding:.3in 0}.pp-h{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:12px}.pp-h h1{font:700 17pt Arial,sans-serif;margin:0}.pp-h p{margin:2px 0;font:10.5pt Arial,sans-serif}.pp-meta{text-align:right;font:10.5pt Arial,sans-serif}.pp-i{font:10pt Arial,sans-serif;margin:0 0 14px}.pp-q>li{margin:0 0 16px;break-inside:avoid;page-break-inside:avoid}.pp-ch{list-style:none;padding-left:14px;margin:6px 0 0}.pp-ch li{margin:3px 0}table{border-collapse:collapse;margin:6px 0;font-size:10.5pt}td,th{border:1px solid #666;padding:3px 7px;text-align:left;vertical-align:top}.pp-key td.ans{font:700 12pt Arial,sans-serif;text-align:center}.pp-key{width:100%}.pp-frq{margin-top:18px}.pp-frq h2{font:700 13pt Arial,sans-serif;margin:0 0 4px}.pp-frq h3,.pp-frq h4{font:700 11pt Arial,sans-serif;margin:8px 0 4px}.pb{break-before:page;page-break-before:always}.pp-lines i{display:block;border-bottom:1px solid #999;height:26px}.pp-psg{border:1px solid #999;padding:6px 10px;margin-bottom:6px;font-size:10.5pt}.pp-sample{border-left:3px solid #999;padding-left:10px}sub,sup{font-size:.72em;line-height:0}.as-grid{display:flex;gap:28px;align-items:flex-start}.as-col{flex:1;min-width:0}.as-row{display:flex;align-items:center;gap:7px;margin:0 0 8px;break-inside:avoid;page-break-inside:avoid;font:10pt Arial,sans-serif}.as-row b{width:24px;text-align:right;margin-right:4px}.as-row em{font-size:8pt;color:#444}.bub{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;width:22px;height:22px;line-height:1;padding-top:1px;border:1.3px solid #000;border-radius:50%;font:8.5pt/1 Arial,sans-serif}.bub.on{background:#000;color:#fff}.as-score{margin-top:18px;width:100%}.as-score td{text-align:center;font:10pt Arial,sans-serif;padding:8px}.as-score b{display:inline-block;margin-top:6px;font-size:12pt}.pp-prompt{break-inside:avoid;page-break-inside:avoid}.nuc{display:inline-flex;flex-direction:column;font-size:.7em;line-height:1;vertical-align:middle;text-align:right;margin-right:1px}aside{border:0}`;
-const utPages = (ut, which) => { const T = `<div class="pp">${utPaper(ut, false)}</div><div class="pp pb">${utSheet(ut, false)}</div>`, K = `<div class="pp pb">${utPaper(ut, true)}</div><div class="pp pb">${utSheet(ut, true)}</div>`;
+const PRINT_CSS = `body{font:12pt/1.45 Georgia,"Times New Roman",serif;color:#000;margin:0}.pp{max-width:7.2in;margin:0 auto;padding:.3in 0}.pp-h{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:12px}.pp-h h1{font:700 17pt Arial,sans-serif;margin:0}.pp-h p{margin:2px 0;font:10.5pt Arial,sans-serif}.pp-meta{text-align:right;font:10.5pt Arial,sans-serif}.pp-i{font:10pt Arial,sans-serif;margin:0 0 14px}.pp-q>li{margin:0 0 16px;break-inside:avoid;page-break-inside:avoid}.pp-ch{list-style:none;padding-left:14px;margin:6px 0 0}.pp-ch li{margin:3px 0}table{border-collapse:collapse;margin:6px 0;font-size:10.5pt}td,th{border:1px solid #666;padding:3px 7px;text-align:left;vertical-align:top}.pp-key td.ans{font:700 12pt Arial,sans-serif;text-align:center}.pp-key{width:100%}.pp-frq{margin-top:18px}.pp-frq h2{font:700 13pt Arial,sans-serif;margin:0 0 4px}.pp-frq h3,.pp-frq h4{font:700 11pt Arial,sans-serif;margin:8px 0 4px}.pb{break-before:page;page-break-before:always}.pp-lines i{display:block;box-sizing:border-box;border-bottom:1px solid #999;height:28px}.pp-psg{border:1px solid #999;padding:6px 10px;margin-bottom:6px;font-size:10.5pt}.pp-sample{border-left:3px solid #999;padding-left:10px}sub,sup{font-size:.72em;line-height:0}.as-grid{display:flex;gap:28px;align-items:flex-start}.as-col{flex:1;min-width:0}.as-row{display:flex;align-items:center;gap:7px;margin:0 0 8px;break-inside:avoid;page-break-inside:avoid;font:10pt Arial,sans-serif}.as-row b{width:24px;text-align:right;margin-right:4px}.as-row em{font-size:8pt;color:#444}.bub{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;width:22px;height:22px;line-height:1;padding-top:1px;border:1.3px solid #000;border-radius:50%;font:8.5pt/1 Arial,sans-serif}.bub.on{background:#000;color:#fff}.as-score{margin-top:18px;width:100%}.as-score td{text-align:center;font:10pt Arial,sans-serif;padding:8px}.as-score b{display:inline-block;margin-top:6px;font-size:12pt}.cv{display:flex;flex-direction:column;min-height:9.2in;font-family:Arial,sans-serif}.cv-head{display:flex;justify-content:space-between;border-bottom:3px solid #000;padding-bottom:8px;font:700 9.5pt Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase}.cv-title{text-align:center;margin-top:.5in}.cv-course{font:11pt Arial,sans-serif;text-transform:uppercase;letter-spacing:.12em;color:#333;margin:0}.cv-title h1{font:700 24pt Arial,sans-serif;margin:8px 0 0}.cv-fields{display:grid;gap:20px;margin:.5in .3in 0}.cv-fields div{display:flex;align-items:flex-end;gap:12px;font:12pt Arial,sans-serif}.cv-fields span{width:1.35in;font-weight:700}.cv-fields i{flex:1;border-bottom:1.5px solid #000;height:24px}.cv-box{margin:auto .3in;border:2px solid #000;border-radius:12px;padding:20px 26px;text-align:center}.cv-box h2{font:700 13pt Arial,sans-serif;margin:0 0 12px;text-transform:uppercase;letter-spacing:.08em}.cv-units{list-style:none;padding:0;margin:0;font:13pt/1.75 Georgia,serif}.cv-box p{font:10.5pt Arial,sans-serif;margin:12px 0 0;color:#222}.cv-sec{width:100%;margin:0}.cv-sec td,.cv-sec th{font:10.5pt Arial,sans-serif;padding:6px 10px;text-align:center}.cv-sec td:first-child,.cv-sec th:first-child{text-align:left}.cv-inst{border-top:1.5px solid #000;padding-top:10px;font:10pt Arial,sans-serif}.cv-inst ul{margin:6px 0 0;padding-left:18px}.pp-prompt{break-inside:avoid;page-break-inside:avoid}.nuc{display:inline-flex;flex-direction:column;font-size:.7em;line-height:1;vertical-align:middle;text-align:right;margin-right:1px}aside{border:0}`;
+const utPages = (ut, which) => { const T = `<div class="pp">${utCover(ut)}</div><div class="pp pb">${utPaper(ut, false)}</div><div class="pp pb">${utSheet(ut, false)}</div>`, K = `<div class="pp pb">${utPaper(ut, true)}</div><div class="pp pb">${utSheet(ut, true)}</div>`;
   return which === 'sheet' ? `<div class="pp">${utSheet(ut, false)}</div>` : which === 'key' ? K.replace('pp pb', 'pp') : which === 'test' ? T : T + K; };
 function utDoc(ut) { return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(ut.n)}</title><style>${PRINT_CSS}</style></head><body>${utPages(ut, 'both')}</body></html>`; }
 function utPrint(ut, key) {
