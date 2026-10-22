@@ -1130,6 +1130,33 @@ body.locked #exam textarea, body.locked #exam input { -webkit-user-select: text;
 @media (max-width: 900px) { .gb-rep { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 560px) { .gb-cat { grid-template-columns: minmax(0, 1fr) 70px; } .gb-cat select { grid-column: 1; } .gb-k { grid-template-columns: minmax(0, 1fr); } .gb-sum { flex-direction: column; align-items: flex-start; } }
 .lk-badge { display: inline-flex; align-items: center; gap: 6px; color: var(--bad); font-weight: 700; } .lk-badge .ico { width: 16px; height: 16px; }
+/* teacher password, pause, accommodations, teacher access */
+.pw-box { display: grid; gap: 6px; padding: 10px 12px; border-radius: 10px; background: var(--mark-soft); }
+.pw-box p { margin: 0; display: flex; gap: 6px; align-items: flex-start; }
+.pw-box .ico { width: 16px; height: 16px; flex: none; margin-top: 2px; color: var(--mark); }
+.lk-key { display: flex; gap: 8px; justify-content: center; margin: 6px 0 4px; }
+.lk-key input { flex: 1; min-width: 0; max-width: 240px; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; font-size: 16px; }
+.acc-box { max-width: 560px; text-align: left; }
+.acc-box h2 { text-align: center; }
+.acc-sec { display: grid; gap: 8px; padding: 10px 0; border-top: 1px solid var(--line); }
+.acc-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.acc-ov { z-index: 10001; background: color-mix(in srgb, var(--paper) 92%, transparent); }
+.pz-ov { position: fixed; inset: 0; z-index: 9998; display: grid; place-items: center; padding: 24px; background: color-mix(in srgb, var(--paper) 55%, transparent); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+.pz-t { font-size: 22px; font-weight: 700; margin: 4px 0 12px; }
+#exam.paused { filter: blur(18px); pointer-events: none; user-select: none; }
+body.acc-big #exam { font-size: 118%; }
+body.acc-big #exam .qtext, body.acc-big #exam .opt, body.acc-big #exam .stem { font-size: 1.15em; }
+.lk-line.info { background: var(--cobalt-soft); }
+.acc-pre { margin: 10px 0 0; text-align: center; }
+.dev-page { max-width: 760px; padding-top: 6vh; }
+.dev-page form { display: grid; gap: 10px; }
+.dev-page label { display: grid; gap: 6px; font-weight: 600; font-size: 14px; }
+.dev-page input { padding: 10px 12px; border: 1px solid var(--rule); border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; }
+.dev-to { min-width: 260px; flex: 1; }
+.dev-list { display: grid; gap: 10px; margin-top: 12px; }
+.dev-item { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.dev-item > div:first-child { display: grid; gap: 2px; }
+.dev-item small { color: var(--muted); }
 
 </style>
 </head><body>
@@ -8793,18 +8820,18 @@ let T = null, X = null, tick = null, hideTime = false, lastSave = 0, inExam = fa
 const save = () => { if (T && X) LS.set(T.unit ? `ap.${PID}.ut.current.v1` : KEY(X).cur, T); };
 const loadCur = x => { const c = LS.get(KEY(x).cur, null); if (c && c.v === 1) { c.testId = c.testId || x.id; return c; } return null; };
 function show(view) { ['hub', 'exam', 'results'].forEach(v => { $('#' + v).hidden = v !== view; }); window.scrollTo(0, 0); }
-function leaveExam() { ttsStop(); spStop(); lkStop(); if (inExam) { save(); clearInterval(tick); inExam = false; } }
+function leaveExam() { ttsStop(); spStop(); lkStop(); document.body.classList.remove('acc-big'); if (typeof pzOff === 'function') pzOff(); if (inExam) { save(); clearInterval(tick); inExam = false; } }
 const lkExitFull = () => { try { if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {}); } catch (e) {} };
 function route() {
   leaveExam(); closeModal(); livePresence(); document.body.classList.remove('side-open');
   const h = ROUTE;
   if (MODE === 'loading') return renderLoading();
   if (MODE === 'blocked') return renderBlocked();
-  const tonly = MODE === 'gate' && (h === 'take' || /^take-/.test(h) || /^ut-/.test(h) || (h === 'unit-tests' && TEST_ONLY));
+  const tonly = MODE === 'gate' && (h === 'take' || h === 'device' || /^take-/.test(h) || /^ut-/.test(h) || (h === 'unit-tests' && TEST_ONLY));
   ['hub', 'results'].forEach(v => $('#' + v).classList.toggle('solo', tonly));
   if (tonly) { TEST_ONLY = true; if (!PID) PID = 'testonly'; renderTestOnly(h); bindNav(); return; }
   if (MODE === 'gate') { TEST_ONLY = false; return renderGate(); }
-  if (h === 'take' || /^take-/.test(h)) { renderTestOnly(h); bindNav(); return; }
+  if (h === 'take' || /^take-/.test(h) || h === 'device') { renderTestOnly(h); bindNav(); return; }
   if ((h === 'admin' || h === 'admin-invite' || h === 'admin-teachers') && MODE === 'owner') { ADM.tab = h === 'admin-invite' ? 'invite' : h === 'admin-teachers' ? 'teachers' : 'codes'; renderAdmin(); bindNav(); return; }
   if (MODE === 'owner' && (!PID || !me() || h === 'profiles')) renderProfiles();
   else if (h === 'tests' || h === 'simulate' || h === 'subjects') renderTests();
@@ -9595,7 +9622,7 @@ document.addEventListener('keydown', e => {
 /* ═══════════ EXAM ═══════════ */
 function enterExam() {
   for (const k in CBOX) delete CBOX[k];
-  X = BY_ID[T.testId] || X; setAccent(X); inExam = true; show('exam'); renderExam(); livePresence(); if (T.lk) lkStart(); else lkStop();
+  X = BY_ID[T.testId] || X; setAccent(X); inExam = true; show('exam'); renderExam(); livePresence(); if (T.lk) lkStart(); else lkStop(); document.body.classList.toggle('acc-big', !!(T.acc && T.acc.big));
   clearInterval(tick);
   tick = setInterval(() => {
     if (!T || !inExam) return;
@@ -9628,7 +9655,7 @@ function renderExam() {
     <div class="xtop"><div class="xtitle">${esc(T.title)} <span>· ${kind}${secLbl ? ' · ' + secLbl : ''}</span></div>
       <div class="timer" id="timer"><span class="lbl">${T.practice || T.untimed ? 'Time spent' : T.secs ? 'Section time left' : 'Time remaining'}</span><span class="t" id="tval"></span><button class="tb link" id="hideT">${hideTime ? 'Show' : 'Hide'}</button></div></div>
     <div class="xtools"><div class="qcount">${isRev ? (T.secs ? `Review · Section ${T.sec ? 'II' : 'I'}` : 'Review') : `Question ${pos + 1} of ${n}`}${T.practice ? (() => { const ck = T.checked.filter(Boolean).length, ok = T.items.filter((qq, i) => T.checked[i] && isRight(qq, T.ans[i])).length; return `<span class="score-run" aria-live="polite">Score ${ok} / ${ck}${ck ? ` · ${Math.round(ok / ck * 100)}%` : ''}</span>`; })() : ''}</div>
-      <div class="tbtns">${T.lk ? `<span class="tb lk-badge" title="Lockdown is on">${SVG(IC.lock)} Locked</span>` : '<button class="tb link" id="exitB">Save &amp; exit</button>'}${isRev || T.unit ? '' : '<button class="tb link" id="repB" title="Report a problem with this question">Report</button>'}
+      <div class="tbtns">${T.lk && !(T.acc && T.acc.nolock) ? `<span class="tb lk-badge" title="Lockdown is on">${SVG(IC.lock)} Locked</span>` : '<button class="tb link" id="exitB">Save &amp; exit</button>'}${T.unit || T.assign ? '<button class="tb link" id="pzB" title="Hide the questions for a short break. The timer keeps running.">Pause</button><button class="tb link" id="accB" title="Teacher: accommodations (password needed)">Teacher</button>' : ''}${isRev || T.unit ? '' : '<button class="tb link" id="repB" title="Report a problem with this question">Report</button>'}
         ${X.tools.length ? `<button class="tb" id="helpB">${T.nocalc ? 'Reference sheet' : 'Calculator &amp; reference'}</button>` : ''}
         ${T.practice ? `<button class="tb" id="endB">End session</button>` : `${isRev ? '' : `<button class="tb ${T.marked[T.cur] ? 'on' : ''}" id="markB" aria-pressed="${T.marked[T.cur]}">${T.marked[T.cur] ? 'Marked' : 'Mark'}</button>`}
         <button class="tb" id="revB">${isRev ? 'Return' : 'Review'}</button>
@@ -9673,6 +9700,8 @@ function renderExam() {
   $('#hideT').onclick = () => { hideTime = !hideTime; $('#hideT').textContent = hideTime ? 'Show' : 'Hide'; updateTimer(); };
   if ($('#helpB')) $('#helpB').onclick = () => openHelp(X, helpTools(X)[0]);
   if ($('#repB')) $('#repB').onclick = () => openReport({ test: X.id, q: T.cur + 1, qid: q.id, stem: q.stem });
+  if ($('#pzB')) $('#pzB').onclick = pzOn;
+  if ($('#accB')) $('#accB').onclick = () => accOpen(testUt(), accApply);
   if ($('#exitB')) $('#exitB').onclick = () => { leaveExam(); go(T && T.unit ? 'unit-tests' : T && T.mode === 'calc' ? 'calc' : X.id); };
   if (T.practice) { bindPractice(q, n); return; }
   $('#revB').onclick = () => { T.screen = isRev ? 'q' : 'review'; save(); renderExam(); window.scrollTo(0, 0); };
@@ -9761,7 +9790,7 @@ const isRight = (q, a) => {
   if (q.type === 'num') { const v = parseNum(a[0]); return isFinite(v) && Math.abs(v - q.ans) <= (q.tol != null ? q.tol : Math.max(1e-9, Math.abs(q.ans) * 1e-6)); }
   return a.length === q.correct.length && a.every((v, i) => v === q.correct[i]);
 };
-function finish(auto) { ttsStop(); spStop(); lkStop(); lkExitFull(); if (T && T.unit) return utFinish(auto);
+function finish(auto) { ttsStop(); spStop(); pzOff(); lkStop(); lkExitFull(); document.body.classList.remove('acc-big'); if (T && T.unit) return utFinish(auto);
   clearInterval(tick); inExam = false; closeModal(); const k = KEY(X);
   if (T.practice) { const keep = T.items.map((_, i) => i).filter(i => T.checked[i]); T.items = keep.map(i => T.items[i]); T.ans = keep.map(i => T.ans[i]); T.marked = keep.map(() => false); T.remaining = T.total - (T.elapsed || 0); }
   const byCat = {}; let correct = 0; const seen = LS.get(k.seen, {});
@@ -9771,7 +9800,7 @@ function finish(auto) { ttsStop(); spStop(); lkStop(); lkExitFull(); if (T && T.
   const nSR = T.items.filter(q => q.type !== 'cr').length, crIdx = T.items.map((q, i) => q.type === 'cr' ? i : -1).filter(i => i >= 0);
   const rec = { date: new Date().toISOString(), testId: X.id, mode: T.mode, level: T.level || 'std', cat: T.cat, title: T.title, n: nSR, correct, pct: nSR ? Math.round(correct / nSR * 100) : 0, byCat, used: T.spent || (T.total - Math.max(0, T.remaining)), auto, items: T.items, ans: T.ans, marked: T.marked };
   if (T.practice) rec.practice = true;
-  if (T.assign) { rec.assign = T.assign; rec.studentName = T.studentName; if (T.lk) rec.lk = lkPack(T.lk); }
+  if (T.assign) { rec.assign = T.assign; rec.studentName = T.studentName; if (T.lk) rec.lk = lkPack(T.lk); if (T.acc && T.acc.log && T.acc.log.length) rec.acc = T.acc.log; if (T.pz) rec.pz = [T.pz.n, T.pz.secs]; }
   if (crIdx.length) { rec.cr = { idx: crIdx, sc: {}, ck: {}, w: X.cr.weight }; rec.crDone = false; }
   const hist = LS.get(k.hist, []); hist.push(rec);
   hist.forEach((h, i) => { if (i < hist.length - 10) { delete h.items; delete h.ans; delete h.marked; } });
@@ -10733,6 +10762,7 @@ function utShortOf(ut) {
   put(1, 2); put(ci, 5); put(SC_KIND.indexOf(kind), 2); put(SC_MIX.indexOf(ut.zm || 'std'), 2); put(ut.a === 'never' ? 1 : 0, 1); put(ut.lk ? +ut.lk.m || 0 : 0, 2); put(ut.m || 0, 8); put(ut.z, 20); put(scCheck(ut.q, ut.f), 8);
   if (kind === 'unit') { const fi = frqIdx(x), f = ut.f.map(id => fi.indexOf(id)); if (cats.length > 16 || (ut.zn || 0) > 127 || f.length > 3 || f.some(i => i < 0 || i > 127)) return null;
     put(cats.reduce((m, k, i) => m | (ut.u.includes(k) ? 1 << i : 0), 0), 16); put(ut.zn || 0, 7); put(f.length, 2); f.forEach(i => put(i, 7)); }
+  put(ut.kh ? 1 : 0, 1); if (ut.kh) { put(parseInt(ut.kh, 16), 24); put(ut.lk && ut.lk.k ? 1 : 0, 1); }
   while (bits.length % 5) bits.push(0);
   let out = ''; for (let i = 0; i < bits.length; i += 5) out += SC_ABC[parseInt(bits.slice(i, i + 5).join(''), 2)];
   return out.match(/.{1,4}/g).join('-');
@@ -10748,16 +10778,17 @@ function utShortParse(raw) {
   const cats = srCatsOf(x).map(c => c.k); let o = { kind, mix };
   if (kind === 'unit') { const mask = get(16), n = get(7), nf = get(2), fi = frqIdx(x), f = []; for (let i = 0; i < nf; i++) f.push(fi[get(7)]);
     o = { ...o, u: cats.filter((k, i) => mask & (1 << i)), n, f: f.filter(Boolean) }; if (!o.u.length) return null; }
+  const hasK = get(1), kh = hasK ? get(24).toString(16).padStart(6, '0') : null, kLock = hasK ? get(1) : 0;
   const g = utGenerate(x, o, z);
   if (scCheck(g.q, g.f) !== chk) return { stale: true };
-  const ut = { v: 1, n: utDefaultTitle(x, g.u, kind), t: x.id, u: g.u, q: g.q, f: g.f, m, e: '', a, s: z, z, zm: mix, o: 1, ...(lkm ? { lk: { m: lkm } } : {}), ...(kind !== 'unit' ? { ex: kind } : { zn: o.n }) };
+  const ut = { v: 1, n: utDefaultTitle(x, g.u, kind), t: x.id, u: g.u, q: g.q, f: g.f, m, e: '', a, s: z, z, zm: mix, o: 1, ...(lkm ? { lk: { m: lkm, ...(kLock ? { k: 1 } : {}) } } : {}), ...(kh ? { kh } : {}), ...(kind !== 'unit' ? { ex: kind } : { zn: o.n }) };
   return { ut, code: utCode(ut) };
 }
 function renderUtNew() {
   if (!isTeacher()) return renderUnitTests();
   setAccent(null); show('hub');
   const mine = LS.get(UT_MINE, []);
-  const st = UTB || (UTB = { t: TESTS[0].id, u: [srCatsOf(TESTS[0])[0].k], n: 20, kind: 'unit', mix: 'std', fsel: [], fall: false, m: null, e: teacherDefaultEmail(), a: 'send', title: '', draft: null, open: true, lk: '1' });
+  const st = UTB || (UTB = { t: TESTS[0].id, u: [srCatsOf(TESTS[0])[0].k], n: 20, kind: 'unit', mix: 'std', fsel: [], fall: false, m: null, e: teacherDefaultEmail(), a: 'send', title: '', draft: null, open: true, lk: '4', pw: '' });
   const x = BY_ID[st.t]; setAccent(x);
   const avail = x.bank.filter(b => st.u.includes(b.cat)).length;
   const fp = frqPool(x, st.fall ? [] : st.u), fpAll = frqPool(x, []);
@@ -10770,7 +10801,8 @@ function renderUtNew() {
   const draftHTML = d ? (() => { const ut = d.ut, items = utItems(ut), code = utCode(ut), nf = ut.f.length;
     return `<section class="card" style="margin-top:18px" id="utDraft"><div class="card-h sm"><h3>${esc(ut.n)}</h3><span class="small muted">${utMcq(items).length} multiple choice${nf ? ' + ' + nf + ' free response' : ''} · ${ut.m ? ut.m + ' min' : 'no time limit'}</span></div>
       <div class="row ut-acts"><button class="btn primary" id="utSave">${d.saved ? '✓ Saved' : 'Save test'}</button><a class="btn" href="#assign" id="utAssign">${SVG(IC.assign)} Assign to students</a>${pdfBtn('utPdfBoth', 'PDF: test + answer key')}${pdfBtn('utPdfTest', 'PDF: test only')}${pdfBtn('utPdfSheet', 'PDF: answer sheet')}${paperSel()}${IN_VIEWER ? '' : '<button class="btn quiet" data-utp="test">Print test</button><button class="btn quiet" data-utp="key">Print key</button>'}<button class="btn quiet" data-utdl="1">${SVG(IC.print)} Printable web page</button><button class="btn quiet" id="utTry">Preview as a student</button></div>
-      ${ut.lk && ut.lk.m === 3 ? `<div class="notice seb-note">${SVG(IC.lock)} <span>Students must open this test in <b>Safe Exam Browser</b> (free, Windows, Mac, iPad). <button class="linkbtn sm" id="utSeb">Download the Safe Exam Browser settings file (.seb)</button>. Students open the file and Safe Exam Browser starts this test, locked. Try it on one device before test day.</span></div>` : ut.lk ? `<p class="small muted" style="margin:0 0 10px">${SVG(IC.lock)} Lockdown is on: full screen, no copy/paste, and every time a student leaves the test it’s recorded in their results.</p>` : ''}
+      ${ut.lk && ut.lk.m === 3 ? `<div class="notice seb-note">${SVG(IC.lock)} <span>Students must open this test in <b>Safe Exam Browser</b> (free, Windows, Mac, iPad). <button class="linkbtn sm" id="utSeb">Download the Safe Exam Browser settings file (.seb)</button>. Students open the file and Safe Exam Browser starts this test, locked. Try it on one device before test day.</span></div>` : ut.lk ? `<p class="small muted" style="margin:0 0 10px">${SVG(IC.lock)} Lockdown is on: full screen, no copy/paste, and every time a student leaves the test it’s recorded in their results.${ut.lk.k ? ' <b>Leaving the test locks it until you type your teacher password on the student’s device.</b>' : ''}</p>` : ''}
+      ${ut.kh ? `<p class="small muted" style="margin:0 0 10px">Your teacher password works on this test for unlocking, accommodations (extra time, larger text), and Teacher access to results saved on a student’s device.</p>` : ''}
       <div class="share"><label class="small">Your website address (where students open the site)<div class="copyline"><input id="utSite" value="${esc(siteBase())}" spellcheck="false"><button class="btn quiet" id="utSiteB">Update link</button></div></label><label class="small">Student link<div class="copyline"><input readonly value="${esc(utLink(code))}" id="utLinkIn"><button class="btn" data-copy="#utLinkIn">Copy link</button></div></label>
         ${(() => { const sc = utShortOf(ut); return sc ? `<div class="sc-box"><span class="small">Short test code${ut.o ? ' (works without an account)' : ''}</span><div class="sc-code" id="utShort">${esc(sc)}</div><div class="row"><button class="btn" data-copyt="${esc(sc)}">Copy code</button><span class="small muted">Students go to <b>${esc(siteBase().replace(/^https?:\/\//, ''))}/#take</b> and type it. They enter your email at the end to send you their results.</span></div></div>` : `<p class="small muted" style="margin:0">${ut.z == null ? 'A short code isn’t available after replacing or removing questions. Share the link instead, or generate a new version.' : 'Share the link below.'}</p>`; })()}
         <label class="small">Or share the long test code (students paste it on the Unit Tests page)<div class="copyline"><input readonly value="${esc(code)}" id="utCodeIn"><button class="btn" data-copy="#utCodeIn">Copy code</button></div></label><span class="copied" id="utCopied" aria-live="polite"></span></div>
@@ -10792,6 +10824,8 @@ function renderUtNew() {
         <label>Title<input id="utTitle" maxlength="80" value="${esc(st.title || utDefaultTitle(x, st.u, st.kind))}"></label></div>
       <label>Send results to (your school email)<input id="utE" type="email" value="${esc(st.e)}"></label>
       <label>After a student sends results<select id="utA"><option value="send" ${st.a === 'send' ? 'selected' : ''}>Show them the answers and explanations</option><option value="never" ${st.a === 'never' ? 'selected' : ''}>Keep answers hidden (I’ll go over them in class)</option></select></label>
+      <div class="pw-box"><label>Teacher password (unlocks locked tests, accommodations, and saved results)<input id="utPw" maxlength="40" value="${esc(st.pw || teacherPw())}" autocomplete="off" spellcheck="false"></label>
+        <p class="small">${SVG(IC.lock)} <b>Don’t show this password to students.</b> If a student sees it, change it here; tests you make after that use the new password. The default is <b>ad31</b>.</p></div>
       <label>Test security (online)<select id="utL">${LK_MODES.map(([k, l]) => `<option value="${k}" ${st.lk === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
       <p class="small muted" style="margin:-6px 0 0">Lockdown hides the questions and records it every time a student leaves the test, and blocks copy/paste. A web page can’t block a phone or a second device, so supervise the room too. Safe Exam Browser is the strongest option on Windows, Mac, and iPad; on school Chromebooks, IT can turn off Gemini in the Google Admin console.</p>
       <label class="chk"><input type="checkbox" id="utO" ${st.open ? 'checked' : ''}> <span>Students can take this test without an Educator Hub account (with the short test code or link)</span></label>
@@ -10803,7 +10837,7 @@ function renderUtNew() {
     </section></div>
     ${draftHTML}
     ${foot()}</div>`;
-  const upd = () => { st.t = $('#utT').value; if ($('#utN')) st.n = Math.max(0, +$('#utN').value || 0); st.mix = $('#utMix').value; st.m = $('#utM').value === '' ? null : Math.max(0, +$('#utM').value); st.title = $('#utTitle').value.trim(); st.e = $('#utE').value.trim(); st.a = $('#utA').value; st.open = $('#utO').checked; st.lk = $('#utL').value; };
+  const upd = () => { st.t = $('#utT').value; if ($('#utN')) st.n = Math.max(0, +$('#utN').value || 0); st.mix = $('#utMix').value; st.m = $('#utM').value === '' ? null : Math.max(0, +$('#utM').value); st.title = $('#utTitle').value.trim(); st.e = $('#utE').value.trim(); st.a = $('#utA').value; st.open = $('#utO').checked; st.lk = $('#utL').value; st.pw = $('#utPw').value.trim(); };
   const redo = (keepY) => { const y = window.scrollY; renderUtNew(); bindNav(); if (keepY) window.scrollTo(0, y); };
   $('#utT').onchange = () => { upd(); const nx = BY_ID[st.t]; st.u = [srCatsOf(nx)[0].k]; st.title = ''; st.m = null; st.fsel = []; st.fall = false; redo(); };
   $$('[data-utu]').forEach(c => c.onchange = () => { upd(); const k = c.dataset.utu; st.u = c.checked ? [...new Set(st.u.concat(k))] : st.u.filter(u => u !== k); st.u.sort((p, q) => srCatsOf(x).findIndex(c => c.k === p) - srCatsOf(x).findIndex(c => c.k === q)); if (!st.title || st.title.endsWith(' Test')) st.title = ''; st.m = null; redo(true); });
@@ -10813,13 +10847,14 @@ function renderUtNew() {
   if ($('#utFNone')) $('#utFNone').onclick = () => { upd(); st.fsel = []; st.m = null; redo(true); };
   if ($('#utN')) $('#utN').onchange = () => { upd(); st.m = null; redo(true); };
   $('#utK').onchange = () => { upd(); st.kind = $('#utK').value; st.title = ''; st.m = null; redo(true); };
-  ['#utMix', '#utM', '#utTitle', '#utE', '#utA', '#utO', '#utL'].forEach(s => $(s).onchange = upd);
-  $('#utGen').onclick = () => { upd();
+  ['#utMix', '#utM', '#utTitle', '#utE', '#utA', '#utO', '#utL', '#utPw'].forEach(s => $(s).onchange = upd);
+  $('#utGen').onclick = async () => { upd(); const pw = (st.pw || teacherPw()).trim(); if (pw.length < 4) return $('#utErr').textContent = 'The teacher password needs at least 4 characters.'; LS.set('ap.lk.pw', pw);
+    const lkx = lkModeOf(st.lk), sec = async z => ({ ...(lkx ? { lk: lkx } : {}), kh: await keyHash(pw, String(z)) });
     if (exam) {
       if (!isEmail(st.e)) return $('#utErr').textContent = 'Enter the email address where students should send results.';
       LS.set('ap.ut.email', normEmail(st.e));
       const z = Math.floor(Math.random() * 2 ** 20), g = utGenerate(x, { kind: st.kind, mix: st.mix }, z);
-      st.draft = { ut: { v: 1, ex: st.kind, n: st.title || utDefaultTitle(x, [], st.kind), t: x.id, u: g.u, q: g.q, f: g.f, m: st.m == null ? autoMin : st.m, e: normEmail(st.e), a: st.a, s: z, z, zm: st.mix, ...(st.open ? { o: 1 } : {}), ...(+st.lk ? { lk: { m: +st.lk } } : {}), d: new Date().toISOString().slice(0, 10) }, saved: false };
+      st.draft = { ut: { v: 1, ex: st.kind, n: st.title || utDefaultTitle(x, [], st.kind), t: x.id, u: g.u, q: g.q, f: g.f, m: st.m == null ? autoMin : st.m, e: normEmail(st.e), a: st.a, s: z, z, zm: st.mix, ...(st.open ? { o: 1 } : {}), ...(await sec(z)), d: new Date().toISOString().slice(0, 10) }, saved: false };
       redo(); const el = $('#utDraft'); if (el) el.scrollIntoView({ block: 'start' }); return; }
     if (!st.u.length) return $('#utErr').textContent = 'Choose at least one unit.';
     if (!st.n && !st.fsel.length) return $('#utErr').textContent = 'Add some multiple-choice or free-response questions.';
@@ -10827,7 +10862,7 @@ function renderUtNew() {
     const n = Math.min(st.n, avail);
     LS.set('ap.ut.email', normEmail(st.e));
     const z = Math.floor(Math.random() * 2 ** 20), g = utGenerate(x, { kind: 'unit', u: st.u, n, mix: st.mix, f: st.fsel }, z);
-    st.draft = { ut: { v: 1, n: st.title || utDefaultTitle(x, st.u), t: x.id, u: st.u, q: g.q, f: g.f, m: st.m == null ? autoMin : st.m, e: normEmail(st.e), a: st.a, s: z, z, zm: st.mix, zn: n, ...(st.open ? { o: 1 } : {}), ...(+st.lk ? { lk: { m: +st.lk } } : {}), d: new Date().toISOString().slice(0, 10) }, saved: false };
+    st.draft = { ut: { v: 1, n: st.title || utDefaultTitle(x, st.u), t: x.id, u: st.u, q: g.q, f: g.f, m: st.m == null ? autoMin : st.m, e: normEmail(st.e), a: st.a, s: z, z, zm: st.mix, zn: n, ...(st.open ? { o: 1 } : {}), ...(await sec(z)), d: new Date().toISOString().slice(0, 10) }, saved: false };
     redo(); const el = $('#utDraft'); if (el) el.scrollIntoView({ block: 'start' }); };
   if (d) bindUtDraft(d, () => redo(true));
   $$('[data-open]').forEach(b => b.onclick = () => { const m = LS.get(UT_MINE, [])[+b.dataset.open]; const p = utParse(m.code); if (!p) return; st.t = p.ut.t; st.u = p.ut.u; st.kind = p.ut.ex || 'unit'; st.fsel = p.ut.f.slice(); st.draft = { ut: p.ut, saved: true }; redo(); const el = $('#utDraft'); if (el) el.scrollIntoView({ block: 'start' }); });
@@ -10921,11 +10956,22 @@ function renderUnitTests(err) {
     ${cur ? `<div class="resume card"><p><b>Unit test in progress:</b> ${esc(cur.title)} · ${cur.ans.filter(a => a.length).length} of ${cur.items.length} answered${cur.untimed ? '' : ` · <span class="mono">${fmtT(cur.remaining)}</span> left`}</p><div class="row"><button class="btn primary" id="utResume">Resume</button></div></div>` : ''}
     <section class="card"><form id="utOpenF" class="field" autocomplete="off"><input id="utCodeIn2" placeholder="Type the test code or paste the link from your teacher" aria-label="Test link or code"><button class="btn primary" type="submit">Open test</button></form><div class="err" id="utOpenErr" role="alert">${err ? esc(err) : ''}</div></section>
     <section class="card" style="margin-top:18px"><h3 class="ch">Your submitted unit tests</h3>${res.length ? `<div class="tablewrap"><table class="hist"><thead><tr><th>Test</th><th>Submitted</th><th>Score</th><th>Results</th><th></th></tr></thead><tbody>${res.map((r, i) => [r, i]).reverse().map(([r, i]) => `<tr><td><b>${esc(r.ut.n)}</b><br><small class="muted">${esc((BY_ID[r.testId] || {}).subject || '')}</small></td><td>${fmtDate(r.date)}</td><td class="mono">${r.n ? r.correct + '/' + r.n + ' · <b>' + r.pct + '%</b>' : '—'}${r.items.some(q => q.type === 'cr') ? '<br><small class="muted">+ free response</small>' : ''}</td><td>${r.sent ? '<span class="st-on">Sent</span>' : '<span class="st-off">Not sent</span>'}</td><td><button class="linkbtn" data-utr="${i}">${r.sent ? 'View' : 'Send results'}</button></td></tr>`).join('')}</tbody></table></div>` : '<p class="empty">No unit tests yet.</p>'}</section>
+    <p class="small muted" style="margin-top:14px"><a href="#device">Teacher access</a> (results saved on this device)</p>
     ${foot()}</div>`;
   $('#utOpenF').onsubmit = e => { e.preventDefault(); const p = utParse($('#utCodeIn2').value); if (!p) { $('#utOpenErr').textContent = 'That doesn’t look like a test link or code. Copy the whole link or code from your teacher and try again.'; return; } go('ut-' + p.code); };
   formFix('#utOpenF');
   if ($('#utResume')) $('#utResume').onclick = () => { T = LS.get(utCurKey(), null); if (T) { X = BY_ID[T.testId]; enterExam(); } };
   $$('[data-utr]').forEach(b => b.onclick = () => renderUtResult(+b.dataset.utr, false));
+}
+/* accommodations set on the intro page, applied when the test starts */
+const UTACC = {};
+function accStart(code) {
+  const A = UTACC[code]; if (!A || !T) return; T.acc = { log: A.log.slice(), big: !!A.big, nolock: !!A.nolock };
+  if (A.nolock && T.lk) T.lk.off = true;
+  if (A.untimed) T.untimed = true;
+  else { const mult = A.x ? Math.round((T.secs ? T.secs.reduce((s, x) => s + x.t, 0) : T.total) * (A.x - 1)) : 0, add = (A.add || 0) + mult;
+    if (add) { if (T.secs) { const tot = T.secs.reduce((s, x) => s + x.t, 0); T.secs.forEach(x => { x.t += Math.round(add * x.t / tot); }); T.remaining = T.secs[0].t; } else { T.remaining += add; } T.total += add; } }
+  delete UTACC[code];
 }
 const dueText = ut => ut.due ? new Date(ut.due + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) : '';
 function renderUtIntro(code) {
@@ -10954,19 +11000,24 @@ function renderUtIntro(code) {
       <form id="utStartF" autocomplete="off"><label>Your full name (as your teacher knows you)<input id="utName" maxlength="60" value="${esc(name)}" placeholder="First and last name"></label>
       ${MODE === 'member' ? '' : `<label>Your school email (optional)<input id="utMe" type="email" maxlength="80" value="${esc(LS.get('ap.testonly.email', '') || '')}" placeholder="you@school.org"></label>`}
       ${!exam && !ut.e ? `<label>Your teacher’s email (where your results go)<input id="utTo" type="email" maxlength="80" value="${esc((LS.get(`ap.${PID}.teacher`, null) || {}).e || '')}" placeholder="teacher@school.org"></label>` : ''}
-      <button class="btn primary big" type="submit">${lkm ? SVG(IC.lock) + ' Start in full screen' : 'Start ' + (exam ? 'exam simulation' : 'unit test')}</button><div class="err" id="utStErr" role="alert"></div></form>`}
+      <button class="btn primary big" type="submit">${lkm ? SVG(IC.lock) + ' Start in full screen' : 'Start ' + (exam ? 'exam simulation' : 'unit test')}</button>
+      <p class="small muted acc-pre">${UTACC[p.code] && UTACC[p.code].log.length ? `<b>Accommodations set by your teacher:</b> ${esc(UTACC[p.code].log.join('; '))} · ` : ''}<button class="linkbtn sm" type="button" id="utAcc">Teacher: accommodations</button></p><div class="err" id="utStErr" role="alert"></div></form>`}
     </section>${foot()}</div>`;
   if ($('#utRes')) $('#utRes').onclick = () => { T = cur; X = x; if (T.lk && T.lk.fs) lkFull(); enterExam(); };
   if (!$('#utStartF')) return;
+  $('#utAcc').onclick = () => accOpen(ut, o => { const A = UTACC[p.code] = UTACC[p.code] || { log: [], add: 0 }; if (o.big != null) { A.big = o.big; A.log.push(o.big ? 'larger text' : 'normal text'); }
+    else if (o.nolock != null) { A.nolock = o.nolock; A.log.push(o.nolock ? 'lockdown off' : 'lockdown on'); }
+    else if (o.time === 'none') { A.untimed = true; A.log.push('no time limit'); } else { A.x = /^x/.test(o.time) ? parseFloat(o.time.slice(1)) : A.x; if (!/^x/.test(o.time)) A.add += +o.time; A.log.push(o.label); }
+    return 'Applied: ' + A.log.join('; '); }, () => UTACC[p.code] || {}, () => { renderUtIntro(code); bindNav(); });
   $('#utStartF').onsubmit = e => { e.preventDefault(); const nm = $('#utName').value.trim().replace(/\s+/g, ' ');
     if (nm.length < 3 || !/\s/.test(nm)) { $('#utStErr').textContent = 'Enter your first and last name so your teacher can match your results.'; return; }
     if ($('#utMe')) { const me2 = normEmail($('#utMe').value); if (me2 && !isEmail(me2)) { $('#utStErr').textContent = 'Check your email address, or leave it blank.'; return; } LS.set('ap.testonly.email', me2); }
     if ($('#utTo')) { const to = normEmail($('#utTo').value); if (!isEmail(to)) { $('#utStErr').textContent = 'Enter your teacher’s email address so you can send them your results.'; return; } LS.set(`ap.${PID}.teacher`, { e: to, r: '' }); }
     const go2 = () => { LS.set(`ap.${PID}.ut.name`, nm); X = x; const lk = lkNew(ut); if (lk && fsOK()) { lk.fs = 1; lkFull(); }
-      if (exam) { T = buildTest(x, 'full', null, ut.lv || 'std', false); T.title = ut.n; T.assign = { code: p.code, ut }; T.studentName = nm; T.lk = lk; save(); enterExam(); return; }
+      if (exam) { T = buildTest(x, 'full', null, ut.lv || 'std', false); T.title = ut.n; T.assign = { code: p.code, ut }; T.studentName = nm; T.lk = lk; accStart(p.code); save(); enterExam(); return; }
       T = { v: 1, testId: x.id, mode: 'unit', level: 'std', cat: null, items, title: ut.n, ans: items.map(() => []), marked: items.map(() => false), visited: items.map(() => false), cur: 0, screen: 'q',
         remaining: ut.m * 60, total: ut.m * 60, untimed: !ut.m, elapsed: 0, spent: 0, started: new Date().toISOString(), unit: { code: p.code, ut }, studentName: nm, lk };
-      save(); enterExam(); };
+      accStart(p.code); save(); enterExam(); };
     const other = exam ? loadCur(x) : cur && cur.unit ? cur : null;
     if (other) confirmBox(exam ? 'Start this exam?' : 'Start this unit test?', exam ? `You have another ${x.subject} attempt in progress. Starting this one discards it.` : `You have another unit test in progress (${other.title}). Starting this one discards it.`, 'Start', go2); else go2(); };
   formFix('#utStartF');
@@ -10977,14 +11028,14 @@ function utFinish(auto) {
   items.forEach((q, i) => { if (q.type === 'cr') return; const ok = isRight(q, T.ans[i]); if (ok) correct++; byCat[q.cat] = byCat[q.cat] || [0, 0]; byCat[q.cat][1]++; if (ok) byCat[q.cat][0]++; });
   const nSR = utMcq(items).length, prev = LS.get(utResKey(), []);
   const rec = { code: T.unit.code, ut: T.unit.ut, testId: x.id, name: T.studentName, email: myEmail(), date: new Date().toISOString(), started: T.started, used: T.spent || 0, auto,
-    n: nSR, correct, pct: nSR ? Math.round(correct / nSR * 100) : 0, byCat, items, ans: T.ans, attempt: prev.filter(r => r.code === T.unit.code).length + 1, sent: null, ...(T.lk ? { lk: lkPack(T.lk) } : {}) };
+    n: nSR, correct, pct: nSR ? Math.round(correct / nSR * 100) : 0, byCat, items, ans: T.ans, attempt: prev.filter(r => r.code === T.unit.code).length + 1, sent: null, ...(T.lk ? { lk: lkPack(T.lk) } : {}), ...(T.acc && T.acc.log && T.acc.log.length ? { acc: T.acc.log } : {}), ...(T.pz ? { pz: [T.pz.n, T.pz.secs] } : {}) };
   prev.push(rec); LS.set(utResKey(), prev.slice(-40)); LS.del(utCurKey()); T = null;
   go('unit-tests'); renderUtResult(LS.get(utResKey(), []).length - 1, true);
 }
 /* the signed data block lets the teacher recompute the score from the answers, so an edited score is caught */
 async function utData(r) {
   const fr = r.items.map((q, i) => q.type === 'cr' ? String(r.ans[i][0] || '').slice(0, 6000) : null).filter(v => v !== null);
-  const payload = b64e({ c: r.code.slice(2), h: (await sha256hex(r.code)).slice(0, 16), nm: r.name, em: r.email, d: r.date, u: r.used, x: r.auto ? 1 : 0, at: r.attempt, a: r.items.map((q, i) => ansStr(q, r.ans[i])).join('.'), ...(fr.length ? { fr } : {}), ...(r.lk ? { lk: r.lk } : {}) });
+  const payload = b64e({ c: r.code.slice(2), h: (await sha256hex(r.code)).slice(0, 16), nm: r.name, em: r.email, d: r.date, u: r.used, x: r.auto ? 1 : 0, at: r.attempt, a: r.items.map((q, i) => ansStr(q, r.ans[i])).join('.'), ...(fr.length ? { fr } : {}), ...(r.lk ? { lk: r.lk } : {}), ...(r.acc ? { ac: r.acc } : {}), ...(r.pz ? { pz: r.pz } : {}) });
   const sig = (await sha256hex(SITE_KEY + '|ut|' + payload)).slice(0, 12);
   return `APUT.${payload}.${sig}`;
 }
@@ -11000,7 +11051,7 @@ Student: ${r.name}${r.email ? ' <' + r.email + '>' : ''}
 Submitted: ${fmtDate(r.date)}${r.attempt > 1 ? ` (attempt ${r.attempt} on this device)` : ''}
 Time used: ${fmtDur(r.used)}${r.ut.m ? ` of ${r.ut.m} min` : ''}${r.auto ? ' (time ran out)' : ''}
 
-Multiple choice: ${r.correct} / ${r.n} correct (${r.pct}%)${r.lk ? `\nTest security (lockdown): ${lkSummary(r.lk).text}` : ''}
+Multiple choice: ${r.correct} / ${r.n} correct (${r.pct}%)${r.lk ? `\nTest security (lockdown): ${lkSummary(r.lk).text}` : ''}${r.acc ? `\nAccommodations (set by the teacher): ${r.acc.join('; ')}` : ''}${r.pz && r.pz[0] ? `\nPauses: ${r.pz[0]} (${fmtDur(r.pz[1] || 0)} total)` : ''}
 Answers chosen: ${ansLine}
 ${fr.length ? `\nFree response (${fr.length}) — for the teacher to score:\n` + fr.map(([q, i], k) => `\n[FRQ ${k + 1}] ${CASES[q.caseId] ? CASES[q.caseId].title : ''} (${q.max} points)\n${r.ans[i][0] || '(no answer)'}`).join('\n') + '\n' : ''}
 Teacher check data (paste into Check Results to verify and score):
@@ -11067,7 +11118,7 @@ async function renderUtResult(idx, fresh) {
 /* ── exam simulation results: email the school address, score card ── */
 async function examData(rec, x, nm) {
   const t = crTotals(rec);
-  const payload = b64e({ ...(rec.lk ? { lk: rec.lk } : {}), t: x.id, nm, em: myEmail(), d: rec.date, u: rec.used, lv: rec.level || 'std', mc: [rec.correct, rec.n], bc: rec.byCat, ...(t ? { fr: [t.pts, t.max, t.done ? 1 : 0] } : {}), ...(rec.ap ? { ap: [rec.ap.score, rec.ap.comp] } : {}), ...(rec.assign ? { as: rec.assign.ut.n } : {}), w: rec.pct });
+  const payload = b64e({ ...(rec.lk ? { lk: rec.lk } : {}), ...(rec.acc ? { ac: rec.acc } : {}), ...(rec.pz ? { pz: rec.pz } : {}), t: x.id, nm, em: myEmail(), d: rec.date, u: rec.used, lv: rec.level || 'std', mc: [rec.correct, rec.n], bc: rec.byCat, ...(t ? { fr: [t.pts, t.max, t.done ? 1 : 0] } : {}), ...(rec.ap ? { ap: [rec.ap.score, rec.ap.comp] } : {}), ...(rec.assign ? { as: rec.assign.ut.n } : {}), w: rec.pct });
   const sig = (await sha256hex(SITE_KEY + '|ex|' + payload)).slice(0, 12);
   return `APEX.${payload}.${sig}`;
 }
@@ -11172,7 +11223,8 @@ function utcScorecard(r) {
     frqs: tt.fq.map(f => ({ title: CASES[f.o.q.caseId] ? CASES[f.o.q.caseId].title : 'Free response', max: f.max, pts: f.pts, text: f.o.text == null ? '(answer is in the email)' : f.o.text, rubric: f.P && f.P.rubric ? f.P.rubric.map((rb, j) => ({ t: rb.t, pts: rb.pts, on: !!f.on[j] })) : null })),
     note: r.sigOk ? 'Multiple-choice score recalculated from the student’s answers; check code verified.' : 'Warning: the check code does not match, so these results may have been edited.', check: r.sig });
 }
-const lkLine = lk => { const s = lkSummary(lk); return s ? `<p class="lk-line ${s.ok ? 'ok' : 'warn'}">${SVG(IC.lock)} <span><b>Lockdown${s.seb ? ' (Safe Exam Browser)' : ''}:</b> ${esc(s.text)}</span></p>` : ''; };
+const lkLine = (lk, d) => { const s = lkSummary(lk); return (s ? `<p class="lk-line ${s.ok ? 'ok' : 'warn'}">${SVG(IC.lock)} <span><b>Lockdown${s.seb ? ' (Safe Exam Browser)' : ''}:</b> ${esc(s.text)}</span></p>` : '')
+  + (d && (d.ac || (d.pz && d.pz[0])) ? `<p class="lk-line info">${SVG(IC.info)} <span>${d.ac ? `<b>Accommodations:</b> ${esc(d.ac.join('; '))}` : ''}${d.ac && d.pz && d.pz[0] ? ' · ' : ''}${d.pz && d.pz[0] ? `<b>Pauses:</b> ${d.pz[0]} (${fmtDur(d.pz[1] || 0)})` : ''}</span></p>` : ''); };
 function renderUtCheck() {
   if (!isTeacher()) return renderUnitTests();
   setAccent(null); show('hub');
@@ -11182,14 +11234,14 @@ function renderUtCheck() {
     const sigTag = r.sigOk ? '<span class="st-on">✓ Check code valid</span>' : '<span class="st-off">⚠ Check code doesn’t match — the results may have been edited</span>';
     if (r.kind === 'EX') { const d = r.d, x = BY_ID[d.t];
       return `<section class="card utc"><div class="card-h sm"><h3>${esc(d.nm || 'Unknown student')}</h3><span class="small muted">${esc(d.em || '')}</span>${sigTag}<span style="flex:1"></span><button class="btn sm" data-scp="${ri}">${SVG(IC.dl)} Score card PDF</button></div>
-        ${lkLine(d.lk)}<p class="small" style="margin:0 0 8px"><b>${esc(d.as || 'Exam simulation')}</b> · ${esc(x ? x.subject : d.t)} · ${(LEVEL[d.lv] || LEVEL.std).name} · submitted ${d.d ? fmtDate(d.d) : '—'} · time ${fmtDur(d.u || 0)}</p>
+        ${lkLine(d.lk, d)}<p class="small" style="margin:0 0 8px"><b>${esc(d.as || 'Exam simulation')}</b> · ${esc(x ? x.subject : d.t)} · ${(LEVEL[d.lv] || LEVEL.std).name} · submitted ${d.d ? fmtDate(d.d) : '—'} · time ${fmtDur(d.u || 0)}</p>
         <div class="utc-k"><div><small>Multiple choice</small><b>${d.mc[0]}/${d.mc[1]}</b></div>${d.fr ? `<div><small>Free response (self-scored)</small><b>${d.fr[2] ? d.fr[0] + '/' + d.fr[1] : 'not scored'}</b></div>` : ''}${d.ap ? `<div><small>AP estimate</small><b>${apBadge(d.ap[0])}</b></div>` : ''}</div>
         <p class="small muted" style="margin:8px 0 0">Exam simulations draw random questions, so the score can’t be recalculated here; the check code shows whether these numbers were changed. The student’s free-response answers are in their email.</p></section>`; }
     if (!r.ut) return `<section class="card utc"><div class="card-h sm"><h3>${esc(r.d.nm || 'Unknown student')}</h3>${sigTag}</div><p class="notice">This test isn’t in your saved tests and couldn’t be rebuilt. Open the test from “Your unit tests” on this device, then check again.</p></section>`;
     const tt = utcTotals(r);
     return `<section class="card utc"><div class="card-h sm"><h3>${esc(r.d.nm || 'Unknown student')}</h3><span class="small muted">${esc(r.d.em || '')}</span>${sigTag}<span style="flex:1"></span><button class="btn sm" data-scp="${ri}">${SVG(IC.dl)} Score card PDF</button></div>
       <p class="small" style="margin:0 0 8px"><b>${esc(r.ut.n)}</b> · ${esc(BY_ID[r.ut.t].subject)} · submitted ${r.d.d ? fmtDate(r.d.d) : '—'} · time ${fmtDur(r.d.u || 0)}${r.d.x ? ' (time ran out)' : ''}${r.d.at > 1 ? ` · <b>attempt ${r.d.at}</b> on their device` : ''}</p>
-      ${lkLine(r.d.lk)}<div class="utc-k"><div><small>Multiple choice (recalculated)</small><b>${r.c}/${r.n} · ${r.n ? Math.round(r.c / r.n * 100) : 0}%</b></div>${tt.fq.length ? `<div><small>Free response${tt.confirmed ? '' : ' (auto, confirm below)'}</small><b>${tt.fp}/${tt.fm}</b></div>${r.n ? `<div><small>Combined (50/50)</small><b>${tt.comb}%</b></div>` : ''}` : ''}</div>
+      ${lkLine(r.d.lk, r.d)}<div class="utc-k"><div><small>Multiple choice (recalculated)</small><b>${r.c}/${r.n} · ${r.n ? Math.round(r.c / r.n * 100) : 0}%</b></div>${tt.fq.length ? `<div><small>Free response${tt.confirmed ? '' : ' (auto, confirm below)'}</small><b>${tt.fp}/${tt.fm}</b></div>${r.n ? `<div><small>Combined (50/50)</small><b>${tt.comb}%</b></div>` : ''}` : ''}</div>
       ${tt.fq.map((f, k) => `<div class="utc-frq"><h4>Free response ${k + 1}: ${esc(CASES[f.o.q.caseId] ? CASES[f.o.q.caseId].title : '')} <span class="muted">(${f.max} points)</span></h4>
         <div class="crans"><div class="lbl">Student response</div><div class="txt">${f.o.text == null ? '<i>This result came from an older version; the answer is in the email.</i>' : f.o.text ? esc(f.o.text) : '<i>No answer</i>'}</div></div>
         ${f.P && f.P.rubric ? `<ul class="rubck">${f.P.rubric.map((rb, j) => `<li><label><input type="checkbox" data-uk="${ri}|${f.i}|${j}" ${f.on[j] ? 'checked' : ''}><span class="rpt">${rb.pts} pt${rb.pts > 1 ? 's' : ''}</span><span>${F(esc(rb.t))}${f.auto[j] ? ' <span class="autotag">auto</span>' : ''}</span></label></li>`).join('')}</ul>
@@ -11270,7 +11322,7 @@ function renderClass() {
 }
 
 /* ═════ TEACHER: ASSIGN TESTS ═════ */
-let AS = { kind: 'ut', code: '', t: null, lv: 'std', due: '', msg: '', sel: new Set(), out: null, to: '', lk: '1' };
+let AS = { kind: 'ut', code: '', t: null, lv: 'std', due: '', msg: '', sel: new Set(), out: null, to: '', lk: '4' };
 function rosterEmails() {
   if (MODE === 'owner') return ADM.codes.filter(c => !c.revoked && c.email).map(c => normEmail(c.email));
   return classList().map(s => s.email);
@@ -11308,7 +11360,8 @@ function renderAssign() {
         ${AS.kind === 'ut' ? (mine.length ? `<select id="asUt" aria-label="Saved unit test">${mine.map(({ m, p }) => `<option value="${esc(m.code)}" ${m.code === AS.code ? 'selected' : ''}>${esc(p.ut.n)} · ${p.ut.q.length} MC${p.ut.f.length ? ' + ' + p.ut.f.length + ' FRQ' : ''}</option>`).join('')}</select>` : `<p class="small muted" style="margin:0 0 0 26px">No saved unit tests yet. <a href="#ut-new">Create one</a> first.</p>`) : ''}
         <label class="chk"><input type="radio" name="asK" value="exam" ${AS.kind === 'exam' ? 'checked' : ''}> A full exam simulation (AP exam or final exam)</label>
         ${AS.kind === 'exam' ? `<div class="row2"><label>Course<select id="asT">${courseOpts(AS.t)}</select></label><label>Difficulty<select id="asLv"><option value="std" ${AS.lv === 'std' ? 'selected' : ''}>Standard (like the ${examWord(x)})</option><option value="hard" ${AS.lv === 'hard' ? 'selected' : ''}>Challenge</option></select></label></div><p class="small muted" style="margin:0">${x.nSR} multiple choice${x.crCat ? ' + ' + x.crCat.n + ' free response' : ''} · ${fmtDur(x.minutes * 60)} · each student gets a new set of questions.</p>
-        <label>Test security<select id="asLk">${LK_MODES.map(([k, l]) => `<option value="${k}" ${AS.lk === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>` : ''}
+        <label>Test security<select id="asLk">${LK_MODES.map(([k, l]) => `<option value="${k}" ${AS.lk === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+        <p class="small muted" style="margin:0">Your teacher password (<b>${esc(teacherPw())}</b>, set in Create Unit Test) unlocks locked tests and opens accommodations. Don’t show it to students.</p>` : ''}
       </fieldset>
       <div class="row2"><label>Due date (optional)<input type="date" id="asDue" value="${esc(AS.due)}"></label>${AS.kind === 'exam' ? `<label>Send results to (your school email)<input type="email" id="asTo" value="${esc(AS.to)}"></label>` : `<label>Results go to<input readonly value="${esc((utParse(AS.code) || { ut: {} }).ut.e || '')}" title="Set when the unit test was created"></label>`}</div>
       <label>Message to students (optional)<textarea id="asMsg" maxlength="400" style="min-height:70px">${esc(AS.msg)}</textarea></label>
@@ -11333,11 +11386,11 @@ function renderAssign() {
   ['#asUt', '#asT', '#asLv', '#asLk', '#asDue', '#asMsg', '#asTo'].forEach(s => { if ($(s)) $(s).onchange = () => { upd(); if (s === '#asT' || s === '#asUt') { AS.out = null; redo(); } }; });
   if ($('#asAll')) $('#asAll').onchange = () => { upd(); roster.forEach(e => $('#asAll').checked ? AS.sel.add(e) : AS.sel.delete(e)); redo(); };
   $$('[data-ass]').forEach(c => c.onchange = () => { upd(); c.checked ? AS.sel.add(c.dataset.ass) : AS.sel.delete(c.dataset.ass); redo(); });
-  $('#asGo').onclick = () => { upd(); const err = m => { $('#asErr').textContent = m; };
+  $('#asGo').onclick = async () => { upd(); const err = m => { $('#asErr').textContent = m; }; const asS = Math.floor(Math.random() * 2 ** 31);
     let ut;
     if (AS.kind === 'ut') { const p = utParse(AS.code); if (!p) return err('Choose a saved unit test, or create one first.'); ut = { ...p.ut }; }
     else { if (!isEmail(AS.to)) return err('Enter the email address where results should go.'); const xx = BY_ID[AS.t]; LS.set('ap.ut.email', normEmail(AS.to));
-      ut = { v: 1, k: 'exam', n: `${xx.subject} · Full exam simulation`, t: xx.id, u: [], q: [], f: [], m: xx.minutes, e: normEmail(AS.to), a: 'send', lv: AS.lv, ...(+AS.lk ? { lk: { m: +AS.lk } } : {}), s: Math.floor(Math.random() * 2 ** 31), d: new Date().toISOString().slice(0, 10) }; }
+      ut = { v: 1, k: 'exam', n: `${xx.subject} · Full exam simulation`, t: xx.id, u: [], q: [], f: [], m: xx.minutes, e: normEmail(AS.to), a: 'send', lv: AS.lv, ...(lkModeOf(AS.lk) ? { lk: lkModeOf(AS.lk) } : {}), s: asS, kh: await keyHash(teacherPw(), String(asS)), d: new Date().toISOString().slice(0, 10) }; }
     if (AS.due) ut.due = AS.due; else delete ut.due;
     if (AS.msg) ut.msg = AS.msg; else delete ut.msg;
     if (okRelay(relay)) ut.r = relay;
@@ -11668,7 +11721,8 @@ function renderTake(err, val) {
       <label>Test code<input id="tkIn" class="tk-in" maxlength="400" autocomplete="off" value="${esc(val || '')}" placeholder="XXXX-XXXX-XXXX-XXX" spellcheck="false" autocapitalize="characters"></label>
       <button class="btn primary big" type="submit">Open test</button><div class="err" id="tkErr" role="alert">${err ? esc(err) : ''}</div></form></section>
     ${res.length ? `<p class="small"><a href="#unit-tests">Your submitted tests on this device (${res.length})</a></p>` : ''}
-    ${MODE === 'gate' ? `<p class="small muted">Have an Educator Hub account? <a href="#home">Sign in</a> to practice, see your history, and more.</p>` : ''}</div>`;
+    ${MODE === 'gate' ? `<p class="small muted">Have an Educator Hub account? <a href="#home">Sign in</a> to practice, see your history, and more.</p>` : ''}
+    <p class="small muted"><a href="#device">Teacher access</a></p></div>`;
   $('#tkF').onsubmit = e => { e.preventDefault(); const v = $('#tkIn').value.trim(), nm = $('#tkName').value.trim().replace(/\s+/g, ' '), em = normEmail($('#tkMail').value);
     const bad = (m, el) => { $('#tkErr').textContent = m; $(el).focus(); };
     if (nm.length < 3 || !/\s/.test(nm)) return bad('Enter your first and last name so your teacher can match your results.', '#tkName');
@@ -11685,11 +11739,56 @@ function renderTake(err, val) {
 }
 function renderTestOnly(h) {
   if (h === 'take') return renderTake();
+  if (h === 'device') return renderDevice();
   if (/^take-/.test(h)) { const v = h.slice(5), sc = utShortParse(v); if (sc && sc.ut) { ROUTE = 'ut-' + sc.code; return renderUtIntro(sc.code); } return renderTake(sc && sc.stale ? 'This code is from an older version of the question bank. Ask your teacher for the test link instead.' : 'That test code doesn’t look right. Check it and try again.', v); }
   if (/^ut-/.test(h)) { const p = utParse(h.slice(3)); if (!p) return renderTake('This test link is incomplete or damaged. Ask your teacher to send it again.');
     if (MODE === 'gate' && !p.ut.o) return renderTake('This test needs you to sign in first. Sign in with your Educator Hub account, or ask your teacher for a code that works without one.');
     return renderUtIntro(h.slice(3)); }
   return renderUnitTests();
+}
+
+/* ── Teacher access on a student's device: every finished or unfinished teacher test saved in this browser,
+   behind the teacher password, so results can still reach the teacher if a student never sent them ── */
+let DEV = { pw: null, list: null };
+function lsAllKeys() { const ks = new Set(MEM.keys()); try { for (let i = 0; i < localStorage.length; i++) ks.add(localStorage.key(i)); } catch (e) {} return [...ks]; }
+async function devScan(pw) {
+  const out = [];
+  for (const k of lsAllKeys()) {
+    let m;
+    if ((m = k.match(/^ap\.(.+)\.ut\.results\.v1$/))) LS.get(k, []).forEach((r, i) => out.push({ kind: 'ut', key: k, i, r, ut: r.ut, name: r.name, title: r.ut.n, date: r.date, score: `${r.correct}/${r.n} MC`, sent: r.sent }));
+    else if ((m = k.match(/^ap\.(.+)\.ut\.current\.v1$/))) { const c = LS.get(k, null); if (c && c.unit) out.push({ kind: 'utcur', key: k, c, ut: c.unit.ut, name: c.studentName, title: c.title, date: c.started, score: `${c.ans.filter(a => a.length).length} of ${c.items.length} answered` }); }
+    else if ((m = k.match(/^ap\.(.+)\.([a-z0-9]+)\.history\.v1$/))) { const x = TESTS.find(t => t.store === m[2]); if (x) LS.get(k, []).forEach((h, i) => { if (h.assign) out.push({ kind: 'ex', key: k, i, r: h, x, ut: h.assign.ut, name: h.studentName, title: h.assign.ut.n, date: h.date, score: `${h.correct}/${h.n} MC`, sent: h.sent }); }); }
+    else if ((m = k.match(/^ap\.(.+)\.([a-z0-9]+)\.current\.v1$/))) { const x = TESTS.find(t => t.store === m[2]), c = LS.get(k, null); if (x && c && c.assign) out.push({ kind: 'excur', key: k, c, x, ut: c.assign.ut, name: c.studentName, title: c.title, date: c.started, score: `${c.ans.filter(a => a.length).length} of ${c.items.length} answered` }); }
+  }
+  const mine = []; for (const o of out) if (await keyOK(o.ut, pw)) mine.push(o);
+  return mine.sort((a, b) => (a.date || '') < (b.date || '') ? 1 : -1);
+}
+async function renderDevice(err) {
+  setAccent(null); show('hub');
+  const head = `<div class="page dev-page"><div class="gate-brand">${SVG(IC.cap)}<span>${BRAND}</span></div><h1 class="display">Teacher access</h1>
+    <p class="lead">Tests taken on this device, including results that were never emailed and tests that were closed before they were finished.</p>`;
+  if (!DEV.list) {
+    $('#hub').innerHTML = nav('device') + head + `<section class="panel"><form id="devF" autocomplete="off"><label>Teacher password<input id="devPw" type="password" autocomplete="off" placeholder="Teacher password"></label><button class="btn primary" type="submit">Show saved tests</button><p class="err" id="devErr" role="alert">${err ? esc(err) : ''}</p></form></section>
+      <p class="small muted">Only tests made with this password are shown. Students: this page is for your teacher.</p></div>`;
+    $('#devF').onsubmit = async e => { e.preventDefault(); const pw = $('#devPw').value; $('#devErr').textContent = 'Checking…'; const list = await devScan(pw);
+      if (!list.length) { $('#devErr').textContent = 'No tests on this device match that password.'; return; } DEV = { pw, list }; renderDevice(); bindNav(); };
+    formFix('#devF'); $('#devPw').focus(); return;
+  }
+  const to0 = (LS.get('ap.dev.to', '') || DEV.list[0].ut.e || '');
+  $('#hub').innerHTML = nav('device') + head + `<section class="card"><div class="row" style="align-items:flex-end"><label class="dev-to">Send results to<input id="devTo" type="email" value="${esc(to0)}" placeholder="you@school.org"></label><span style="flex:1"></span><button class="btn quiet" id="devLock">${SVG(IC.lock)} Lock this page</button></div></section>
+    <div class="dev-list">${DEV.list.map((o, n) => `<section class="card dev-item"><div><b>${esc(o.name || 'Unknown student')}</b><small>${esc(o.title)} · ${o.date ? fmtDate(o.date) : ''}</small><span class="small">${esc(o.score)} · ${/cur$/.test(o.kind) ? '<span class="st-off">not finished</span>' : o.sent ? '<span class="st-on">student confirmed sending</span>' : '<span class="st-off">not sent</span>'}</span></div>
+      <div class="row">${/cur$/.test(o.kind) ? `<button class="btn primary sm" data-devsub="${n}">Submit it now</button>` : `<button class="btn primary sm" data-devgm="${n}">Open in Gmail</button><button class="btn sm" data-devml="${n}">Email app</button><button class="btn quiet sm" data-devcp="${n}">Copy results</button>`}</div></section>`).join('')}</div>
+    <p class="small" id="devMsg" role="status"></p>
+    <p class="small muted">Paste the email (or the copied results) into Check Results to verify the score, score written answers, and add it to your gradebook.</p></div>`;
+  const mail = async o => { const to = normEmail($('#devTo').value); LS.set('ap.dev.to', to); return o.kind === 'ut' ? { ...(await utMail({ ...o.r, to })), to } : { ...(await examMail(o.r, o.x, to)), to }; };
+  $('#devLock').onclick = () => { DEV = { pw: null, list: null }; renderDevice(); bindNav(); };
+  const need = () => { if (!isEmail(normEmail($('#devTo').value))) { $('#devMsg').textContent = 'Enter the email address to send results to.'; $('#devTo').focus(); return false; } return true; };
+  $$('[data-devgm]').forEach(b => b.onclick = async () => { if (!need()) return; const m = await mail(DEV.list[+b.dataset.devgm]); window.open(gmailHref(m.to, m), '_blank', 'noopener'); });
+  $$('[data-devml]').forEach(b => b.onclick = async () => { if (!need()) return; const m = await mail(DEV.list[+b.dataset.devml]); location.href = mailtoHref(m.to, m); });
+  $$('[data-devcp]').forEach(b => b.onclick = async () => { const m = await mail(DEV.list[+b.dataset.devcp]); copyText('To: ' + m.to + '\nSubject: ' + m.subject + '\n\n' + m.body, '#devMsg', 'Copied. Paste it into an email to yourself, or straight into Check Results.'); });
+  $$('[data-devsub]').forEach(b => b.onclick = () => { const o = DEV.list[+b.dataset.devsub];
+    confirmBox('Submit this test now?', `${o.name || 'The student'}’s answers so far are scored and saved. Unanswered questions count as wrong.`, 'Submit', () => {
+      LS.del(o.key); T = o.c; X = o.x || BY_ID[T.testId]; DEV = { pw: DEV.pw, list: null }; inExam = false; if (T.lk) T.lk.off = true; finish(false); }); });
 }
 
 /* Unit formulas for the hand-calculation worksheet: the equations and constants each unit uses,
@@ -11778,23 +11877,38 @@ function unitFormulaBox(x, units) {
    printing shortcuts, the questions hide whenever the student leaves the test (switching tabs or apps, opening a side
    panel such as an AI assistant, shrinking the window), and every event is logged into the signed results the teacher
    checks. Optional auto-submit after a number of exits. For a true lockdown the teacher can require Safe Exam Browser. */
-const LK_MODES = [['0', 'Standard: no restrictions'], ['1', 'Lockdown: full screen, no copy/paste, leaving the test is recorded'], ['2', 'Lockdown + submit automatically after 3 exits'], ['3', 'Require Safe Exam Browser (strongest; Windows, Mac, iPad)']];
+const LK_MODES = [['0', 'Standard: no restrictions'], ['4', 'Lockdown + teacher password: leaving the test locks it until you unlock it (recommended)'], ['1', 'Lockdown: full screen, no copy/paste, leaving the test is recorded'], ['2', 'Lockdown + submit automatically after 3 exits'], ['3', 'Require Safe Exam Browser (strongest; Windows, Mac, iPad)']];
+const lkModeOf = v => +v === 4 ? { m: 1, k: 1 } : +v ? { m: +v } : null;
+const lkModeVal = lk => lk ? (lk.k ? '4' : String(lk.m || 0)) : '0';
+/* teacher password (unlock + accommodations + saved results): only a slow hash of it travels in the test code */
+const LK_DEFAULT = 'ad31';
+async function keyHash(pw, salt) {
+  const enc = new TextEncoder(), key = await crypto.subtle.importKey('raw', enc.encode(String(pw).trim().toLowerCase()), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: enc.encode('eh-key|' + salt), iterations: 120000 }, key, 32);
+  return [...new Uint8Array(bits)].slice(0, 3).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+async function keyOK(ut, pw) { if (!ut) return false; if (!ut.kh) return String(pw).trim().toLowerCase() === LK_DEFAULT; try { return (await keyHash(pw, String(ut.s))) === ut.kh; } catch (e) { return false; } }
+const teacherPw = () => LS.get('ap.lk.pw', LK_DEFAULT) || LK_DEFAULT;
 const isSEB = () => /\bSEB\b/i.test(navigator.userAgent || '');
-const lkOf = ut => ut && ut.lk ? { m: +ut.lk.m || 0, max: ut.lk.m === 2 ? 3 : 0 } : null;
-const lkNew = ut => { const c = lkOf(ut); return c && c.m ? { m: c.m, max: c.max, seb: isSEB() ? 1 : 0, log: { n: 0, away: 0, secs: 0, fsx: 0, paste: 0, ins: 0, keys: 0, rs: 0, auto: 0 }, ev: [] } : null; };
+const lkOf = ut => ut && ut.lk ? { m: +ut.lk.m || 0, max: ut.lk.m === 2 ? 3 : 0, k: ut.lk.k ? 1 : 0 } : null;
+const lkNew = ut => { const c = lkOf(ut); return c && c.m ? { m: c.m, max: c.max, k: c.k, seb: isSEB() ? 1 : 0, locked: false, log: { n: 0, away: 0, secs: 0, fsx: 0, paste: 0, ins: 0, keys: 0, rs: 0, auto: 0, unl: 0, bad: 0 }, ev: [] } : null; };
+const testUt = () => T ? (T.unit ? T.unit.ut : T.assign ? T.assign.ut : null) : null;
 const fsOK = () => !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen);
 function lkFull() { const d = document.documentElement, fail = () => { if (T && T.lk) { T.lk.fs = 0; save(); } }; try { const p = (d.requestFullscreen || d.webkitRequestFullscreen).call(d); if (p && p.catch) p.catch(fail); } catch (e) { fail(); } }
 const inFull = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
 let LK = null; /* live listeners while a locked test is open */
 function lkStart() {
-  lkStop(); if (!T || !T.lk) return;
+  lkStop(); if (!T || !T.lk || (T.acc && T.acc.nolock)) return;
   const L = T.lk; let w0 = window.innerWidth; let hidAt = null, lastV = 0;
   document.body.classList.add('locked');
   const note = (type, msg) => { L.ev.push({ t: T.spent || 0, type }); if (L.ev.length > 40) L.ev.shift(); save(); if (msg) lkToast(msg); };
   const violate = (type, label) => {
+    if (L.off || L.locked) return;
     const now = Date.now(); if (now - lastV < 1500) return; lastV = now;
     L.log.n++; if (type === 'away') L.log.away++; if (type === 'fs') L.log.fsx++; if (type === 'rs') L.log.rs++;
-    note(type); lkOverlay(label);
+    note(type);
+    if (L.k) { L.locked = true; save(); lkKeyOverlay(label); return; }
+    lkOverlay(label);
     if (L.max && L.log.n >= L.max) { L.log.auto = 1; save(); setTimeout(() => { lkHideOverlay(); finish(true); lkToast(`You left the test ${L.log.n} times, so it was submitted automatically. Your teacher will see what happened.`); }, 300); }
   };
   const on = (t, ev, fn, opt) => { t.addEventListener(ev, fn, opt); LK.off.push(() => t.removeEventListener(ev, fn, opt)); };
@@ -11802,7 +11916,7 @@ function lkStart() {
   on(document, 'visibilitychange', () => { if (!inExam) return; if (document.hidden) { hidAt = Date.now(); violate('away', 'You left the test (switched tabs or apps).'); } else if (hidAt) { L.log.secs += Math.round((Date.now() - hidAt) / 1000); hidAt = null; save(); } });
   on(window, 'blur', () => { if (!inExam || document.hidden) return; hidAt = hidAt || Date.now(); setTimeout(() => { if (!document.hasFocus() && inExam) violate('away', 'The test window lost focus (another window, app, or assistant panel was opened).'); }, 400); });
   on(window, 'focus', () => { if (hidAt && !document.hidden) { L.log.secs += Math.round((Date.now() - hidAt) / 1000); hidAt = null; save(); } });
-  on(document, 'fullscreenchange', () => { if (inExam && L.fs && !inFull()) violate('fs', 'You left full screen.'); });
+  on(document, 'fullscreenchange', () => { if (inExam && L.fs && !inFull() && !LK.quiet) violate('fs', 'You left full screen.'); });
   on(document, 'webkitfullscreenchange', () => { if (inExam && L.fs && !inFull()) violate('fs', 'You left full screen.'); });
   on(window, 'resize', () => { if (!inExam) return; if (window.innerWidth > w0) w0 = window.innerWidth; else if (window.innerWidth < w0 * 0.85 && !inFull()) violate('rs', 'The test window got smaller (a side panel or split screen was opened).'); });
   const block = (e, kind, msg) => { e.preventDefault(); e.stopPropagation(); if (kind) { L.log[kind]++; note(kind, msg); } };
@@ -11816,7 +11930,72 @@ function lkStart() {
   on(document, 'input', e => { const el = e.target; if (!el || !/^(TEXTAREA|INPUT)$/.test(el.tagName)) return; const was = lens.get(el) || 0, now = (el.value || '').length; lens.set(el, now); if (now - was > 30 && !/^insertFrom/.test(e.inputType || '')) { L.log.ins++; note('ins', 'A large block of text appeared at once. This is recorded for your teacher.'); } }, true);
   on(document, 'keydown', e => { const k = (e.key || '').toLowerCase(), mod = e.ctrlKey || e.metaKey;
     if ((mod && ['c', 'v', 'x', 'p', 's', 'u', 'f', 'g', 'o'].includes(k)) || k === 'f12' || (mod && e.shiftKey && ['i', 'j', 'c', 'k'].includes(k)) || k === 'printscreen') block(e, 'keys', 'That shortcut is turned off during this test.'); }, true);
-  setTimeout(() => { if (LK && T && T.lk === L && L.fs && !inFull()) lkOverlay('Return to full screen to continue the test.', true); }, 1500);
+  if (L.locked) lkKeyOverlay('This test was locked when you left it.');
+  else setTimeout(() => { if (LK && T && T.lk === L && L.fs && !inFull() && !L.locked) lkOverlay('Return to full screen to continue the test.', true); }, 1500);
+}
+/* locked until the teacher types their password on this device */
+function lkKeyOverlay(msg) {
+  if (!T || !T.lk) return; const L = T.lk; let ov = document.getElementById('lkOv');
+  if (!ov) { ov = document.createElement('div'); ov.id = 'lkOv'; ov.className = 'lk-ov'; document.body.appendChild(ov); }
+  ov.innerHTML = `<div class="lk-box" role="alertdialog" aria-labelledby="lkH"><div class="lk-ic">${SVG(IC.lock)}</div><h2 id="lkH">Test locked</h2><p>${esc(msg)}</p>
+    <p class="small">Raise your hand. Your teacher must enter their password to unlock the test. The timer is still running, and this is recorded in your results.</p>
+    <form id="lkKeyF" class="lk-key" autocomplete="off"><input id="lkKey" type="password" autocomplete="off" placeholder="Teacher password" aria-label="Teacher password"><button class="btn primary" type="submit">Unlock</button></form>
+    <p class="err small" id="lkErr" role="alert"></p></div>`;
+  ov.hidden = false;
+  const f = ov.querySelector('#lkKeyF'), inp = ov.querySelector('#lkKey'), err = ov.querySelector('#lkErr'); setTimeout(() => inp.focus(), 50);
+  f.onsubmit = async e => { e.preventDefault(); if (L.wait && Date.now() < L.wait) { err.textContent = `Too many tries. Wait ${Math.ceil((L.wait - Date.now()) / 1000)} seconds.`; return; }
+    err.textContent = 'Checking…'; const ok = await keyOK(testUt(), inp.value);
+    if (!ok) { L.log.bad++; L.tries = (L.tries || 0) + 1; if (L.tries >= 5) { L.wait = Date.now() + 30000; L.tries = 0; } save(); err.textContent = 'That password is not right. Ask your teacher.'; inp.value = ''; inp.focus(); return; }
+    L.locked = false; L.log.unl++; L.tries = 0; save(); lkHideOverlay(); if (L.fs) lkFull(); lkToast('Unlocked by your teacher. The test continues.'); };
+}
+/* pause: the questions blur, the clock keeps running (a washroom break) */
+function pzOn() {
+  if (!T || !inExam) return; T.pz = T.pz || { n: 0, secs: 0 }; T.pz.n++; T.pz.at = Date.now(); save();
+  $('#exam').classList.add('paused'); let ov = document.getElementById('pzOv');
+  if (!ov) { ov = document.createElement('div'); ov.id = 'pzOv'; ov.className = 'pz-ov'; document.body.appendChild(ov); }
+  ov.innerHTML = `<div class="lk-box" role="dialog" aria-labelledby="pzH"><h2 id="pzH">Test paused</h2><p>The questions are hidden. <b>The timer is still running.</b></p><p class="small muted">Stay on this page. ${T.lk ? 'Leaving the test window still counts as leaving the test.' : ''}</p><p class="pz-t mono" id="pzT"></p><button class="btn primary big" id="pzBack">Resume the test</button></div>`;
+  ov.hidden = false; const upd = () => { const el = document.getElementById('pzT'); if (el && T) el.textContent = T.untimed ? '' : 'Time left ' + fmtT(Math.max(0, T.remaining)); };
+  upd(); clearInterval(ov._t); ov._t = setInterval(upd, 1000);
+  ov.querySelector('#pzBack').onclick = pzOff;
+}
+function pzOff() { const ov = document.getElementById('pzOv'); if (ov) { clearInterval(ov._t); ov.hidden = true; } $('#exam').classList.remove('paused'); if (T && T.pz && T.pz.at) { T.pz.secs += Math.round((Date.now() - T.pz.at) / 1000); T.pz.at = null; save(); } }
+/* accommodations: the teacher types their password, then changes the time or turns on supports for this student */
+const ACC_TIME = [['+5 min', 300], ['+10 min', 600], ['+15 min', 900], ['+30 min', 1800], ['Time and a half', 'x1.5'], ['Double time', 'x2'], ['No time limit', 'none']];
+function accOpen(ut, onDone, pre, onClose) {
+  let ov = document.getElementById('accOv'); if (!ov) { ov = document.createElement('div'); ov.id = 'accOv'; ov.className = 'lk-ov acc-ov'; document.body.appendChild(ov); }
+  const LQ = inExam && T && T.lk; if (LQ) LQ.off = true;
+  const close = () => { ov.hidden = true; if (onClose) setTimeout(onClose, 0); if (LQ) LQ.off = !!(T && T.acc && T.acc.nolock); if (inExam && T && T.lk && T.lk.fs && !inFull()) lkFull(); };
+  ov.innerHTML = `<div class="lk-box acc-box" role="dialog" aria-labelledby="accH"><h2 id="accH">Teacher: accommodations</h2><p class="small">Enter your teacher password to change this student’s time or supports.</p>
+    <form id="accF" class="lk-key" autocomplete="off"><input id="accKey" type="password" autocomplete="off" placeholder="Teacher password" aria-label="Teacher password"><button class="btn primary" type="submit">Continue</button></form><p class="err small" id="accErr" role="alert"></p>
+    <div class="row" style="justify-content:center"><button class="linkbtn sm" id="accX">Cancel</button></div></div>`;
+  ov.hidden = false; setTimeout(() => ov.querySelector('#accKey').focus(), 50);
+  ov.querySelector('#accX').onclick = close;
+  ov.querySelector('#accF').onsubmit = async e => { e.preventDefault(); const err = ov.querySelector('#accErr'); err.textContent = 'Checking…';
+    if (!(await keyOK(ut, ov.querySelector('#accKey').value))) { err.textContent = 'That password is not right.'; return; }
+    const cur = pre ? pre() : (T && T.acc) || {};
+    ov.innerHTML = `<div class="lk-box acc-box" role="dialog" aria-labelledby="accH2"><h2 id="accH2">Accommodations</h2>
+      <p class="small">${T && inExam ? (T.untimed ? 'This test has no time limit.' : `Time left now: <b class="mono">${fmtT(Math.max(0, T.remaining))}</b>.`) : 'These apply when the student starts the test.'}</p>
+      <div class="acc-sec"><b>Extra time</b><div class="acc-btns">${ACC_TIME.map(([l, v]) => `<button class="btn sm" data-acct="${v}">${l}</button>`).join('')}</div></div>
+      <div class="acc-sec"><label class="chk"><input type="checkbox" id="accBig" ${cur.big ? 'checked' : ''}> <span>Larger text</span></label>
+        ${ut && ut.lk ? `<label class="chk"><input type="checkbox" id="accNoLk" ${cur.nolock ? 'checked' : ''}> <span>Turn off lockdown for this student (for example, for assistive technology)</span></label>` : ''}</div>
+      <p class="small" id="accMsg" role="status">${(cur.log || []).length ? 'Applied: ' + esc(cur.log.join('; ')) : ''}</p>
+      <div class="row" style="justify-content:center"><button class="btn primary" id="accDone">Done</button></div></div>`;
+    const msg = t => { const el = ov.querySelector('#accMsg'); el.textContent = t; };
+    ov.querySelectorAll('[data-acct]').forEach(b => b.onclick = () => { const r = onDone({ time: b.dataset.acct, label: b.textContent }); msg(r || ''); });
+    ov.querySelector('#accBig').onchange = ev => onDone({ big: ev.target.checked });
+    if (ov.querySelector('#accNoLk')) ov.querySelector('#accNoLk').onchange = ev => onDone({ nolock: ev.target.checked });
+    ov.querySelector('#accDone').onclick = close; };
+}
+/* apply one accommodation to the running test; returns a short note */
+function accApply(o) {
+  if (!T) return ''; const A = T.acc = T.acc || { log: [] };
+  if (o.big != null) { A.big = o.big; document.body.classList.toggle('acc-big', o.big); A.log.push(o.big ? 'larger text' : 'normal text'); save(); return 'Applied: ' + A.log.join('; '); }
+  if (o.nolock != null) { A.nolock = o.nolock; if (T.lk) { T.lk.off = o.nolock; if (o.nolock) { T.lk.locked = false; lkStop(); } else lkStart(); } A.log.push(o.nolock ? 'lockdown off' : 'lockdown on'); save(); return 'Applied: ' + A.log.join('; '); }
+  if (o.time === 'none') { T.untimed = true; A.log.push('no time limit'); }
+  else { const base = T.secs ? T.secs[T.sec || 0].t : (T.total || 0); const add = /^x/.test(o.time) ? Math.round(base * (parseFloat(o.time.slice(1)) - 1)) : +o.time;
+    T.remaining += add; T.total = (T.total || 0) + add; if (T.secs) T.secs[T.sec || 0].t += add; A.log.push(o.label + ` (+${Math.round(add / 60)} min)`); }
+  save(); if (typeof updateTimer === 'function') updateTimer(); if (inExam) renderExam();
+  return 'Applied: ' + A.log.join('; ');
 }
 function lkStop() { if (LK) { LK.off.forEach(f => f()); LK = null; } document.body.classList.remove('locked'); lkHideOverlay(); }
 function lkOverlay(msg, soft) {
@@ -11840,6 +12019,8 @@ function lkSummary(lk) {
   if (l.ins) bits.push(`${l.ins} large text insert${l.ins > 1 ? 's' : ''} (possible AI tool or autofill)`);
   if (l.keys) bits.push(`${l.keys} blocked shortcut${l.keys > 1 ? 's' : ''}`);
   if (l.auto) bits.push('submitted automatically after too many exits');
+  if (l.unl) bits.push(`unlocked by the teacher ${l.unl} time${l.unl > 1 ? 's' : ''}`);
+  if (l.bad) bits.push(`${l.bad} wrong password attempt${l.bad > 1 ? 's' : ''}`);
   if (lk.fs === 0 && lk.m) bits.push('full screen wasn’t available on this device');
   return { ok: !bits.length, text: bits.length ? bits.join('; ') : 'no issues recorded', seb: !!lk.seb };
 }
