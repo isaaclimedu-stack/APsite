@@ -2,7 +2,7 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%2313284a'/%3E%3Cpath d='M3.5 10l8.5-4.2 8.5 4.2-8.5 4.2z' fill='%23fff'/%3E%3Cpath d='M7 11.8v3.6c2.8 2.2 7.2 2.2 10 0v-3.6' fill='none' stroke='%23fff' stroke-width='1.6'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&family=Caveat:wght@500;600&display=swap">
 <style>
 /* ───── test page ───── */
 .t-head { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 40px; align-items: end; padding-bottom: 22px; border-bottom: 1px solid var(--ink); }
@@ -476,6 +476,7 @@ details.rv-psg .psg { position: static; max-height: 360px; margin-top: 8px; }
   --font-q: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --wrap: 1240px; --side-w: 272px; --radius: 12px;
+  --hx-sky1: #cfe0f4; --hx-sky2: #eef3fa; --hx-sun: #ffd9a0; --hx-sunc: #fff4dc; --hx-mist: #f3f6fb; --hx-m1: #a9bfdf; --hx-m2: #8aa6cf; --hx-m3: #6f8fbf; --hx-tree1: #4d7193; --hx-tree2: #2f5170; --hx-ink: #0f1f3d;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -486,6 +487,7 @@ details.rv-psg .psg { position: static; max-height: 360px; margin-top: 8px; }
     --accent-ink: #0e1524; --btn: #9db6f2; --btn-ink: #0e1524;
     --mark: #e8b45a; --mark-soft: #3a2d14; --good: #6fd197; --good-soft: #16301f; --bad: #f28c78; --bad-soft: #3d1f19;
     --scrim: rgba(0, 0, 0, .6); --shadow: none; color-scheme: dark;
+    --hx-sky1: #0d1830; --hx-sky2: #142038; --hx-sun: #d98a4a; --hx-sunc: #f3c58a; --hx-mist: #0e1524; --hx-m1: #22355a; --hx-m2: #1c2c4b; --hx-m3: #17243d; --hx-tree1: #142238; --hx-tree2: #0d1828; --hx-ink: #e7ecf6;
   }
 }
 :root[data-theme="dark"] {
@@ -496,6 +498,7 @@ details.rv-psg .psg { position: static; max-height: 360px; margin-top: 8px; }
   --accent-ink: #0e1524; --btn: #9db6f2; --btn-ink: #0e1524;
   --mark: #e8b45a; --mark-soft: #3a2d14; --good: #6fd197; --good-soft: #16301f; --bad: #f28c78; --bad-soft: #3d1f19;
   --scrim: rgba(0, 0, 0, .6); --shadow: none; color-scheme: dark;
+  --hx-sky1: #0d1830; --hx-sky2: #142038; --hx-sun: #d98a4a; --hx-sunc: #f3c58a; --hx-mist: #0e1524; --hx-m1: #22355a; --hx-m2: #1c2c4b; --hx-m3: #17243d; --hx-tree1: #142238; --hx-tree2: #0d1828; --hx-ink: #e7ecf6;
 }
 #app.acc-chem, .acc-chem { --accent: var(--chem); --accent-soft: var(--chem-soft); }
 #app.acc-bio, .acc-bio { --accent: var(--bio); --accent-soft: var(--bio-soft); }
@@ -1218,6 +1221,160 @@ body.acc-big #exam .qtext, body.acc-big #exam .opt, body.acc-big #exam .stem { f
 .sk-rev li { padding: 8px 10px; border-radius: 8px; background: var(--sunk); }
 .sk-rev li.no { border-left: 3px solid var(--bad); }
 .sk-rev li.ok { border-left: 3px solid var(--good); }
+
+/* ═════ dashboard (2026 redesign): landscape hero, explore by subject, quick access, progress rail ═════ */
+#hub { position: relative; }
+#hub.is-home > .topbar { position: absolute; top: 0; left: var(--side-w); right: 0; background: transparent; border-bottom-color: transparent; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+@media (max-width: 980px) { #hub.is-home > .topbar { left: 0; } }
+.hx { position: relative; overflow: hidden; min-height: 330px; background: var(--hx-sky2); border-bottom: 1px solid var(--line); }
+.hx-art { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hx-in { position: relative; max-width: var(--wrap); margin: 0 auto; padding: 96px max(28px, env(safe-area-inset-right, 0px)) 44px max(28px, env(safe-area-inset-left, 0px)); }
+.hx h1 { font-family: var(--font-display); font-size: clamp(30px, 4.2vw, 50px); line-height: 1.08; letter-spacing: -.025em; margin: 0; color: var(--hx-ink); text-wrap: balance; max-width: 16ch; }
+.hx-sub { margin: 12px 0 22px; font-size: 18px; line-height: 1.5; color: var(--muted); max-width: 40ch; }
+.hx-quote { position: absolute; top: 84px; right: max(28px, env(safe-area-inset-right, 0px)); margin: 0; font-family: "Caveat", "Segoe Script", cursive; font-size: 28px; line-height: 1.05; color: var(--hx-ink); opacity: .85; transform: rotate(-4deg); text-align: left; }
+.hx-quote span { padding-left: 26px; }
+.hx-search { position: relative; display: flex; align-items: center; max-width: 720px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 10px 30px rgba(15, 31, 61, .12); padding: 6px 6px 6px 18px; }
+.hx-si .ico { width: 20px; height: 20px; color: var(--muted); }
+.hx-search input { flex: 1; min-width: 0; border: 0; background: transparent; outline: 0; font: inherit; font-size: 15.5px; padding: 12px 12px; color: var(--ink); }
+.hx-search:focus-within { outline: 2px solid var(--ember); outline-offset: 2px; }
+.hx-go { flex: none; width: 46px; height: 46px; border-radius: 50%; border: 0; background: #2463eb; color: #fff; display: grid; place-items: center; cursor: pointer; }
+.hx-go .ico { width: 20px; height: 20px; }
+.hx-res { position: absolute; z-index: 20; top: calc(100% + 8px); left: 0; right: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 18px 40px rgba(15, 31, 61, .18); padding: 6px; max-height: 380px; overflow: auto; }
+.hx-res a { display: flex; gap: 12px; align-items: center; padding: 9px 12px; border-radius: 10px; color: var(--ink); text-decoration: none; }
+.hx-res a.on, .hx-res a:hover { background: var(--sunk); }
+.hx-res b { display: block; font-size: 14.5px; } .hx-res small { color: var(--muted); font-size: 12.5px; }
+.hr-ic { width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; background: var(--ember-soft); color: var(--ember); flex: none; }
+.hr-ic .ico { width: 17px; height: 17px; }
+.hr-none { margin: 0; padding: 12px; color: var(--muted); font-size: 14px; }
+.hx-cont { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.hx-chip { display: inline-flex; gap: 6px; align-items: center; padding: 7px 12px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); text-decoration: none; font-size: 13px; font-weight: 600; }
+.hx-chip .ico { width: 16px; height: 16px; color: var(--ember); }
+@media (max-width: 760px) { .hx-quote { display: none; } .hx-in { padding-top: 84px; } .hx-sub { font-size: 16px; } }
+.dash2 { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 26px; align-items: start; padding-top: 30px; }
+@media (max-width: 1180px) { .dash2 { grid-template-columns: minmax(0, 1fr); } }
+.d2-main { display: grid; gap: 26px; min-width: 0; }
+.d2-rail { display: grid; gap: 20px; position: sticky; top: 20px; }
+.d2-h { display: flex; gap: 16px; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; margin-bottom: 16px; }
+.d2-h h2, .d2-qa h2 { margin: 0; font-size: 22px; letter-spacing: -.01em; }
+.d2-h p, .d2-qa > p { margin: 4px 0 0; color: var(--muted); font-size: 14.5px; }
+.d2-track { display: inline-flex; gap: 4px; background: var(--sunk); padding: 4px; border-radius: 999px; }
+.d2-track label { position: relative; }
+.d2-track input { position: absolute; opacity: 0; pointer-events: none; }
+.d2-track span { display: block; padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; }
+.d2-track input:checked + span { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(15, 31, 61, .12); }
+.d2-track input:focus-visible + span { outline: 2px solid var(--ember); }
+.xs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(205px, 1fr)); gap: 16px; }
+.xs-card { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 8px; min-height: 218px; padding: 20px; border-radius: 16px; text-decoration: none; color: var(--ink);
+  background: linear-gradient(165deg, var(--accent-soft) 0%, color-mix(in srgb, var(--accent-soft) 45%, var(--surface)) 100%); border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent); transition: transform .15s, box-shadow .15s; }
+.xs-card:hover { transform: translateY(-3px); box-shadow: 0 12px 26px color-mix(in srgb, var(--accent) 18%, transparent); }
+.xs-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.sc-art { position: absolute; right: -24px; bottom: -14px; width: 150px; height: 136px; fill: var(--accent); stroke: var(--accent); opacity: .13; pointer-events: none; }
+.xs-ic { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: #fff; margin-bottom: 6px; box-shadow: 0 6px 14px color-mix(in srgb, var(--accent) 35%, transparent); }
+.xs-ic .ico { width: 23px; height: 23px; }
+.xs-card b { font-size: 17px; position: relative; }
+.xs-t { font-size: 13.5px; line-height: 1.5; color: var(--muted); position: relative; flex: 1; }
+.xs-go { position: relative; width: 36px; height: 36px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; color: var(--accent); box-shadow: 0 2px 6px rgba(15, 31, 61, .1); }
+.xs-go .ico { width: 17px; height: 17px; }
+.d2-more { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 14px; font-weight: 600; color: var(--ember); text-decoration: none; }
+.d2-more .ico { width: 15px; height: 15px; }
+.d2-qa { padding: 22px; }
+.qa-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(98px, 1fr)); gap: 12px; margin-top: 16px; }
+.qa-tile { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 20px 10px 18px; border: 1px solid var(--line); border-radius: 14px; text-decoration: none; color: var(--ink); font-size: 14px; font-weight: 600; text-align: center; background: var(--surface); transition: border-color .15s, transform .15s; }
+.qa-tile:hover { transform: translateY(-2px); border-color: var(--rule); }
+.qa-ic { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; }
+.qa-ic .ico { width: 23px; height: 23px; }
+.qa-blue .qa-ic { background: #e3ecfd; color: #2463eb; } .qa-teal .qa-ic { background: #dcf3ee; color: #12866f; } .qa-violet .qa-ic { background: #ece7fd; color: #6d4ed8; }
+.qa-rose .qa-ic { background: #fce4ef; color: #c42f73; } .qa-amber .qa-ic { background: #fdf0d8; color: #b6740b; } .qa-green .qa-ic { background: #e2f5e7; color: #23864a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .qa-ic { background: var(--sunk) !important; } }
+:root[data-theme="dark"] .qa-ic { background: var(--sunk) !important; }
+.d2-next { position: relative; overflow: hidden; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 22px 24px; border-radius: 16px; background: linear-gradient(100deg, var(--hx-sky2), var(--hx-sky1)); border: 1px solid var(--line); }
+.d2-next-art { position: absolute; right: 0; bottom: 0; width: 70%; height: 100%; pointer-events: none; }
+.d2-next > * { position: relative; }
+.d2-next > .d2-next-art { position: absolute; right: 0; bottom: 0; width: 60%; height: 100%; }
+.d2-next-ic .ico { width: 40px; height: 40px; color: #12866f; stroke-width: 1.6; }
+.d2-next div { flex: 1 1 260px; display: grid; gap: 4px; }
+.d2-next b { font-size: 17px; } .d2-next div span { color: var(--muted); font-size: 14px; }
+.hp-top { display: flex; gap: 18px; align-items: center; margin: 4px 0 16px; }
+.hp-top b { display: block; font-size: 15px; } .hp-top small { display: block; color: var(--muted); font-size: 13px; }
+.hp-st { display: flex; gap: 5px; align-items: center; font-size: 13px; font-weight: 600; margin: 4px 0; }
+.hp-st .ico { width: 15px; height: 15px; } .hp-st.good { color: var(--good); } .hp-st.mid { color: var(--mark); } .hp-st.bad { color: var(--bad); } .hp-st.muted { color: var(--muted); }
+.hp-bars { list-style: none; margin: 0; padding: 14px 0 0; border-top: 1px solid var(--line); display: grid; gap: 12px; }
+.hp-bars li { display: grid; grid-template-columns: 10px minmax(96px, auto) minmax(60px, 1fr) 40px; gap: 10px; align-items: center; font-size: 13.5px; }
+.hp-bars li > i { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.hp-bar { height: 7px; border-radius: 99px; background: var(--sunk); overflow: hidden; } .hp-bar em { display: block; height: 100%; border-radius: 99px; background: var(--accent); }
+.hp-bars b { text-align: right; font-size: 13px; color: var(--muted); font-weight: 600; }
+.hp-weak { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); display: grid; gap: 6px; }
+.hp-wk { display: flex; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.hp-wk:hover { border-color: var(--rule); } .hp-wk em { font-style: normal; font-weight: 700; color: var(--bad); }
+.ra { list-style: none; margin: 0; padding: 0; display: grid; }
+.ra a { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none; }
+.ra li:last-child a { border-bottom: 0; }
+.ra-ic { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+.ra-ic .ico { width: 18px; height: 18px; }
+.ra-t b { display: block; font-size: 14px; } .ra-t small { color: var(--muted); font-size: 12.5px; }
+.ra time { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.ra-empty { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+/* sidebar quote */
+.side-quote { display: flex; gap: 10px; align-items: flex-start; font-family: var(--font-ui) !important; font-style: normal !important; font-size: 13px !important; }
+.side-quote .ico { width: 22px; height: 22px; flex: none; color: var(--navy-muted); }
+/* charts: legends wrap instead of running out of the card */
+.keys { flex-wrap: wrap; row-gap: 4px; min-width: 0; }
+.card-h.sm { flex-wrap: wrap; }
+
+.ut-tag { flex: none; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px; letter-spacing: .02em; }
+.ut-tag.new { background: var(--good-soft); color: var(--good); } .ut-tag.sec { background: var(--ember-soft); color: var(--ember); }
+.sec-t { color: var(--ember); font-weight: 700; }
+
+.side-h-btn { margin-top: 18px; padding-top: 16px !important; border-top: 1px solid rgba(255, 255, 255, .1) !important; border-radius: 0 !important; font-size: 12px !important; font-weight: 700 !important; letter-spacing: .1em; text-transform: uppercase; color: var(--navy-muted) !important; }
+.xs-grid { grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 14px; }
+.xs-card { min-height: 200px; padding: 18px; }
+.xs-card b { font-size: 16.5px; }
+.sg-hi { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--accent); color: #fff; vertical-align: -6px; margin-right: 6px; }
+.sg-hi .ico { width: 22px; height: 22px; }
+.sg-more { margin-top: 22px; } .sg-more h3 { margin: 0 0 10px; }
+
+.sppick .sp-opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 4px 14px; margin-bottom: 8px; }
+.sppick select { margin-top: 4px; }
+.sp-modal { max-width: 760px; width: calc(100vw - 32px); }
+.sp-modal .mhead { display: flex; justify-content: space-between; align-items: center; }
+.sp-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 20px 10px; border-bottom: 1px solid var(--line); }
+.sp-tabs button { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 99px; padding: 6px 14px; font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; }
+.sp-tabs button[aria-selected="true"] { background: var(--btn); color: var(--btn-ink); border-color: var(--btn); }
+.sp-body { max-height: min(62vh, 560px); overflow: auto; }
+.sp-body table { width: 100%; border-collapse: collapse; font-size: 14px; } .sp-body td, .sp-body th { border-bottom: 1px solid var(--line); padding: 7px 8px; text-align: left; vertical-align: top; }
+.sp-note { color: var(--muted); font-size: 13.5px; } .sp-tips li, .sp-frames li { margin: 0 0 8px; line-height: 1.55; }
+/* Skill Builder: hands-on items */
+.sk-qh { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.sk-kind { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); padding: 3px 10px; border-radius: 99px; }
+.sk-fig { margin: 4px 0 14px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--sunk); display: flex; justify-content: center; overflow-x: auto; color: var(--ink); }
+.sk-fig svg { max-width: 100%; height: auto; }
+.sk-imgs { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.sk-imgs .sk-opt { align-items: center; min-height: 120px; }
+.sk-imgs .sk-opt > span { flex: 1; display: flex; justify-content: center; color: var(--ink); }
+.sk-imgs svg { max-width: 100%; height: auto; }
+.sk-fields { display: grid; gap: 12px; margin-top: 4px; }
+.sk-fl { display: grid; gap: 6px; font-weight: 600; font-size: 15px; }
+.sk-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-weight: 400; }
+.sk-in { font: inherit; font-size: 16px; padding: 8px 10px; border: 1.5px solid var(--line); border-radius: 9px; background: var(--surface); color: var(--ink); max-width: 100%; min-width: 0; }
+.sk-in:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+.sk-sel { min-width: 200px; }
+.sk-in.ok { border-color: var(--good); background: color-mix(in srgb, var(--good) 10%, var(--surface)); }
+.sk-in.no { border-color: var(--bad); background: color-mix(in srgb, var(--bad) 9%, var(--surface)); }
+.sk-in[disabled] { opacity: 1; color: var(--ink); }
+.sk-u { color: var(--muted); font-weight: 600; }
+.sk-fix { font-weight: 700; color: var(--good); font-size: 14.5px; }
+.sk-fix::before { content: "→ "; color: var(--muted); font-weight: 400; }
+.sk-eq { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 6px; font-size: 19px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--sunk); }
+.sk-sp { display: inline-flex; align-items: center; gap: 5px; }
+.sk-eq .sk-in { width: 3.6em !important; text-align: center; font-weight: 700; padding: 6px 4px; }
+.sk-op { color: var(--muted); font-weight: 700; padding: 0 4px; }
+.sk-pun { border-collapse: collapse; margin: 6px 0 14px; }
+.sk-pun th, .sk-pun td { border: 1.5px solid var(--line); padding: 8px; text-align: center; }
+.sk-pun th { background: var(--sunk); font-size: 18px; min-width: 52px; font-weight: 700; }
+.sk-pun td .sk-in { width: 5.5em !important; text-align: center; }
+.sk-pun td .sk-fix { display: block; margin-top: 4px; }
+.sk-pun td .sk-fix::before { content: ""; }
+.sk-fig.wide { justify-content: flex-start; } .sk-fig.wide svg { min-width: 540px; margin: 0 auto; }
 
 </style>
 </head><body>
@@ -10960,7 +11117,12 @@ const LS = {
 };
 const BY_ID = Object.fromEntries(TESTS.map(t => [t.id, t]));
 TESTS.forEach(t => { { const ids = new Set(); t.bank = t.bank.filter(b => !ids.has(b.id) && ids.add(b.id)); }
-  t.n = t.cats.reduce((s, c) => s + c.n, 0); t.nSR = t.cats.filter(c => !c.cr).reduce((s, c) => s + c.n, 0); t.crCat = t.cats.find(c => c.cr) || null; t.secPer = (t.srMinutes || t.minutes) * 60 / t.nSR; t.CAT = Object.fromEntries(t.cats.map(c => [c.k, c])); });
+  t.n = t.cats.reduce((s, c) => s + c.n, 0); t.nSR = t.cats.filter(c => !c.cr).reduce((s, c) => s + c.n, 0); t.crCat = t.cats.find(c => c.cr) || null; t.secPer = (t.srMinutes || t.minutes) * 60 / t.nSR; t.CAT = Object.fromEntries(t.cats.map(c => [c.k, c]));
+  /* teacher-only questions: part of each unit is held back from student practice, exam simulations, and the question bank,
+     so teacher-made tests can use questions students haven't seen word for word. Enough stays public to fill a full exam. */
+  t.secure = new Set(); t.cats.filter(c => !c.cr).forEach(c => { const u = t.bank.filter(b => b.cat === c.k).sort((p, q) => hashStr('sec|' + p.id) < hashStr('sec|' + q.id) ? -1 : 1);
+    const r = Math.max(0, Math.min(Math.floor(u.length * 0.32), u.length - Math.ceil(c.n * 1.15) - 1)); u.slice(0, r).forEach(b => t.secure.add(b.id)); });
+  t.pub = t.bank.filter(b => !t.secure.has(b.id)); });
 let PID = null;
 const KEY = x => ({ seen: `ap.${PID}.${x.store}.seen.v1`, hist: `ap.${PID}.${x.store}.history.v1`, cur: `ap.${PID}.${x.store}.current.v1` });
 const LEGACY = x => ({ seen: x.store + '.seen.v1', hist: x.store + '.history.v1', cur: x.store + '.current.v1' });
@@ -11073,13 +11235,15 @@ const setAccent = x => { $('#app').className = x ? 'acc-' + x.accent : ''; };
 /* ── test assembly ── */
 function instantiate(raw) {
   if (raw.type === 'num') return { id: raw.id, cat: raw.cat, lv: raw.lv || 1, type: 'num', stem: raw.stem, ans: raw.ans, tol: raw.tol, unit: raw.unit || '', show: raw.show, expl: raw.expl, k: 1, choices: [] };
+  /* AP style: four choices (A–D). Longer generated lists keep the answer and a window of neighbors around it. */
+  if (raw.choices.length > 4 && raw.correct.length === 1) { const c = raw.correct[0], st = Math.max(0, Math.min(raw.choices.length - 4, c - R.ri(0, 3))); raw = { ...raw, choices: raw.choices.slice(st, st + 4), correct: [c - st] }; }
   const n = raw.choices.length; const order = [...Array(n).keys()]; if (!raw.ordered) R.shuf(order);
   return { id: raw.id, cat: raw.cat, lv: raw.lv || 1, stem: raw.stem, choices: order.map(i => raw.choices[i]), correct: raw.correct.map(c => order.indexOf(c)).sort((a, b) => a - b), expl: raw.expl, k: raw.correct.length, psg: raw.psg };
 }
 const fromStatic = b => instantiate({ id: b.id, cat: b.cat, lv: b.lv, stem: b.stem, choices: b.ch, correct: [...Array(b.k).keys()], expl: b.expl, psg: b.psg });
 function priority(id, seen) { const s = seen[id]; if (!s) return Math.random(); return 1 + Math.random() + s.n * 0.15 - (s.w ? 0.85 : 0); }
 function pickCat(x, k, n, seen, level) {
-  const all = x.bank.filter(b => b.cat === k), gensAll = x.gens[k] || [];
+  const all = x.pub.filter(b => b.cat === k), gensAll = x.gens[k] || [];
   const stems = new Set(), used = {}, out = [];
   const statics = lv => all.filter(b => (b.lv || 1) === lv).map(b => ({ b, p: priority(b.id, seen) })).sort((p, q) => p.p - q.p).map(o => o.b);
   const pools = { 2: { s: statics(2), g: gensAll.filter(g => g.lv === 2) }, 1: { s: statics(1), g: gensAll.filter(g => (g.lv || 1) === 1) } };
@@ -11258,6 +11422,7 @@ function show(view) { ['hub', 'exam', 'results'].forEach(v => { $('#' + v).hidde
 function leaveExam() { ttsStop(); spStop(); lkStop(); document.body.classList.remove('acc-big'); if (typeof pzOff === 'function') pzOff(); if (inExam) { save(); clearInterval(tick); inExam = false; } }
 const lkExitFull = () => { try { if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {}); } catch (e) {} };
 function route() {
+  $('#hub').classList.remove('is-home');
   leaveExam(); closeModal(); livePresence(); document.body.classList.remove('side-open');
   const h = ROUTE;
   if (MODE === 'loading') return renderLoading();
@@ -11273,6 +11438,7 @@ function route() {
   else if (h === 'bank' || h === 'practice') renderBank();
   else if (h === 'analytics') renderAnalytics();
   else if (h.startsWith('subj-')) renderSubject(h.slice(5));
+  else if (h.startsWith('topic-')) renderSubjectGroup(h.slice(6));
   else if (h === 'unit-tests') renderUnitTests();
   else if (h === 'ut-new') renderUtNew();
   else if (h === 'ut-check') renderUtCheck();
@@ -11284,7 +11450,8 @@ function route() {
   else if (h === 'grades') renderGrades();
   else if (h === 'defs' || h.startsWith('defs-')) renderDefs(h.slice(5));
   else if (h === 'skills' || h.startsWith('skill-')) renderSkills(h.startsWith('skill-') ? h.slice(6) : null);
-  else if (h === 'review' || h === 'resources') renderReview();
+  else if (h === 'flashcards' || h === 'formulas') { RV.tab = h === 'flashcards' ? 'cards' : 'sheets'; RV.via = h; renderReview(); }
+  else if (h === 'review' || h === 'resources') { RV.via = null; renderReview(); }
   else if (h === 'about' || h === 'faq' || h === 'about-faq') renderAbout();
   else if (BY_ID[h]) renderTestPage(BY_ID[h]);
   else renderHome();
@@ -11338,16 +11505,23 @@ const IC = {
   cap: '<path d="M2 9.5l10-5 10 5-10 5z"/><path d="M6 11.5v4.8c3.3 2.6 8.7 2.6 12 0v-4.8"/><path d="M21 10v5.5"/>',
   lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
   grade: '<rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M3.5 9h17M3.5 14.5h17M9 3.5v17"/>',
-  play: '<path d="M8 5l11 7-11 7z"/>', resume: '<circle cx="12" cy="12" r="8.5"/><path d="M10 8.5l5.5 3.5-5.5 3.5z"/>',
+  play: '<path d="M8 5l11 7-11 7z"/>', cards: '<rect x="3" y="7" width="14" height="13" rx="2"/><path d="M7 4h11a3 3 0 0 1 3 3v10"/>', sigma: '<path d="M18 5H6l6 7-6 7h12"/>', folder: '<path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H9l2 2.5h7.5A2.5 2.5 0 0 1 21 10v7.5a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/>', search: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>', mtn: '<path d="M2.5 19l6-9 4 5.5 2.5-3 6.5 6.5z"/><circle cx="17" cy="6.5" r="1.6"/>', resume: '<circle cx="12" cy="12" r="8.5"/><path d="M10 8.5l5.5 3.5-5.5 3.5z"/>',
 };
 const SUBJ_IC = { bio: 'leaf', chem: 'flask', phys: 'atom', econ: 'chart', stats: 'target', psych: 'bulb', hbio: 'leaf', hchem: 'flask', hphys: 'atom', mlife: 'leaf', mphys: 'atom', mearth: 'globe' };
 const subjIcon = (k, cls = '') => `<span class="sico acc-${(AREA[k] || {}).accent || 'chem'} ${cls}">${SVG(IC[SUBJ_IC[k]] || IC.file)}</span>`;
-const SIDE = [['home', 'Dashboard', 'home'], ['tests', 'Practice Tests', 'file'], ['bank', 'Question Bank', 'list'], ['unit-tests', 'Unit Tests', 'check'], ['lab', 'Free Response Lab', 'pen'], ['defs', 'Definitions', 'vocab'], ['skills', 'Skill Builder', 'target'], ['analytics', 'Performance Analytics', 'chart'], ['review', 'Resources', 'book']];
+const SIDE = [['home', 'Home', 'home']];
+const SIDE_GROUPS = [
+  ['Practice', [['tests', 'Practice Tests', 'file'], ['bank', 'Question Bank', 'list'], ['unit-tests', 'Unit Tests', 'check'], ['lab', 'Free Response', 'pen'], ['calc', 'Calculation Practice', 'calc'], ['skills', 'Skill Builder', 'target']]],
+  ['Study', [['flashcards', 'Flashcards', 'cards'], ['defs', 'Definitions', 'vocab'], ['formulas', 'Formulas & Reference', 'sigma'], ['review', 'Study Resources', 'folder']]],
+  ['Progress', [['analytics', 'Performance', 'chart']]],
+];
 let PREF_MODE = 'practice';
 function navKey(active) {
-  if (BY_ID[active]) return 'subj-' + BY_ID[active].area;
   if (/^defs/.test(active)) return 'defs';
   if (/^skill/.test(active)) return 'skills';
+  if (BY_ID[active] || /^subj-/.test(active)) { const ar = BY_ID[active] ? BY_ID[active].area : active.slice(5), g = SUBJ_GROUPS.find(o => o.areas.includes(ar)); if (g) return 'topic-' + g.k; }
+  if (active === 'review' && RV.tab === 'cards' && RV.via === 'flashcards') return 'flashcards';
+  if (active === 'review' && RV.via === 'formulas') return 'formulas';
   if (active === 'admin') return ADM.tab === 'teachers' ? 'admin-teachers' : 'admin';
   if (/^(faq|about-faq)$/.test(active)) return 'about';
   if (/^ut-U1/.test(active)) return 'unit-tests';
@@ -11375,23 +11549,22 @@ function notes() {
 }
 /* subject groups in the sidebar: each band is a dropdown; the one holding the current page opens by itself */
 function sideGroups(cur) {
-  const curA = /^subj-/.test(cur) ? AREA[cur.slice(5)] : null, open = LS.get('ap.ui.sideopen', null) || {};
-  return `<div class="side-h">Subjects</div>` + BANDS.map(b => { const as = AREAS.filter(a => a.band === b.k && TESTS.some(t => t.area === a.k)); if (!as.length) return '';
-    const isOpen = curA ? curA.band === b.k || open[b.k] === true : open[b.k] != null ? open[b.k] : b.k === getTrack();
-    return `<div class="side-grp${isOpen ? ' open' : ''}"><button class="side-gh" data-sg="${b.k}" aria-expanded="${isOpen}" aria-controls="sg-${b.k}"><span>${esc(b.name)}</span>${SVG(IC.down, 'sg-ch')}</button>
-      <nav class="side-nav subjnav" id="sg-${b.k}" aria-label="${esc(b.name)}" ${isOpen ? '' : 'hidden'}>${as.map(a => `<a href="#subj-${a.k}" class="acc-${a.accent}" ${cur === 'subj-' + a.k ? 'aria-current="page"' : ''}><span class="s-ic">${SVG(IC[SUBJ_IC[a.k]])}</span><span>${esc(a.nav)}</span></a>`).join('')}</nav></div>`; }).join('');
+  const open = LS.get('ap.ui.sideopen', null), isOpen = /^topic-/.test(cur) || !(open && open.subjects === false);
+  return `<div class="side-grp${isOpen ? ' open' : ''}"><button class="side-gh side-h-btn" data-sg="subjects" aria-expanded="${isOpen}" aria-controls="sg-subjects"><span>Subjects</span>${SVG(IC.down, 'sg-ch')}</button>
+    <nav class="side-nav subjnav" id="sg-subjects" aria-label="Subjects" ${isOpen ? '' : 'hidden'}>${SUBJ_GROUPS.filter(g => groupTests(g).length).map(g => `<a href="#topic-${g.k}" class="acc-${g.accent}" ${cur === 'topic-' + g.k ? 'aria-current="page"' : ''}><span class="s-ic">${SVG(IC[g.ic])}</span><span>${esc(g.name)}</span></a>`).join('')}</nav></div>`;
 }
 function nav(active) {
   if (TEST_ONLY && MODE === 'gate') return `<header class="topbar tonly"><a class="tb-brand" href="#take">${SVG(IC.cap)} ${BRAND}</a><span class="spacer"></span><a class="btn quiet sm" href="#take">Test code</a><a class="btn quiet sm" href="#home">Sign in</a></header>`;
   const cur = navKey(active), owner = MODE === 'owner', nNotes = me() ? notes().length : 0, nNew = me() ? unseenNotes().length : 0;
   const link = ([k, l, ic]) => `<a href="#${k}" ${cur === k ? 'aria-current="page"' : ''}>${SVG(IC[ic])}<span>${l}</span></a>`;
   const side = `<aside class="side" id="side" aria-label="Main menu">
-    <a class="side-brand" href="#home" aria-label="${BRAND} home"><span class="sb-ic">${SVG(IC.cap)}</span><span><b>${BRAND}</b><small>Practice · Improve · Succeed</small></span></a>
+    <a class="side-brand" href="#home" aria-label="${BRAND} home"><span class="sb-ic">${SVG(IC.cap)}</span><span><b>${BRAND}</b><small>Practice · Learn · Teach</small></span></a>
     <nav class="side-nav" aria-label="Main">${SIDE.map(link).join('')}</nav>
+    ${SIDE_GROUPS.map(([h, ls]) => `<div class="side-h">${h}</div><nav class="side-nav" aria-label="${h}">${ls.map(link).join('')}</nav>`).join('')}
     ${sideGroups(cur)}
     ${isTeacher() ? `<div class="side-h">Teacher Tools</div><nav class="side-nav" aria-label="Teacher tools">${owner ? link(['admin', 'Manage Students', 'users']) + link(['admin-teachers', 'Teachers', 'teacher']) : link(['class', 'My Students', 'users'])}${link(['assign', 'Assign Tests', 'assign'])}${link(['ut-new', 'Create Unit Test', 'plus'])}${link(['ut-check', 'Check Results', 'check'])}${link(['grades', 'Gradebook & Classes', 'grade'])}</nav>` : ''}
     <div class="side-h">Help</div><nav class="side-nav" aria-label="Help">${link(['about', 'About & FAQ', 'info'])}</nav>
-    <p class="side-quote">“Small, steady practice beats last-minute cramming.”</p></aside>`;
+    <p class="side-quote">${SVG(IC.leaf)}<span>Better preparation today. Bigger opportunities tomorrow.</span></p></aside>`;
   const top = `<header class="topbar"><button class="tb-icon menu-btn" id="menuBtn" aria-label="Open menu" aria-controls="side" aria-expanded="false">${SVG(IC.menu)}</button><a class="tb-brand" href="#home">${BRAND}</a><span class="spacer"></span>
     ${owner && ROOM ? `<a class="live-pill ${liveCount() ? '' : 'zero'}" id="livePill" href="#admin" title="People on the site right now (only you can see this)"><i></i> ${liveCount()}</a>` : ''}
     ${MODE === 'owner' || MODE === 'member' ? `<button class="tb-icon" id="fbBtn" title="Report a problem or send a suggestion" aria-label="Send feedback">${SVG(IC.help)}</button>` : ''}
@@ -11483,7 +11656,7 @@ function dashMini(a) {
   const x = dashPick(a.k), cats = srCatsOf(x), u = DASH.unit[x.id] && x.CAT[DASH.unit[x.id]] ? DASH.unit[x.id] : cats[0].k;
   const meta = { full: [[IC.file, `${x.nSR} multiple choice${x.crCat ? ' + ' + x.crCat.n + ' free response' : ''}`], [IC.clock, fmtDur(x.minutes * 60)]],
     unit: [[IC.file, '20 questions · instant feedback'], [IC.clock, 'Untimed']],
-    bank: [[IC.list, '20 mixed questions · instant feedback'], [IC.file, `${x.bank.length.toLocaleString('en-US')} questions in the bank`]],
+    bank: [[IC.list, '20 mixed questions · instant feedback'], [IC.file, `${x.pub.length.toLocaleString('en-US')} questions in the bank`]],
     timed: [[IC.file, '20 questions, paced like the real exam'], [IC.clock, `${Math.round(20 * x.secPer / 60)} min`]] }[DASH.tab];
   const label = { full: isAP(x) ? 'Full-Length Practice Test' : 'Final Exam', unit: 'Practice by unit', bank: 'Mixed question set', timed: 'Timed unit practice' }[DASH.tab];
   return `<div class="mini acc-${a.accent}"><div class="mini-h">${subjIcon(a.k)}<div><b>${esc(a.name)}</b>${xs.length > 1 ? `<select data-dpick="${a.k}" aria-label="${esc(a.name)} course">${xs.map(t => `<option value="${t.id}" ${t === x ? 'selected' : ''}>${esc(t.short || t.subject)}</option>`).join('')}</select>` : `<small>${label}</small>`}</div></div>
@@ -11509,56 +11682,129 @@ function nextGoal(all) {
   if (low) return { t: 'Next Goal', s: `Lift your ${low.a.name} accuracy above ${Math.min(95, Math.floor(low.s.pct / 10) * 10 + 10)}%`, href: '#subj-' + low.a.k };
   return { t: 'Next Goal', s: 'Keep your streak going with a new set', href: '#bank' };
 }
-function renderHome() {
-  setAccent(null); show('hub');
-  const all = allHist(), goal = nextGoal(all), weak = weakUnits(all), inProg = TESTS.map(x => ({ x, c: loadCur(x) })).filter(o => o.c);
-  const nm = meName().trim(), ws = nm.split(/\s+/);
-  const first = /^(mr|mrs|ms|miss|mx|dr|prof)\.?$/i.test(ws[0] || '') ? nm : ws[0];
-  const subjCard = a => { const xs = testsIn(a.k), nQ = xs.reduce((s, x) => s + x.bank.length, 0), nF = xs.reduce((s, x) => s + (x.cr ? Object.values(CASES).filter(c => crBands(x).some(g => g.band === c.band)).length : 0), 0);
-    const target = xs.length > 1 ? '#subj-' + a.k : xs.length ? '#' + xs[0].id : '#tests';
-    return `<article class="subj-card acc-${a.accent}"><div class="sc-h">${subjIcon(a.k, 'lg')}<h2>${esc(a.name)}</h2></div><p>${esc(a.blurb)}</p>
-      <ul class="meta">${xs.length > 1 ? `<li>${SVG(IC.book)}${xs.length} courses: ${xs.map(x => esc(x.short || x.subject)).join(', ')}</li>` : `<li>${SVG(IC.file)}${a.band === 'ap' ? 'Full exam' : 'Final exam'}: ${xs[0] ? `${xs[0].nSR} MCQ${xs[0].crCat ? ' + ' + xs[0].crCat.n + ' FRQ' : ''}` : '—'}</li>`}
-        <li>${SVG(IC.list)}${nQ.toLocaleString('en-US')} original multiple-choice questions</li>${a.band === 'ap' ? `<li>${SVG(IC.pen)}${nF} free-response questions with scoring guides</li>` : `<li>${SVG(IC.vocab)}${xs.reduce((s, x) => s + srCatsOf(x).length, 0)} NGSS-aligned units with definitions</li>`}</ul>
-      <a class="btn primary block" href="${target}">${xs.length > 1 ? 'Choose a Course' : 'Start Practice Test'} ${SVG(IC.arrow)}</a></article>`; };
-  const TA = trackAreas();
-  const progress = TA.map(a => { const s = areaStats(a.k, all);
-    return `<li class="prog acc-${a.accent}">${ringSVG(s.pct, a.k)}<div><b>${esc(a.name)}</b><span class="pv">${s.pct == null ? 'No attempts yet' : s.pct + '% recent accuracy'}</span><small>${s.t ? `${s.c.toLocaleString('en-US')} / ${s.t.toLocaleString('en-US')} correct` : 'Start practicing to see progress'}${s.ap ? ` · est. AP ${s.ap.score}` : ''}</small><span class="lbar"><i style="width:${s.pct || 0}%"></i></span></div></li>`; }).join('');
-  const recent = all.slice(0, 5).map(h => `<li class="acc-${(AREA[h.x.area] || {}).accent}"><a href="#${h.x.id}">${subjIcon(h.x.area, 'sm')}<span><b>${esc(recTitle(h))}</b><small>${h.cr && !h.crDone && !h.n ? 'FRQ not scored' : 'Score: ' + h.pct + '%'}${h.ap ? ' · AP ' + h.ap.score : ''} <i>|</i> ${ago2(h.date)}</small></span></a></li>`).join('');
-  const upNext = inProg.map(o => `<li><a href="#${o.x.id}"><span class="un-ic">${SVG(IC.resume)}</span><span><b>Resume: ${esc(o.x.subject)} ${o.c.practice ? 'practice' : o.c.mode === 'full' ? 'exam simulation' : 'timed practice'}</b><small>${o.c.ans.filter(a => a.length).length} of ${o.c.items.length} answered${o.c.practice ? '' : ' · ' + fmtT(o.c.remaining) + ' left'}</small></span></a></li>`)
-    .concat(weak.slice(0, 2).map(w => `<li><button class="un-b" data-wk="${w.x.id}|${w.c.k}"><span class="un-ic">${SVG(IC.cal)}</span><span><b>Practice ${esc(w.x.short || w.x.subject)} Unit ${w.c.k}</b><small>${esc(w.c.short)} · currently ${w.p}%</small></span></button></li>`)).slice(0, 4).join('');
-  $('#hub').innerHTML = nav('home') + `<div class="page dash">
-    <div class="dash-main">
-      <div class="welcome"><div><h1>${first ? `Welcome back, ${esc(first)}!` : `Welcome to ${BRAND}!`}</h1><p class="serif">${all.length ? 'Keep practicing. You’re making progress.' : 'Pick a subject below to get started.'}</p></div>
-        <a class="goal" href="${goal.href}">${SVG(IC.target, 'gi')}<span><b>${esc(goal.t)}</b><span>${esc(goal.s)}</span></span>${SVG(IC.chev, 'gc')}</a></div>
-      <div class="track-row"><span class="small">Showing</span><div class="seg" role="radiogroup" aria-label="Course level">${BANDS.map(b => `<label><input type="radio" name="track" value="${b.k}" ${getTrack() === b.k ? 'checked' : ''}><span>${esc(b.name)}</span></label>`).join('')}</div></div>
-      <div class="subjs">${TA.map(subjCard).join('')}</div>
-      <section class="card take"><div class="card-h">${SVG(IC.clock, 'hi')}<div><h2>Take a Practice Test</h2><p>Choose a test type and start practicing. ${getTrack() === 'ap' ? 'Full-length exams are timed and follow the official AP format.' : 'Final exams are timed and cover every unit.'}</p></div><a class="more" href="#tests">View All Tests ${SVG(IC.arrow)}</a></div>
-        <div class="seg-tabs" role="tablist">${DASH_TABS.map(([k, l]) => `<button role="tab" data-dtab="${k}" aria-selected="${DASH.tab === k}">${l}</button>`).join('')}</div>
-        <div class="minis">${TA.map(dashMini).join('')}</div>
-        <div class="lvl-row"><span class="small">Difficulty</span><div class="seg" role="radiogroup" aria-label="Difficulty">${Object.entries(LEVEL).map(([lk, v]) => `<label><input type="radio" name="lvl" value="${lk}" ${getLevel() === lk ? 'checked' : ''}><span>${v.name}</span></label>`).join('')}</div><span class="small muted" id="lvlNote">${esc(LEVEL[getLevel()].note)}</span></div></section>
-      <div class="dash-row">
-        <section class="card"><div class="card-h sm">${SVG(IC.chart, 'hi')}<h3>Performance Overview</h3><ul class="keys">${TA.map(a => `<li class="acc-${a.accent}"><i></i>${esc(a.short)}</li>`).join('')}</ul></div>${perfChart(all, TA)}</section>
-        <section class="card"><div class="card-h sm">${SVG(IC.chart, 'hi')}<h3>Score Breakdown</h3></div>${donut(all, TA)}</section>
-        <section class="card"><div class="card-h sm">${SVG(IC.bulb, 'hi')}<h3>Top Areas to Improve</h3></div>${weak.length ? `<ol class="improve">${weak.map((w, i) => `<li><span class="n">${i + 1}</span><span><b>${esc(w.x.subject)}</b><small>Unit ${w.c.k}: ${esc(w.c.short)} · ${w.p}%</small></span><button class="linkbtn sm" data-wk="${w.x.id}|${w.c.k}">Review</button></li>`).join('')}</ol>` : `<div class="chart-empty">${SVG(IC.bulb)}<p>Answer at least 3 questions in a unit and your weakest units appear here.</p></div>`}</section>
-      </div>
-      ${foot()}
-    </div>
-    <aside class="dash-rail">
-      <section class="card"><div class="card-h sm"><h3>Your Progress</h3><a class="more" href="#analytics">View All ${SVG(IC.arrow)}</a></div><ul class="progs">${progress}</ul></section>
-      <section class="card"><div class="card-h sm"><h3>Recent Activity</h3><a class="more" href="#analytics">View All ${SVG(IC.arrow)}</a></div>${recent ? `<ul class="acts">${recent}</ul>` : '<p class="pop-e">No attempts yet. Your recent tests will show up here.</p>'}</section>
-      <section class="card"><div class="card-h sm">${SVG(IC.cal, 'hi')}<h3>Up Next</h3></div>${upNext ? `<ul class="upnext">${upNext}</ul>` : `<ul class="upnext"><li><a href="#bank"><span class="un-ic">${SVG(IC.play)}</span><span><b>Start a 20-question practice set</b><small>Instant feedback on every answer</small></span></a></li><li><a href="#review"><span class="un-ic">${SVG(IC.book)}</span><span><b>Review flashcards and equation sheets</b><small>Resources for every course</small></span></a></li></ul>`}
-        ${all.length ? `<div class="reset-row"><button class="linkbtn sm" id="resetPracHome">Reset practice scores</button><button class="linkbtn sm" id="resetPickBtn">Reset tests</button>${MODE === 'owner' ? '<button class="linkbtn sm" id="switchBtn">Switch profile</button>' : ''}</div>` : ''}</section>
-    </aside>
-  </div>`;
-  $$('[data-dtab]').forEach(b => b.onclick = () => { DASH.tab = b.dataset.dtab; renderHome(); bindNav(); });
-  $$('[name="track"]').forEach(r => r.onchange = () => { setTrack(r.value); renderHome(); bindNav(); });
-  $$('[data-dpick]').forEach(s => s.onchange = () => { DASH.pick[s.dataset.dpick] = s.value; renderHome(); bindNav(); });
-  $$('[data-dunit]').forEach(s => s.onchange = () => { DASH.unit[s.dataset.dunit] = s.value; const b = s.closest('.mini').querySelector('[data-dgo]'); if (b) b.dataset.du = s.value; });
-  $$('[data-dgo]').forEach(b => b.onclick = () => dashGo(BY_ID[b.dataset.dgo], b.dataset.du));
-  $$('[data-wk]').forEach(b => b.onclick = () => { const [id, k] = b.dataset.wk.split('|'); startTest(BY_ID[id], 'drill', k, getLevel(), true); });
-  bindLevel();
-  if ($('#resetPracHome')) $('#resetPracHome').onclick = resetPractice; if ($('#resetPickBtn')) $('#resetPickBtn').onclick = resetPick; if ($('#switchBtn')) $('#switchBtn').onclick = () => go('profiles');
+/* ── dashboard: landscape hero with search, subjects to explore, quick access, progress and recent activity ── */
+function heroSVG() {
+  /* layered mountains, mist, and a pine forest on the right; colors come from CSS variables so dark mode works */
+  const trees = []; let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  for (let i = 0; i < 70; i++) { const x = 820 + i * 9.4 + rnd() * 6, base = 420 - Math.max(0, (x - 820) * 0.24) + rnd() * 14, h = 34 + rnd() * 46 + (x - 820) * 0.07, w = h * 0.36;
+    trees.push(`<path d="M${x.toFixed(1)} ${(base - h).toFixed(1)} L${(x + w).toFixed(1)} ${base.toFixed(1)} L${(x - w).toFixed(1)} ${base.toFixed(1)}Z"/>`); }
+  const near = []; for (let i = 0; i < 48; i++) { const x = 1040 + i * 9 + rnd() * 5, base = 430, h = 60 + rnd() * 70, w = h * 0.34; near.push(`<path d="M${x.toFixed(1)} ${(base - h).toFixed(1)} L${(x + w).toFixed(1)} ${base} L${(x - w).toFixed(1)} ${base}Z"/>`); }
+  return `<svg class="hx-art" viewBox="0 0 1440 430" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <defs><linearGradient id="hxSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--hx-sky1)"/><stop offset=".75" style="stop-color:var(--hx-sky2)"/></linearGradient>
+      <radialGradient id="hxSun" cx="1170" cy="215" r="300" gradientUnits="userSpaceOnUse"><stop offset="0" style="stop-color:var(--hx-sun)" stop-opacity=".95"/><stop offset=".25" style="stop-color:var(--hx-sun)" stop-opacity=".45"/><stop offset="1" style="stop-color:var(--hx-sun)" stop-opacity="0"/></radialGradient>
+      <linearGradient id="hxMist" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--hx-mist)" stop-opacity="0"/><stop offset="1" style="stop-color:var(--hx-mist)" stop-opacity=".95"/></linearGradient>
+      <linearGradient id="hxFade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--hx-sky2)" stop-opacity=".92"/><stop offset=".5" style="stop-color:var(--hx-sky2)" stop-opacity=".35"/><stop offset=".7" style="stop-color:var(--hx-sky2)" stop-opacity="0"/></linearGradient></defs>
+    <rect width="1440" height="430" fill="url(#hxSky)"/><rect width="1440" height="430" fill="url(#hxSun)"/><circle cx="1170" cy="222" r="26" style="fill:var(--hx-sunc)"/>
+    <path style="fill:var(--hx-m1)" d="M0 300 L120 255 L230 280 L360 220 L470 262 L600 205 L720 250 L820 190 L930 150 L1010 185 L1090 140 L1180 196 L1260 160 L1350 205 L1440 175 V430 H0Z" opacity=".55"/>
+    <path style="fill:var(--hx-m2)" d="M0 340 L150 300 L300 330 L430 285 L560 318 L700 270 L800 300 L900 240 L990 275 L1080 228 L1170 262 L1260 230 L1360 270 L1440 250 V430 H0Z" opacity=".7"/>
+    <rect y="250" width="1440" height="140" fill="url(#hxMist)" opacity=".7"/>
+    <path style="fill:var(--hx-m3)" d="M560 400 L700 330 L780 352 L880 300 L980 340 L1080 300 L1200 340 L1300 318 L1440 350 V430 H560Z" opacity=".85"/>
+    <g style="fill:var(--hx-tree1)" opacity=".8">${trees.join('')}</g><g style="fill:var(--hx-tree2)">${near.join('')}</g>
+    <rect y="360" width="1440" height="70" fill="url(#hxMist)" opacity=".5"/><rect width="1440" height="430" fill="url(#hxFade)"/></svg>`;
 }
+const SUBJ_ART = {
+  leaf: '<path d="M30 150 C30 70 90 25 170 20 C165 100 120 160 30 150Z"/><path d="M30 150 L130 60" fill="none" stroke-width="3"/><path d="M70 120 L95 85 M100 95 L120 70" fill="none" stroke-width="2"/>',
+  flask: '<circle cx="60" cy="110" r="22"/><circle cx="125" cy="70" r="16"/><circle cx="150" cy="135" r="20"/><circle cx="95" cy="40" r="10"/><path d="M60 110 L125 70 L150 135 M125 70 L95 40" fill="none" stroke-width="5"/>',
+  atom: '<ellipse cx="100" cy="90" rx="80" ry="28" fill="none" stroke-width="5"/><ellipse cx="100" cy="90" rx="80" ry="28" fill="none" stroke-width="5" transform="rotate(60 100 90)"/><ellipse cx="100" cy="90" rx="80" ry="28" fill="none" stroke-width="5" transform="rotate(-60 100 90)"/><circle cx="100" cy="90" r="12"/>',
+  chart: '<rect x="30" y="110" width="26" height="50" rx="4"/><rect x="70" y="80" width="26" height="80" rx="4"/><rect x="110" y="95" width="26" height="65" rx="4"/><rect x="150" y="45" width="26" height="115" rx="4"/><path d="M25 95 L80 60 L120 75 L175 25" fill="none" stroke-width="4"/>',
+  target: '<path d="M10 150 C60 150 70 30 100 30 C130 30 140 150 190 150" fill="none" stroke-width="5"/><path d="M100 30 V150 M60 150 V105 M140 150 V105" fill="none" stroke-width="2" stroke-dasharray="4 5"/>',
+  bulb: '<path d="M100 25 a48 48 0 0 1 28 87 v18 h-56 v-18 a48 48 0 0 1 28 -87Z"/><rect x="76" y="138" width="48" height="10" rx="4"/><rect x="82" y="154" width="36" height="9" rx="4"/>',
+  globe: '<circle cx="100" cy="90" r="62" fill="none" stroke-width="5"/><ellipse cx="100" cy="90" rx="26" ry="62" fill="none" stroke-width="4"/><path d="M38 90 H162 M50 55 H150 M50 125 H150" fill="none" stroke-width="3"/>',
+};
+/* subjects for everyone: each groups its courses at every level (middle school, high school, AP) */
+const SUBJ_GROUPS = [
+  { k: 'biology', name: 'Biology', ic: 'leaf', accent: 'bio', areas: ['mlife', 'hbio', 'bio'], blurb: 'Cells, genetics, evolution, and ecosystems, from life science to AP.' },
+  { k: 'chemistry', name: 'Chemistry', ic: 'flask', accent: 'chem', areas: ['mphys', 'hchem', 'chem'], blurb: 'Atoms, bonding, reactions, and stoichiometry, from basics to exam-ready.' },
+  { k: 'physics', name: 'Physics', ic: 'atom', accent: 'phys', areas: ['mphys', 'hphys', 'phys'], blurb: 'Motion, forces, energy, electricity, and waves, step by step.' },
+  { k: 'earth', name: 'Earth & Space', ic: 'globe', accent: 'earth', areas: ['mearth'], blurb: 'The solar system, plate tectonics, weather, and climate.' },
+  { k: 'economics', name: 'Economics', ic: 'chart', accent: 'econ', areas: ['econ'], blurb: 'Markets, money, and policy, with graphs and real calculations.' },
+  { k: 'statistics', name: 'Statistics', ic: 'target', accent: 'stats', areas: ['stats'], blurb: 'Data, probability, and inference to make sense of the world.' },
+  { k: 'psychology', name: 'Psychology', ic: 'bulb', accent: 'psych', areas: ['psych'], blurb: 'How we think, learn, feel, and connect with others.' },
+];
+const SG = Object.fromEntries(SUBJ_GROUPS.map(g => [g.k, g]));
+const groupTests = g => g.areas.flatMap(k => testsIn(k)).filter((x, i, a) => a.indexOf(x) === i);
+function renderSubjectGroup(k) {
+  const g = SG[k]; if (!g) return renderHome();
+  setAccent({ accent: g.accent }); show('hub');
+  const lv = [['ms', 'Middle School'], ['hs', 'High School'], ['ap', 'AP (Advanced Placement)']].map(([b, l]) => [l, groupTests(g).filter(x => x.band === b)]).filter(r => r[1].length);
+  $('#hub').innerHTML = nav('topic-' + k) + `<div class="page">${pageHead('Subjects', `<span class="sg-hi acc-${g.accent}">${SVG(IC[g.ic])}</span> ${esc(g.name)}`, esc(g.blurb))}
+    ${lv.map(([l, xs]) => `<section class="tgroup"><h2 class="bandh">${esc(l)}</h2><div class="tcards">${xs.map(testCard).join('')}</div></section>`).join('')}
+    <section class="card sg-more"><h3>Keep practicing</h3><div class="row"><a class="btn" href="#skills">${SVG(IC.target)} Skill Builder</a><a class="btn" href="#flashcards">${SVG(IC.cards)} Flashcards</a><a class="btn" href="#defs">${SVG(IC.vocab)} Definitions</a></div></section>
+    ${foot()}</div>`;
+  bindAcc();
+}
+const subjArt = ic => `<svg class="sc-art" viewBox="0 0 200 180" aria-hidden="true">${SUBJ_ART[ic] || SUBJ_ART.leaf}</svg>`;
+function homeSearchIndex() {
+  const out = [];
+  SUBJ_GROUPS.forEach(g => out.push({ t: g.name, s: 'Subject · every level', h: '#topic-' + g.k, ic: g.ic }));
+  TESTS.forEach(x => { out.push({ t: x.subject, s: 'Course · practice tests, question bank, exam', h: '#' + x.id, ic: SUBJ_IC[x.area] }); srCatsOf(x).forEach(c => out.push({ t: `Unit ${c.k}: ${c.name}`, s: x.subject, h: '#' + x.id, ic: 'list' })); });
+  if (typeof SK_SUBJ !== 'undefined') SK_SUBJ.forEach(g => g.topics.forEach(t => out.push({ t: t.name, s: 'Skill Builder · ' + g.name, h: '#skill-' + t.id, ic: 'target' })));
+  [['Practice Tests', '#tests', 'file'], ['Question Bank', '#bank', 'list'], ['Unit Tests', '#unit-tests', 'check'], ['Free Response Lab', '#lab', 'pen'], ['Calculation Practice', '#calc', 'calc'], ['Skill Builder', '#skills', 'target'], ['Flashcards', '#flashcards', 'cards'], ['Definitions', '#defs', 'vocab'], ['Formulas & reference sheets', '#formulas', 'sigma'], ['Study Resources', '#review', 'folder'], ['Performance', '#analytics', 'chart'], ['About & FAQ', '#about', 'info']].forEach(([t, h, ic]) => out.push({ t, s: 'Tool', h, ic }));
+  if (isTeacher()) [['Create Unit Test', '#ut-new', 'plus'], ['Check Results', '#ut-check', 'check'], ['Gradebook & Classes', '#grades', 'grade'], ['Assign Tests', '#assign', 'assign'], ['My Students', '#class', 'users']].forEach(([t, h, ic]) => out.push({ t, s: 'Teacher tool', h, ic }));
+  TESTS.forEach(x => Object.entries(DEF_DB[x.id] || {}).forEach(([k, l]) => l.forEach(([term]) => out.push({ t: term, s: `Definition · ${x.subject} Unit ${k}`, h: '#defs', ic: 'vocab', low: 1 }))));
+  return out;
+}
+function homeSearch(q) {
+  q = q.trim().toLowerCase(); if (!q) return [];
+  const idx = HOME_IDX || (HOME_IDX = homeSearchIndex()), seen = new Set();
+  return idx.map(o => { const t = o.t.toLowerCase(), sc = t === q ? 0 : t.startsWith(q) ? 1 : t.includes(' ' + q) ? 2 : t.includes(q) ? 3 : o.s.toLowerCase().includes(q) ? 5 : 9; return { o, sc: sc + (o.low ? 1.5 : 0) }; })
+    .filter(r => r.sc < 9).sort((a, b) => a.sc - b.sc).filter(r => { const k = r.o.t + r.o.h; if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 8).map(r => r.o);
+}
+let HOME_IDX = null;
+function renderHome() {
+  setAccent(null); show('hub'); $('#hub').classList.add('is-home');
+  const all = allHist(), goal = nextGoal(all), inProg = TESTS.map(x => ({ x, c: loadCur(x) })).filter(o => o.c);
+  const nm = meName().trim(), ws = nm.split(/\s+/), first = /^(mr|mrs|ms|miss|mx|dr|prof)\.?$/i.test(ws[0] || '') ? nm : ws[0];
+  const tch = isTeacher(), groups = SUBJ_GROUPS.filter(g => groupTests(g).length);
+  /* progress by subject (all levels) */
+  const gStat = g => { const r = all.filter(h => h.n && g.areas.includes(h.x.area)).slice(0, 12); const c = r.reduce((t, h) => t + h.correct, 0), n = r.reduce((t, h) => t + h.n, 0); return { c, n, p: n ? Math.round(c / n * 100) : null }; };
+  const rows = groups.map(g => ({ g, s: gStat(g) })), tot = rows.reduce((t, r) => t + r.s.n, 0), cor = rows.reduce((t, r) => t + r.s.c, 0), ov = tot ? Math.round(cor / tot * 100) : null;
+  let sec = 0, secDone = 0; TESTS.forEach(x => { const h = LS.get(KEY(x).hist, []); if (!h.length) return; const agg = catStats(x, h, 99); srCatsOf(x).forEach(c => { sec++; if (agg[c.k] && agg[c.k][1]) secDone++; }); });
+  const status = ov == null ? ['Not started yet', 'muted'] : ov >= 70 ? ['On track', 'good'] : ov >= 55 ? ['Getting there', 'mid'] : ['Needs focus', 'bad'];
+  const ring = (p, sz = 92) => { const r = sz / 2 - 8, c = 2 * Math.PI * r; return `<svg class="hp-ring" viewBox="0 0 ${sz} ${sz}" width="${sz}" height="${sz}" role="img" aria-label="${p == null ? 'No data yet' : p + ' percent'}"><circle cx="${sz / 2}" cy="${sz / 2}" r="${r}" fill="none" stroke="var(--sunk)" stroke-width="8"/><circle cx="${sz / 2}" cy="${sz / 2}" r="${r}" fill="none" stroke="var(--good)" stroke-width="8" stroke-linecap="round" stroke-dasharray="${c * (p || 0) / 100} ${c}" transform="rotate(-90 ${sz / 2} ${sz / 2})"/><text x="50%" y="50%" dy=".35em" text-anchor="middle" font-size="${sz / 4.6}" font-weight="800" fill="var(--ink)">${p == null ? '—' : p + '%'}</text></svg>`; };
+  const skSt = typeof skKey === 'function' ? LS.get(skKey(), {}) : {};
+  const gOf = x => SUBJ_GROUPS.find(g => g.areas.includes(x.area)) || SUBJ_GROUPS[0];
+  const acts = inProg.map(o => ({ d: new Date().toISOString(), ic: gOf(o.x).ic, acc: gOf(o.x).accent, t: `${o.x.subject} · in progress`, s: `${o.c.ans.filter(a => a.length).length} of ${o.c.items.length} answered · tap to resume`, href: '#' + o.x.id, now: 1 }))
+    .concat(all.slice(0, 6).map(h => ({ d: h.date, ic: gOf(h.x).ic, acc: gOf(h.x).accent, t: recTitle(h), s: h.cr && !h.crDone && !h.n ? 'Free response not scored yet' : `Scored ${h.pct}% on ${h.n} questions`, href: '#' + h.x.id })))
+    .concat(Object.entries(skSt).filter(([id, v]) => v.at && typeof SK_TOPIC !== 'undefined' && SK_TOPIC[id]).map(([id, v]) => ({ d: v.at, ic: 'target', acc: SK_TOPIC[id].subj.accent, t: 'Skill Builder · ' + SK_TOPIC[id].name, s: `Last drill ${v.last}%`, href: '#skill-' + id })))
+    .sort((a, b) => (b.now || 0) - (a.now || 0) || (a.d < b.d ? 1 : -1)).slice(0, 4);
+  const quick = tch ? [['ut-new', 'Create Unit Test', 'plus'], ['ut-check', 'Check Results', 'check'], ['grades', 'Gradebook', 'grade'], ['skills', 'Skill Builder', 'target'], ['tests', 'Practice Tests', 'play']]
+    : [['tests', 'Practice Tests', 'play'], ['bank', 'Question Bank', 'list'], ['flashcards', 'Flashcards', 'cards'], ['skills', 'Skill Builder', 'target'], ['formulas', 'Formula Sheets', 'sigma']];
+  const qaTone = ['blue', 'teal', 'violet', 'rose', 'amber'];
+  const card = g => `<a class="xs-card acc-${g.accent}" href="#topic-${g.k}">${subjArt(g.ic)}<span class="xs-ic">${SVG(IC[g.ic])}</span><b>${esc(g.name)}</b><span class="xs-t">${esc(g.blurb)}</span><span class="xs-go" aria-hidden="true">${SVG(IC.arrow)}</span></a>`;
+  $('#hub').innerHTML = nav('home') + `<section class="hx">${heroSVG()}<div class="hx-in">
+      <p class="hx-quote" aria-hidden="true">Small steps<br><span>lead to big goals.</span></p>
+      <h1>${first ? `Welcome back, ${esc(first)}!` : `Welcome to ${BRAND}!`}</h1>
+      <p class="hx-sub">${tch ? 'Teach, assess, and help every student grow, one step at a time.' : 'Practice, learn, and build your confidence, one step at a time.'}</p>
+      <form class="hx-search" id="hxF" role="search" autocomplete="off"><span class="hx-si">${SVG(IC.search)}</span><input id="hxQ" type="search" placeholder="Search for a subject, test, topic, or resource…" aria-label="Search" aria-autocomplete="list" aria-controls="hxR"><button type="submit" class="hx-go" aria-label="Search">${SVG(IC.arrow)}</button><div class="hx-res" id="hxR" role="listbox" hidden></div></form>
+    </div></section>
+    <div class="page dash2">
+      <div class="d2-main">
+        <section class="d2-sec"><div class="d2-h"><div><h2>Explore by Subject</h2><p>Find practice tests, question banks, and study resources for your subjects.</p></div><a class="d2-more" href="#tests">View all subjects ${SVG(IC.arrow)}</a></div>
+          <div class="xs-grid">${groups.map(card).join('')}</div></section>
+        <section class="card d2-qa"><h2>Quick Access</h2><p>Jump straight into the tools you use most.</p>
+          <div class="qa-grid">${quick.map(([h, l, ic], i) => `<a class="qa-tile qa-${qaTone[i]}" href="#${h}"><span class="qa-ic">${SVG(IC[ic])}</span><span>${esc(l)}</span></a>`).join('')}</div></section>
+        <section class="d2-next"><svg class="d2-next-art" viewBox="0 0 600 120" preserveAspectRatio="xMaxYMax slice" aria-hidden="true"><path d="M180 120 L300 50 L360 80 L450 30 L540 75 L600 55 V120Z" style="fill:var(--hx-m2)" opacity=".5"/><path d="M300 120 L390 75 L470 100 L560 70 L600 85 V120Z" style="fill:var(--hx-m3)" opacity=".55"/><circle cx="520" cy="58" r="14" style="fill:var(--hx-sunc)" opacity=".8"/></svg>
+          <span class="d2-next-ic">${SVG(IC.mtn)}</span><div><b>Ready for your next step?</b><span>${tch ? 'Build a unit test, or try a Skill Builder drill with your class.' : esc(goal.s)}</span></div><a class="btn primary" href="${tch ? '#ut-new' : goal.href}">${tch ? 'Create a test' : 'Let’s go'} ${SVG(IC.arrow)}</a></section>
+        ${foot()}
+      </div>
+      <aside class="d2-rail">
+        <section class="card hp"><div class="card-h sm"><h3>Your Progress</h3><a class="more" href="#analytics">View details ${SVG(IC.arrow)}</a></div>
+          <div class="hp-top">${ring(ov)}<div><b>Overall progress</b><span class="hp-st ${status[1]}">${status[1] === 'good' ? SVG(IC.check) : ''}${status[0]}</span><small>${sec ? `${secDone} / ${sec} units practiced` : 'Practice any unit to start tracking'}</small></div></div>
+          <ul class="hp-bars">${rows.map(r => `<li class="acc-${r.g.accent}"><i></i><span>${esc(r.g.name)}</span><span class="hp-bar"><em style="width:${r.s.p || 0}%"></em></span><b>${r.s.p == null ? '—' : r.s.p + '%'}</b></li>`).join('')}</ul></section>
+        <section class="card"><div class="card-h sm"><h3>Recent Activity</h3><a class="more" href="#analytics">View all ${SVG(IC.arrow)}</a></div>
+          ${acts.length ? `<ul class="ra">${acts.map(a => `<li><a href="${a.href}" class="acc-${a.acc}"><span class="ra-ic">${SVG(IC[a.ic] || IC.file)}</span><span class="ra-t"><b>${esc(a.t)}</b><small>${esc(a.s)}</small></span><time>${a.now ? 'now' : ago2(a.d)}</time></a></li>`).join('')}</ul>` : `<p class="ra-empty">No activity yet. Your practice sets, tests, and drills will show up here.</p>`}</section>
+      </aside>
+    </div>`;
+  const q = $('#hxQ'), res = $('#hxR'); let hits = [], sel = -1;
+  const draw = () => { hits = homeSearch(q.value); sel = hits.length ? 0 : -1; res.hidden = !q.value.trim();
+    res.innerHTML = hits.length ? hits.map((o, i) => `<a href="${o.h}" role="option" class="${i === sel ? 'on' : ''}" aria-selected="${i === sel}"><span class="hr-ic">${SVG(IC[o.ic] || IC.file)}</span><span><b>${esc(o.t)}</b><small>${esc(o.s)}</small></span></a>`).join('') : `<p class="hr-none">No matches. Try a subject (“chemistry”), a topic (“ICE tables”), or a tool (“flashcards”).</p>`; };
+  q.oninput = draw;
+  q.onkeydown = e => { if (!hits.length) return; if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); sel = (sel + (e.key === 'ArrowDown' ? 1 : hits.length - 1)) % hits.length; $$('#hxR a').forEach((a, i) => { a.classList.toggle('on', i === sel); a.setAttribute('aria-selected', i === sel); }); } if (e.key === 'Escape') res.hidden = true; };
+  $('#hxF').onsubmit = e => { e.preventDefault(); if (hits[sel]) location.hash = hits[sel].h.slice(1); };
+  formFix('#hxF');
+}
+document.addEventListener('click', e => { const r = document.getElementById('hxR'); if (r && !r.hidden && !e.target.closest('.hx-search')) r.hidden = true; });
 function bindLevel() { $$('[name="lvl"]').forEach(r => r.onchange = () => { LS.set(`ap.${PID}.level`, r.value); const n = $('#lvlNote'); if (n) n.textContent = LEVEL[r.value].note; }); }
 const levelSeg = () => `<div class="lvl-row"><span class="small">Difficulty</span><div class="seg" role="radiogroup" aria-label="Difficulty">${Object.entries(LEVEL).map(([lk, v]) => `<label><input type="radio" name="lvl" value="${lk}" ${getLevel() === lk ? 'checked' : ''}><span>${v.name}</span></label>`).join('')}</div><span class="small muted" id="lvlNote">${esc(LEVEL[getLevel()].note)}</span></div>`;
 const pageHead = (eyebrow, title, lead, extra = '') => `<div class="phead"><div><div class="eyebrow">${eyebrow}</div><h1>${title}</h1>${lead ? `<p class="serif">${lead}</p>` : ''}</div>${extra}</div>`;
@@ -11568,7 +11814,7 @@ function testCard(x) {
   const t = testSummary(x), fr = x.cr ? Object.values(CASES).filter(c => crBands(x).some(g => g.band === c.band)).length : 0;
   const lastSim = t.fulls.slice().reverse().find(h => h.ap);
   return `<article class="tcard acc-${x.accent}"><div class="tc-h">${subjIcon(x.area)}<div><h3><a href="#${x.id}">${esc(x.subject)}</a></h3><small>${isAP(x) ? `${x.nSR} MCQ (${fmtDur(x.srMinutes * 60)}) + ${x.crCat ? x.crCat.n : 0} FRQ (${fmtDur((x.minutes - x.srMinutes) * 60)})` : `Final exam: ${x.nSR} MCQ (${fmtDur(x.minutes * 60)})`}</small></div>${lastSim ? apBadge(lastSim.ap.score) : ''}</div>
-    <ul class="meta"><li>${SVG(IC.list)}${x.bank.length.toLocaleString('en-US')} questions${Object.values(x.gens).reduce((s, a) => s + a.length, 0) ? ' + generated problems' : ''}</li><li>${isAP(x) ? `${SVG(IC.pen)}${fr} free-response questions` : `${SVG(IC.vocab)}${srCatsOf(x).length} NGSS-aligned units`}</li><li>${SVG(IC.chart)}${t.hist.length ? `${t.hist.length} attempt${t.hist.length > 1 ? 's' : ''} · last ${t.last.pct}%` : 'No attempts yet'}</li></ul>
+    <ul class="meta"><li>${SVG(IC.list)}${x.pub.length.toLocaleString('en-US')} questions${Object.values(x.gens).reduce((s, a) => s + a.length, 0) ? ' + generated problems' : ''}</li><li>${isAP(x) ? `${SVG(IC.pen)}${fr} free-response questions` : `${SVG(IC.vocab)}${srCatsOf(x).length} NGSS-aligned units`}</li><li>${SVG(IC.chart)}${t.hist.length ? `${t.hist.length} attempt${t.hist.length > 1 ? 's' : ''} · last ${t.last.pct}%` : 'No attempts yet'}</li></ul>
     ${t.cur ? `<p class="small inprog">${SVG(IC.resume)} ${esc(t.cur.title)} in progress</p>` : ''}
     <div class="row"><button class="btn primary" data-qs="${x.id}">${isAP(x) ? 'Full-length exam' : 'Final exam'}</button><button class="btn" data-qp="${x.id}">20-question practice</button><a class="linkbtn" href="#${x.id}">${t.cur ? 'Resume' : 'More options'}</a></div></article>`;
 }
@@ -11600,7 +11846,7 @@ function renderBank() {
   setAccent(null); show('hub'); PREF_MODE = 'practice';
   const x = BY_ID[BANK_T] || BY_ID[LS.get('ap.ui.bank', '')] || TESTS[0]; BANK_T = x.id; setAccent(x);
   const hist = LS.get(KEY(x).hist, []), seen = LS.get(KEY(x).seen, {}), agg = catStats(x, hist, 10);
-  const units = srCatsOf(x).map(c => { const all = x.bank.filter(b => b.cat === c.k), sn = all.filter(b => seen[b.id]).length, [ok, t] = agg[c.k], p = t ? Math.round(ok / t * 100) : null, ng = (x.gens[c.k] || []).length;
+  const units = srCatsOf(x).map(c => { const all = x.pub.filter(b => b.cat === c.k), sn = all.filter(b => seen[b.id]).length, [ok, t] = agg[c.k], p = t ? Math.round(ok / t * 100) : null, ng = (x.gens[c.k] || []).length;
     return `<article class="unit"><div class="u-h"><span class="u-n">Unit ${c.k}</span>${p == null ? '' : `<span class="u-p ${band(p)}">${p}%</span>`}</div><h3>${esc(c.name)}</h3>${c.ngss ? `<p class="ngss-codes">${c.ngss.map(esc).join(' · ')}</p>` : ''}
       <p class="small muted">${all.length} questions${ng ? ` + ${ng} problem generator${ng > 1 ? 's' : ''}` : ''} · ${sn} seen</p><div class="lbar"><i style="width:${all.length ? sn / all.length * 100 : 0}%"></i></div>
       <div class="row"><button class="btn primary sm" data-bu="${c.k}">Practice ${BANK_N}</button><button class="btn sm" data-bt="${c.k}">Timed</button></div></article>`; }).join('');
@@ -11693,7 +11939,7 @@ function renderAbout() {
 function renderTestPage(x) {
   X = x; setAccent(x); show('hub'); setTrack(x.band);
   const k = KEY(x); const hist = LS.get(k.hist, []); const seen = LS.get(k.seen, {}); const saved = loadCur(x);
-  const nGen = Object.values(x.gens).reduce((s, a) => s + a.length, 0); const nSeen = x.bank.filter(b => seen[b.id]).length;
+  const nGen = Object.values(x.gens).reduce((s, a) => s + a.length, 0); const nSeen = x.pub.filter(b => seen[b.id]).length;
   const agg = catStats(x, hist, 5); const hasStats = hist.length > 0; const maxN = Math.max(...x.cats.map(c => c.n));
   const srCats = srCatsOf(x);
   const weakest = hasStats ? srCats.slice().sort((a, b) => (agg[a.k][1] ? agg[a.k][0] / agg[a.k][1] : 1) - (agg[b.k][1] ? agg[b.k][0] / agg[b.k][1] : 1))[0].k : srCats[0].k;
@@ -11711,7 +11957,7 @@ function renderTestPage(x) {
     <div class="crumb"><a href="#tests">Practice Tests</a> / ${testsIn(x.area).length > 1 ? `<a href="#subj-${x.area}">${esc(area.name)}</a> / ` : ''}${esc(x.subject)}</div>
     <section class="t-head card">${subjIcon(x.area, 'lg')}
       <div class="th-t"><div class="eyebrow">${esc(isAP(x) ? area.name : bandOf(x).name)}</div><h1>${esc(x.subject)}</h1><p class="serif">${esc(x.blurb || '')}</p></div>
-      <div class="specs">${isAP(x) ? `<div><b>${x.nSR}</b><small>multiple choice</small></div><div><b>${x.crCat ? x.crCat.n : 0}</b><small>free response</small></div><div><b>${fmtHM(x.minutes)}</b><small>hours</small></div>` : `<div><b>${x.nSR}</b><small>final exam questions</small></div><div><b>${x.minutes}</b><small>minutes</small></div><div><b>${x.bank.length}</b><small>in the bank</small></div>`}<div><b>${srCats.length}</b><small>units</small></div>${lastAp ? `<div><b>${apBadge(lastAp.ap.score)}</b><small>latest AP est.</small></div>` : ''}</div>
+      <div class="specs">${isAP(x) ? `<div><b>${x.nSR}</b><small>multiple choice</small></div><div><b>${x.crCat ? x.crCat.n : 0}</b><small>free response</small></div><div><b>${fmtHM(x.minutes)}</b><small>hours</small></div>` : `<div><b>${x.nSR}</b><small>final exam questions</small></div><div><b>${x.minutes}</b><small>minutes</small></div><div><b>${x.pub.length}</b><small>in the bank</small></div>`}<div><b>${srCats.length}</b><small>units</small></div>${lastAp ? `<div><b>${apBadge(lastAp.ap.score)}</b><small>latest AP est.</small></div>` : ''}</div>
     </section>
     ${resume}
     <div class="row" style="margin:18px 0 4px;gap:14px">${levelSeg()}${x.tools.length ? `<button class="btn quiet" id="openHelp">${x.tools.length === 1 && x.tools[0] === 'calc' ? 'Calculator' : 'Calculator &amp; reference sheets'}</button>` : ''}</div>
@@ -11729,8 +11975,8 @@ function renderTestPage(x) {
       <div class="card"><h2 class="ch">${hasStats ? 'Your accuracy by unit · last 5 attempts' : 'Questions per unit on the exam'}</h2><ul class="blueprint">${bp}</ul></div>
       <div class="card"><h2 class="ch">Score trend · ${isAP(x) ? 'exam simulations' : 'final exams'}</h2><div class="trend">${fulls.length >= 2 ? trendSVG(fulls) : `<p class="empty">Appears after two ${isAP(x) ? 'simulations' : 'final exams'}.${fulls.length === 1 ? ` First: ${fulls[0].pct}%.` : ''}</p>`}</div>
         <h2 class="ch" style="margin-top:22px">Question pool</h2>
-        <p class="small" style="margin:0 0 8px">${nSeen} of ${x.bank.length} seen${nGen ? ` · ${nGen} problem generators` : ''}${isAP(x) ? ` · ${nCases} free-response questions` : ''}${DEF_DB[x.id] ? ` · <a href="#defs-${x.id}">${Object.values(DEF_DB[x.id]).reduce((s, l) => s + l.length, 0)} definitions</a>` : ''}</p>
-        <div class="lbar"><i style="width:${(nSeen / Math.max(1, x.bank.length) * 100).toFixed(1)}%"></i></div></div>
+        <p class="small" style="margin:0 0 8px">${nSeen} of ${x.pub.length} seen${nGen ? ` · ${nGen} problem generators` : ''}${isAP(x) ? ` · ${nCases} free-response questions` : ''}${DEF_DB[x.id] ? ` · <a href="#defs-${x.id}">${Object.values(DEF_DB[x.id]).reduce((s, l) => s + l.length, 0)} definitions</a>` : ''}</p>
+        <div class="lbar"><i style="width:${(nSeen / Math.max(1, x.pub.length) * 100).toFixed(1)}%"></i></div></div>
     </section>
     ${x.ngssCourse ? ngssTable(x) : ''}
     <section class="card" style="margin-top:20px"><h2 class="ch">Attempt history</h2>
@@ -12093,7 +12339,7 @@ function renderExam() {
       <div class="timer" id="timer"><span class="lbl">${T.practice || T.untimed ? 'Time spent' : T.secs ? 'Section time left' : 'Time remaining'}</span><span class="t" id="tval"></span><button class="tb link" id="hideT">${hideTime ? 'Show' : 'Hide'}</button></div></div>
     <div class="xtools"><div class="qcount">${isRev ? (T.secs ? `Review · Section ${T.sec ? 'II' : 'I'}` : 'Review') : `Question ${pos + 1} of ${n}`}${T.practice ? (() => { const ck = T.checked.filter(Boolean).length, ok = T.items.filter((qq, i) => T.checked[i] && isRight(qq, T.ans[i])).length; return `<span class="score-run" aria-live="polite">Score ${ok} / ${ck}${ck ? ` · ${Math.round(ok / ck * 100)}%` : ''}</span>`; })() : ''}</div>
       <div class="tbtns">${T.lk && !(T.acc && T.acc.nolock) ? `<span class="tb lk-badge" title="Lockdown is on">${SVG(IC.lock)} Locked</span>` : '<button class="tb link" id="exitB">Save &amp; exit</button>'}${T.unit || T.assign ? '<button class="tb link" id="pzB" title="Hide the questions for a short break. The timer keeps running.">Pause</button><button class="tb link" id="accB" title="Teacher: accommodations (password needed)">Teacher</button>' : ''}${isRev || T.unit ? '' : '<button class="tb link" id="repB" title="Report a problem with this question">Report</button>'}
-        ${X.tools.length ? `<button class="tb" id="helpB">${T.nocalc ? 'Reference sheet' : 'Calculator &amp; reference'}</button>` : ''}
+        ${typeof spOn === 'function' && spOn() ? '<button class="tb" id="spB">Supports</button>' : ''}        ${X.tools.length ? `<button class="tb" id="helpB">${T.nocalc ? 'Reference sheet' : 'Calculator &amp; reference'}</button>` : ''}
         ${T.practice ? `<button class="tb" id="endB">End session</button>` : `${isRev ? '' : `<button class="tb ${T.marked[T.cur] ? 'on' : ''}" id="markB" aria-pressed="${T.marked[T.cur]}">${T.marked[T.cur] ? 'Marked' : 'Mark'}</button>`}
         <button class="tb" id="revB">${isRev ? 'Return' : 'Review'}</button>
         ${isRev ? '' : `<button class="tb" id="backB" ${pos === 0 ? 'disabled' : ''}>Back</button><button class="tb solid" id="nextB">Next</button>`}`}</div></div>
@@ -12128,7 +12374,7 @@ function renderExam() {
       <p class="kbd">Keyboard: ← → to move when the answer box is not selected · M to mark</p></div>`;
     else body = `<div class="qcol"><div class="qmeta">${T.marked[T.cur] ? '<span class="flag">● Marked for review</span>' : ''}</div>
       <div class="stem">${F(q.stem)}</div>
-      <div class="choices" role="${multi ? 'group' : 'radiogroup'}">${q.choices.map((c, i) => `<button class="choice ${multi ? 'multi' : ''}" role="${multi ? 'checkbox' : 'radio'}" aria-checked="${sel.includes(i)}" data-ch="${i}"><span class="ov"></span><span><span class="ltr">${LETTERS[i]}.</span> ${F(c)}</span></button>`).join('')}</div>
+      <div class="choices" role="${multi ? 'group' : 'radiogroup'}">${(() => { const drop = T.acc && T.acc.r3 && !T.practice && typeof spDropIdx === 'function' ? spDropIdx(q) : -1; let n2 = 0; return q.choices.map((c, i) => i === drop ? '' : `<button class="choice ${multi ? 'multi' : ''}" role="${multi ? 'checkbox' : 'radio'}" aria-checked="${sel.includes(i)}" data-ch="${i}"><span class="ov"></span><span><span class="ltr">${LETTERS[drop < 0 ? i : n2++]}.</span> ${F(c)}</span></button>`).join(''); })()}</div>
       <div class="qnav"><button class="btn" id="backB2" ${pos === 0 ? 'disabled' : ''}>← Back</button><button class="btn primary" id="nextB2">${lastLbl}</button></div>
       <p class="kbd">Keyboard: 1–${q.choices.length} or A–${LETTERS[q.choices.length - 1]} to choose · ← → to move · M to mark</p></div>`;
     if (q.psg && PASSAGES[q.psg]) body = `<div class="psplit">${psgHTML(PASSAGES[q.psg], !!(T.practice && T.checked[T.cur]))}${body}</div>`;
@@ -12136,6 +12382,7 @@ function renderExam() {
   $('#exam').innerHTML = bar + `<div class="xbody">${body}</div>`; updateTimer();
   $('#hideT').onclick = () => { hideTime = !hideTime; $('#hideT').textContent = hideTime ? 'Show' : 'Hide'; updateTimer(); };
   if ($('#helpB')) $('#helpB').onclick = () => openHelp(X, helpTools(X)[0]);
+  if ($('#spB')) $('#spB').onclick = openSupports;
   if ($('#repB')) $('#repB').onclick = () => openReport({ test: X.id, q: T.cur + 1, qid: q.id, stem: q.stem });
   if ($('#pzB')) $('#pzB').onclick = pzOn;
   if ($('#accB')) $('#accB').onclick = () => accOpen(testUt(), accApply);
@@ -12881,7 +13128,6 @@ Object.assign(IC, {
   assign: '<path d="M8 4h8M9 2.8h6v2.4H9z"/><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 12l2 2 4-4"/>',
   teacher: '<circle cx="9" cy="7.5" r="3.2"/><path d="M3 20c.6-3.7 3-5.8 6-5.8s5.4 2.1 6 5.8"/><path d="M15 4h6v8h-4"/>',
 });
-SIDE.splice(SIDE.findIndex(s => s[0] === 'unit-tests'), 0, ['calc', 'Calculation Practice', 'calc']);
 const isTeacher = () => MODE === 'owner' || (MODE === 'member' && !!MEMBER && MEMBER.role === 'teacher');
 const myEmail = () => MODE === 'member' && MEMBER ? normEmail(MEMBER.email || '') : normEmail(LS.get('ap.testonly.email', '') || '');
 /* the email results go to by default: a signed-in teacher's own address, or the one the owner last used */
@@ -13036,7 +13282,7 @@ async function makePdf(pagesHTML, filename, btn) {
     const lib = await pdfLib();
     const PK = paperKind(), PP = PAPER[PK], M = [0.6, 0.6, 0.6, 0.6];
     host = document.createElement('div'); host.className = 'pdf-host'; host.style.width = (PP.w - M[1] - M[3]).toFixed(2) + 'in';
-    host.innerHTML = `<style>${scopeCss(PRINT_CSS + SC_CSS + DF_CSS + SG_CSS + SK_CSS + '.pp{padding:0;max-width:none}', '.pdfdoc')}.pdfpage{background:#fff;display:flow-root}</style><div class="pdfdoc">${pagesHTML}</div>`;
+    host.innerHTML = `<style>${scopeCss(PRINT_CSS + SC_CSS + DF_CSS + SG_CSS + SK_CSS + SP_CSS + '.pp{padding:0;max-width:none}', '.pdfdoc')}.pdfpage{background:#fff;display:flow-root}</style><div class="pdfdoc">${pagesHTML}</div>`;
     document.body.appendChild(host);
     /* html2canvas draws relative to the scroll position, so render from the top and restore afterwards */
     sy = window.scrollY; window.scrollTo(0, 0);
@@ -13162,15 +13408,25 @@ function customItem(ut, i, r) {
   const unit = c.u && x.CAT[c.u] ? c.u : (ut.u && ut.u[0]) || srCatsOf(x)[0].k;
   return { id: 'c' + i, cat: unit, lv: 1, custom: true, stem: paraHTML(esc(c.s)), choices: order.map(j => esc(c.ch[j])), correct: [order.indexOf(c.a || 0)], expl: c.x ? esc(c.x) : `The correct answer is “${esc(c.ch[c.a || 0])}.”`, k: 1 };
 }
+/* generated questions on teacher tests: the same generator and seed always give the same question (Math.random is seeded while it runs) */
+const genOf = (x, gid) => { for (const arr of Object.values(x.gens || {})) { const g = arr.find(o => o.id === gid); if (g) return g; } return null; };
+function seededGen(g, seed) { const old = Math.random; Math.random = rng(seed); try { return g.fn(); } catch (e) { return null; } finally { Math.random = old; } }
+const genOK = q => q && q.type !== 'num' && q.choices && q.choices.length >= 4 && new Set(q.choices).size === q.choices.length && !/NaN|Infinity|undefined/.test(q.stem + q.choices.join('') + q.expl);
+function genItem(x, id, r) {
+  const [, gid, seed] = id.split(':'), g = genOf(x, gid); if (!g) return null; const q = seededGen(g, +seed); if (!genOK(q)) return null;
+  const cat = Object.entries(x.gens).find(([k, arr]) => arr.includes(g))[0], n = q.choices.length, order = [...Array(n).keys()];
+  if (!q.ordered) for (let i = n - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+  return { id, cat, lv: g.lv || 1, gen: true, stem: q.stem, choices: order.map(i => q.choices[i]), correct: q.correct.map(c => order.indexOf(c)).sort((p, q2) => p - q2), expl: q.expl, k: q.correct.length };
+}
 function utItems(ut) {
   const x = BY_ID[ut.t], r = rng(ut.s), byId = Object.fromEntries(x.bank.map(b => [b.id, b]));
-  const items = ut.q.map(id => /^c:\d+$/.test(id) ? { cu: +id.slice(2) } : byId[id]).filter(Boolean).map(b => { if (b.cu != null) return customItem(ut, b.cu, r);
+  const items = ut.q.map(id => /^c:\d+$/.test(id) ? { cu: +id.slice(2) } : /^g:/.test(id) ? { gi: id } : byId[id]).filter(Boolean).map(b => { if (b.cu != null) return customItem(ut, b.cu, r); if (b.gi) return genItem(x, b.gi, r);
     const n = b.ch.length, order = [...Array(n).keys()]; for (let i = n - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
     return { id: b.id, cat: b.cat, lv: b.lv, stem: b.stem, choices: order.map(i => b.ch[i]), correct: [...Array(b.k).keys()].map(c => order.indexOf(c)).sort((p, q) => p - q), expl: b.expl, k: b.k, psg: b.psg };
   }).filter(Boolean);
   utDefRefs(ut).forEach(ref => { const it = defItem(x, ref, ut.s); if (it) items.push(it); });
   (ut.f || []).forEach(cid => { const c = /^c:\d+$/.test(cid) ? customCase(ut, +cid.slice(2)) : CASES[cid]; if (!c) return; const p = c.prompts[0]; items.push({ id: p.id, cat: x.crCat ? x.crCat.k : 'FRQ', lv: 1, type: 'cr', stem: p.q, caseId: c.id, max: c.max, k: 1, choices: [] }); });
-  return items;
+  return ut._r3 ? spReduce(items) : items;
 }
 const utMcq = items => items.filter(q => q.type !== 'cr');
 const utMissing = ut => ut.q.length + utDefRefs(ut).length - utMcq(utItems(ut)).length;
@@ -13209,16 +13465,31 @@ function utDraw(x, units, nMcq, mix, avoid, rnd = Math.random) {
   const qs = shufR(a.concat(b), rnd).sort((p, q) => units.indexOf(p.cat) - units.indexOf(q.cat));
   return qs.map(b => b.id);
 }
+/* version 2 (Oct 2026): teacher-only questions first, then freshly generated calculation questions, then the public bank */
+function utDraw2(x, units, n, mix, rnd) {
+  const want2 = mix === 'hard' ? 0.75 : mix === 'easy' ? 0 : 0.3;
+  const spread = (arr, cnt) => { const out = [], byU = {}; arr.forEach(b => (byU[b.cat] = byU[b.cat] || []).push(b)); const ks = Object.keys(byU); let i = 0; while (out.length < cnt && ks.some(k => byU[k].length)) { const k = ks[i++ % ks.length]; if (byU[k].length) out.push(byU[k].shift()); } return out; };
+  const lvPick = (arr, cnt) => { if (cnt <= 0) return []; const h = shufR(arr.filter(b => b.lv === 2), rnd), s = shufR(arr.filter(b => (b.lv || 1) === 1), rnd);
+    let a = spread(h, Math.round(cnt * want2)); a = a.concat(spread(s, cnt - a.length)); if (a.length < cnt) a = a.concat(spread(h.filter(q => !a.includes(q)), cnt - a.length)); return a; };
+  const gens = units.flatMap(k => (x.gens[k] || []).filter(g => mix !== 'easy' || (g.lv || 1) === 1).map(g => ({ g, k })));
+  const nG = gens.length ? Math.min(n, Math.round(n * (mix === 'hard' ? 0.35 : mix === 'easy' ? 0.2 : 0.25))) : 0;
+  const pool = x.bank.filter(b => units.includes(b.cat)), sec = pool.filter(b => x.secure.has(b.id)), pub = pool.filter(b => !x.secure.has(b.id));
+  let st = lvPick(sec, n - nG); const gout = [], order = shufR(gens.slice(), rnd), stems = new Set(); let tries = 0;
+  while (gout.length < nG && order.length && tries < nG * 25) { const { g, k } = order[tries++ % order.length], seed = Math.floor(rnd() * 1e9), q = seededGen(g, seed);
+    if (!genOK(q) || stems.has(q.stem)) continue; stems.add(q.stem); gout.push({ id: 'g:' + g.id + ':' + seed, cat: k }); }
+  const rest = n - st.length - gout.length; if (rest > 0) st = st.concat(lvPick(pub, rest));
+  return shufR(st.concat(gout), rnd).sort((p, q) => units.indexOf(p.cat) - units.indexOf(q.cat)).map(b => b.id);
+}
 /* one generator for teachers and for short test codes: the same course, settings and seed always give the same test */
 function utGenerate(x, o, z) {
-  const rnd = rng(z);
+  const rnd = rng(z), v2 = (o.ver || 2) >= 2;
   if (o.kind && o.kind !== 'unit') {
     const ep = examPlan(x, o.kind, rnd);
-    const q = ep.rows.flatMap(([k, n]) => n ? utDraw(x, [k], Math.min(n, x.bank.filter(b => b.cat === k).length), o.mix, null, rnd) : []);
+    const q = ep.rows.flatMap(([k, n]) => n ? (v2 ? utDraw2(x, [k], Math.min(n, x.bank.filter(b => b.cat === k).length + (x.gens[k] || []).length * 3), o.mix, rnd) : utDraw(x, [k], Math.min(n, x.bank.filter(b => b.cat === k).length), o.mix, null, rnd)) : []);
     const f = ep.fr.flatMap(([band, n]) => shufR(Object.values(CASES).filter(c => c.band === band).sort((a, b) => a.id < b.id ? -1 : 1), rnd).slice(0, n).map(c => c.id));
     return { q, f, u: srCatsOf(x).map(c => c.k) };
   }
-  return { q: utDraw(x, o.u, o.n, o.mix, null, rnd), f: (o.f || []).slice(), u: o.u };
+  return { q: v2 ? utDraw2(x, o.u, o.n, o.mix, rnd) : utDraw(x, o.u, o.n, o.mix, null, rnd), f: (o.f || []).slice(), u: o.u };
 }
 /* short test codes (like XXXX-XXXX-XXXX-XXX): course, units, settings and the seed, packed into base-32 */
 const SC_COURSES = ['ap-bio', 'ap-chem', 'ap-phys1', 'ap-phys2', 'ap-physcm', 'ap-physce', 'hs-bio', 'hs-chem', 'hs-phys', 'ms-life', 'ms-phys', 'ms-earth', 'ap-micro', 'ap-macro', 'ap-stats', 'ap-psych'];
@@ -13229,39 +13500,41 @@ function utShortOf(ut) {
   const x = BY_ID[ut.t], ci = SC_COURSES.indexOf(ut.t), kind = ut.ex || 'unit', cats = x ? srCatsOf(x).map(c => c.k) : [];
   if (!x || ut.z == null || ci < 0 || ut.k === 'exam' || ut.c || ut.dp || (ut.dn || 0) > 63 || (ut.m || 0) > 255 || SC_MIX.indexOf(ut.zm || 'std') < 0) return null;
   const bits = []; const put = (v, n) => { for (let i = n - 1; i >= 0; i--) bits.push((v >> i) & 1); };
-  put(1, 2); put(ci, 5); put(SC_KIND.indexOf(kind), 2); put(SC_MIX.indexOf(ut.zm || 'std'), 2); put(ut.a === 'never' ? 1 : 0, 1); put(ut.lk ? +ut.lk.m || 0 : 0, 2); put(ut.m || 0, 8); put(ut.z, 20); put(scCheck(ut.q, ut.f), 8);
+  put(ut.zv === 1 ? 1 : 2, 2); put(ci, 5); put(SC_KIND.indexOf(kind), 2); put(SC_MIX.indexOf(ut.zm || 'std'), 2); put(ut.a === 'never' ? 1 : 0, 1); put(ut.lk ? +ut.lk.m || 0 : 0, 2); put(ut.m || 0, 8); put(ut.z, 20); put(scCheck(ut.q, ut.f), 8);
   if (kind === 'unit') { const fi = frqIdx(x), f = ut.f.map(id => fi.indexOf(id)); if (cats.length > 16 || (ut.zn || 0) > 127 || f.length > 3 || f.some(i => i < 0 || i > 127)) return null;
     put(cats.reduce((m, k, i) => m | (ut.u.includes(k) ? 1 << i : 0), 0), 16); put(ut.zn || 0, 7); put(f.length, 2); f.forEach(i => put(i, 7)); }
   put(ut.kh ? 1 : 0, 1); if (ut.kh) { put(parseInt(ut.kh, 16), 24); put(ut.lk && ut.lk.k ? 1 : 0, 1); }
-  if (ut.dn) put(ut.dn, 6); /* definition questions (older codes end before this, so they read as 0) */
+  /* tail (older codes end before this, so it reads as zeros): definition-question count, then supports */
+  const spx = ut.sp ? SP_KINDS.reduce((m2, [k], i) => m2 | (ut.sp.m.includes(k) ? 1 << i : 0), 0) : 0, spOnly = ut.sp && (ut.sp.all || spx !== 15);
+  if (ut.dn || spOnly) { put(ut.dn || 0, 6); if (spOnly) { put(1, 1); put(spx, 4); put(ut.sp.all ? 1 : 0, 1); } }
   while (bits.length % 5) bits.push(0);
   let out = ''; for (let i = 0; i < bits.length; i += 5) out += SC_ABC[parseInt(bits.slice(i, i + 5).join(''), 2)];
   return out.match(/.{1,4}/g).join('-');
 }
 function utShortParse(raw) {
   const t = String(raw || '').toUpperCase().replace(/^.*[#/]TAKE-/, '').replace(/[OI L]/g, c => c === 'O' ? '0' : c === ' ' ? '' : '1').replace(/[^0-9A-Z]/g, '');
-  if (t.length < 9 || t.length > 28 || [...t].some(c => SC_ABC.indexOf(c) < 0)) return null;
+  if (t.length < 9 || t.length > 32 || [...t].some(c => SC_ABC.indexOf(c) < 0)) return null;
   const bits = []; [...t].forEach(c => { const v = SC_ABC.indexOf(c); for (let i = 4; i >= 0; i--) bits.push((v >> i) & 1); });
   let p = 0; const get = n => { let v = 0; for (let i = 0; i < n; i++) v = v * 2 + (bits[p++] || 0); return v; };
-  if (get(2) !== 1) return null;
+  const ver = get(2); if (ver !== 1 && ver !== 2) return null;
   const x = BY_ID[SC_COURSES[get(5)]], kind = SC_KIND[get(2)], mix = SC_MIX[get(2)], a = get(1) ? 'never' : 'send', lkm = get(2), m = get(8), z = get(20), chk = get(8);
   if (!x || !kind || !mix) return null;
-  const cats = srCatsOf(x).map(c => c.k); let o = { kind, mix };
+  const cats = srCatsOf(x).map(c => c.k); let o = { kind, mix, ver };
   if (kind === 'unit') { const mask = get(16), n = get(7), nf = get(2), fi = frqIdx(x), f = []; for (let i = 0; i < nf; i++) f.push(fi[get(7)]);
     o = { ...o, u: cats.filter((k, i) => mask & (1 << i)), n, f: f.filter(Boolean) }; if (!o.u.length) return null; }
-  const hasK = get(1), kh = hasK ? get(24).toString(16).padStart(6, '0') : null, kLock = hasK ? get(1) : 0, dn = get(6);
+  const hasK = get(1), kh = hasK ? get(24).toString(16).padStart(6, '0') : null, kLock = hasK ? get(1) : 0, dn = get(6), spF = get(1), spm = spF ? get(4) : 15, spA = spF ? get(1) : 0;
   const g = utGenerate(x, o, z);
   if (scCheck(g.q, g.f) !== chk) return { stale: true };
-  const ut = { v: 1, n: utDefaultTitle(x, g.u, kind), t: x.id, u: g.u, q: g.q, f: g.f, m, e: '', a, s: z, z, zm: mix, o: 1, ...(lkm ? { lk: { m: lkm, ...(kLock ? { k: 1 } : {}) } } : {}), ...(kh ? { kh } : {}), ...(dn ? { dn } : {}), ...(kind !== 'unit' ? { ex: kind } : { zn: o.n }) };
+  const ut = { v: 1, n: utDefaultTitle(x, g.u, kind), t: x.id, u: g.u, q: g.q, f: g.f, m, e: '', a, s: z, z, zm: mix, o: 1, ...(lkm ? { lk: { m: lkm, ...(kLock ? { k: 1 } : {}) } } : {}), ...(kh ? { kh } : {}), ...(dn ? { dn } : {}), ...(ver === 1 ? { zv: 1 } : { sp: { m: SP_KINDS.map(o => o[0]).filter((k, i) => spm & (1 << i)), all: spA } }), ...(ver === 1 ? { zv: 1 } : {}), ...(kind !== 'unit' ? { ex: kind } : { zn: o.n }) };
   return { ut, code: utCode(ut) };
 }
 function renderUtNew() {
   if (!isTeacher()) return renderUnitTests();
   setAccent(null); show('hub');
   const mine = LS.get(UT_MINE, []);
-  const st = UTB || (UTB = { t: TESTS[0].id, u: [srCatsOf(TESTS[0])[0].k], n: 20, kind: 'unit', mix: 'std', fsel: [], fall: false, m: null, e: teacherDefaultEmail(), a: 'send', title: '', draft: null, open: true, lk: '4', pw: '', dn: 0, dm: 'auto', dsel: [], bq: [], cust: [], bsrch: '', bmore: 40, bunit: '' });
+  const st = UTB || (UTB = { t: TESTS[0].id, u: [srCatsOf(TESTS[0])[0].k], n: 20, kind: 'unit', mix: 'std', fsel: [], fall: false, m: null, e: teacherDefaultEmail(), a: 'send', title: '', draft: null, open: true, lk: '4', pw: '', dn: 0, dm: 'auto', dsel: [], bq: [], cust: [], bsrch: '', bmore: 40, bunit: '', spm: ['wb', 'fs', 'st', 'ss'], spall: false });
   const x = BY_ID[st.t]; setAccent(x);
-  const avail = x.bank.filter(b => st.u.includes(b.cat)).length;
+  const avail = x.bank.filter(b => st.u.includes(b.cat)).length + st.u.reduce((t, k) => t + (x.gens[k] || []).length * 2, 0), nSecU = x.bank.filter(b => st.u.includes(b.cat) && x.secure.has(b.id)).length;
   const fp = frqPool(x, st.fall ? [] : st.u), fpAll = frqPool(x, []);
   const build = st.kind === 'build', exam = st.kind && st.kind !== 'unit' && !build ? examPlan(x, st.kind) : null;
   const defUnits = exam ? srCatsOf(x).map(c => c.k) : st.u, dAll = DEF_DB[x.id] ? defRefs(x, defUnits) : [];
@@ -13273,10 +13546,11 @@ function renderUtNew() {
   const d = st.draft;
   const frqRow = c => `<label class="chk frq-opt"><input type="checkbox" data-utf="${c.id}" ${st.fsel.includes(c.id) ? 'checked' : ''}><span><b>${esc(c.title)}</b><small>${esc(frqLabel(c))} · ${c.max} points · ${esc(frqUnits(c))} · about ${frqMin(x, c)} min</small></span></label>`;
   const shownF = fp.concat(fpAll.filter(c => st.fsel.includes(c.id) && !fp.includes(c)));
-  const draftHTML = d ? (() => { const ut = d.ut, items = utItems(ut), code = utCode(ut), nf = ut.f.length;
+  const draftHTML = d ? (() => { const ut = d.ut, items = utItems(ut), code = utCode(ut), nf = ut.f.length, x2 = BY_ID[ut.t];
     return `<section class="card" style="margin-top:18px" id="utDraft"><div class="card-h sm"><h3>${esc(ut.n)}</h3><span class="small muted">${utCountText(utCounts(ut, items))} · ${ut.m ? ut.m + ' min' : 'no time limit'}</span></div>
       <div class="row ut-acts"><button class="btn primary" id="utSave">${d.saved ? '✓ Saved' : 'Save test'}</button><a class="btn" href="#assign" id="utAssign">${SVG(IC.assign)} Assign to students</a>${pdfBtn('utPdfBoth', 'PDF: test + answer key')}${pdfBtn('utPdfTest', 'PDF: test only')}${pdfBtn('utPdfSheet', 'PDF: answer sheet')}${paperSel()}</div>
       <div class="row ut-acts">${docxBtn('utDocTest', 'Word: test (editable)')}${docxBtn('utDocKey', 'Word: answer key')}<span class="small muted">Opens in Word or Google Docs (File › Open › Upload).</span></div>
+      <div class="row ut-acts sg-acts"><b class="small">Supports</b>${pdfBtn('utSpPdf', 'Supports packet (PDF)')}${docxBtn('utSpDoc', 'Supports packet (Word)')}${pdfBtn('utModPdf', 'Modified test + key (PDF)')}${docxBtn('utModDoc', 'Modified test (Word)')}</div>
       <div class="row ut-acts sg-acts"><b class="small">Study guide for this test</b>${pdfBtn('utSgPdf', 'Study guide (PDF)')}${docxBtn('utSgDoc', 'Study guide (Word)')}<label class="chk small"><input type="checkbox" id="utSgKey" ${LS.get('ap.sg.key', false) ? 'checked' : ''}> Add answers to the practice questions</label></div>
       <div class="row ut-acts">${IN_VIEWER ? '' : '<button class="btn quiet" data-utp="test">Print test</button><button class="btn quiet" data-utp="key">Print key</button>'}<button class="btn quiet" data-utdl="1">${SVG(IC.print)} Printable web page</button><button class="btn quiet" id="utTry">Preview as a student</button></div>
       ${ut.lk && ut.lk.m === 3 ? `<div class="notice seb-note">${SVG(IC.lock)} <span>Students must open this test in <b>Safe Exam Browser</b> (free, Windows, Mac, iPad). <button class="linkbtn sm" id="utSeb">Download the Safe Exam Browser settings file (.seb)</button>. Students open the file and Safe Exam Browser starts this test, locked. Try it on one device before test day.</span></div>` : ut.lk ? `<p class="small muted" style="margin:0 0 10px">${SVG(IC.lock)} Lockdown is on: full screen, no copy/paste, and every time a student leaves the test it’s recorded in their results.${ut.lk.k ? ' <b>Leaving the test locks it until you type your teacher password on the student’s device.</b>' : ''}</p>` : ''}
@@ -13284,16 +13558,16 @@ function renderUtNew() {
       <div class="share"><label class="small">Your website address (where students open the site)<div class="copyline"><input id="utSite" value="${esc(siteBase())}" spellcheck="false"><button class="btn quiet" id="utSiteB">Update link</button></div></label><label class="small">Student link<div class="copyline"><input readonly value="${esc(utLink(code))}" id="utLinkIn"><button class="btn" data-copy="#utLinkIn">Copy link</button></div></label>
         ${(() => { const sc = utShortOf(ut); return sc ? `<div class="sc-box"><span class="small">Short test code${ut.o ? ' (works without an account)' : ''}</span><div class="sc-code" id="utShort">${esc(sc)}</div><div class="row"><button class="btn" data-copyt="${esc(sc)}">Copy code</button><span class="small muted">Students go to <b>${esc(siteBase().replace(/^https?:\/\//, ''))}/#take</b> and type it. They enter your email at the end to send you their results.</span></div></div>` : `<p class="small muted" style="margin:0">${ut.z == null ? 'A short code isn’t available after replacing or removing questions. Share the link instead, or generate a new version.' : 'Share the link below.'}</p>`; })()}
         <label class="small">Or share the long test code (students paste it on the Unit Tests page)<div class="copyline"><input readonly value="${esc(code)}" id="utCodeIn"><button class="btn" data-copy="#utCodeIn">Copy code</button></div></label><span class="copied" id="utCopied" aria-live="polite"></span></div>
-      <ol class="utlist">${items.map((q, i) => `<li><span class="u-n ${q.type === 'cr' ? 'frq' : q.def ? 'def' : q.custom ? 'own' : ''}">${q.type === 'cr' ? (CASES[q.caseId] && CASES[q.caseId].custom ? 'Own FRQ' : 'FRQ') : q.def ? 'Definition' : q.custom ? 'Yours' : 'Unit ' + q.cat}</span><span class="ut-stem">${q.type === 'cr' ? `<b>${esc(CASES[q.caseId].title)}</b> <span class="muted">· ${esc(frqLabel(CASES[q.caseId]))} · ${q.max} pts</span>` : F(String(q.stem).replace(/<table[\s\S]*?<\/table>/g, '[table]').replace(/<[^>]+>/g, ' ').slice(0, 170))}${q.type !== 'cr' && String(q.stem).length > 170 ? '…' : ''}</span>${q.type === 'cr' ? `<button class="linkbtn sm" data-frm="${esc(ut.f[items.filter(o => o.type === 'cr').indexOf(q)] || q.caseId)}" style="color:var(--bad)">Remove</button>` : !q.def && !q.custom && i < ut.q.length ? `<button class="linkbtn sm" data-swap="${i}">Replace</button>` : ''}</li>`).join('')}</ol></section>`; })() : '';
+      <ol class="utlist">${items.map((q, i) => `<li><span class="u-n ${q.type === 'cr' ? 'frq' : q.def ? 'def' : q.custom ? 'own' : ''}">${q.type === 'cr' ? (CASES[q.caseId] && CASES[q.caseId].custom ? 'Own FRQ' : 'FRQ') : q.def ? 'Definition' : q.custom ? 'Yours' : 'Unit ' + q.cat}</span>${q.gen ? '<span class="ut-tag new">New numbers</span>' : !q.def && !q.custom && q.type !== 'cr' && x2.secure.has(q.id) ? '<span class="ut-tag sec">Teacher-only</span>' : ''}<span class="ut-stem">${q.type === 'cr' ? `<b>${esc(CASES[q.caseId].title)}</b> <span class="muted">· ${esc(frqLabel(CASES[q.caseId]))} · ${q.max} pts</span>` : F(String(q.stem).replace(/<table[\s\S]*?<\/table>/g, '[table]').replace(/<[^>]+>/g, ' ').slice(0, 170))}${q.type !== 'cr' && String(q.stem).length > 170 ? '…' : ''}</span>${q.type === 'cr' ? `<button class="linkbtn sm" data-frm="${esc(ut.f[items.filter(o => o.type === 'cr').indexOf(q)] || q.caseId)}" style="color:var(--bad)">Remove</button>` : !q.def && !q.custom && !q.gen && i < ut.q.length ? `<button class="linkbtn sm" data-swap="${i}">Replace</button>` : ''}</li>`).join('')}</ol></section>`; })() : '';
   $('#hub').innerHTML = nav('ut-new') + `<div class="page">${pageHead('Teacher Tools', 'Create a unit test', 'Build a fixed test from the question bank, with multiple-choice and free-response questions. Students get no feedback while testing, and their results are sent to you when they finish.')}
     <div class="ut-grid"><section class="card ut-form">
       <label>Course<select id="utT">${courseOpts(st.t)}</select></label>
       <label>Test type<select id="utK"><option value="unit" ${st.kind === 'unit' ? 'selected' : ''}>Unit test (choose the units)</option><option value="half" ${st.kind === 'half' ? 'selected' : ''}>Half-length ${examWord(x)} (all units)</option><option value="full" ${st.kind === 'full' ? 'selected' : ''}>Full-length ${examWord(x)} (all units)</option><option value="build" ${build ? 'selected' : ''}>Build my own (pick questions, add your own)</option></select></label>
       ${exam ? `<div class="exam-plan">${isAP(x) ? `<b>${esc(examLabel(st.kind))}: ${exam.nMc} multiple choice + ${exam.nFr} free response</b><span>Section I: ${exam.nMc} questions, ${exam.mcMin} min · Section II: ${exam.nFr} questions, ${exam.frMin} min</span><span>Multiple-choice questions are spread across all units by the AP exam weightings; free response follows the AP question types.</span>` : `<b>${esc(examLabel(st.kind))}: ${exam.nMc} multiple choice</b><span>${exam.mcMin} minutes · questions spread across every unit by the final exam weightings</span>`}</div>
-      <label>Difficulty<select id="utMix"><option value="std" ${st.mix === 'std' ? 'selected' : ''}>Like the ${examWord(x)}</option><option value="hard" ${st.mix === 'hard' ? 'selected' : ''}>Harder (mostly multi-step)</option><option value="easy" ${st.mix === 'easy' ? 'selected' : ''}>Core concepts only</option></select></label>` : `
-      <fieldset><legend>Units</legend><div class="ucks">${srCatsOf(x).map(c => `<label class="chk"><input type="checkbox" data-utu="${c.k}" ${st.u.includes(c.k) ? 'checked' : ''}> Unit ${c.k}: ${esc(c.short)}</label>`).join('')}</div><p class="small muted" style="margin:6px 0 0">${avail} multiple-choice questions in the chosen units.</p></fieldset>
+      <label>Difficulty<select id="utMix"><option value="easy" ${st.mix === 'easy' ? 'selected' : ''}>Beginner (core concepts)</option><option value="std" ${st.mix === 'std' ? 'selected' : ''}>Standard (like the ${examWord(x)})</option><option value="hard" ${st.mix === 'hard' ? 'selected' : ''}>Challenge (mostly multi-step)</option></select></label>` : `
+      <fieldset><legend>Units</legend><div class="ucks">${srCatsOf(x).map(c => `<label class="chk"><input type="checkbox" data-utu="${c.k}" ${st.u.includes(c.k) ? 'checked' : ''}> Unit ${c.k}: ${esc(c.short)}</label>`).join('')}</div><p class="small muted" style="margin:6px 0 0">${nSecU} teacher-only questions (never shown in student practice) plus the public bank${Object.keys(x.gens).some(k => st.u.includes(k) && x.gens[k].length) ? ', and calculation questions generated fresh for each test' : ''}.</p></fieldset>
       ${build ? `<p class="small muted" style="margin:0">The units above filter the question bank below. Pick questions there and add your own; ${st.bq.length} chosen so far.</p><input type="hidden" id="utMix" value="std">` : `<div class="row2"><label>Multiple-choice questions<input type="number" id="utN" min="0" max="${Math.max(5, Math.min(60, avail))}" value="${st.n}"></label>
-        <label>Difficulty<select id="utMix"><option value="std" ${st.mix === 'std' ? 'selected' : ''}>Like the ${examWord(x)}</option><option value="hard" ${st.mix === 'hard' ? 'selected' : ''}>Harder (mostly multi-step)</option><option value="easy" ${st.mix === 'easy' ? 'selected' : ''}>Core concepts only</option></select></label></div>`}
+        <label>Difficulty<select id="utMix"><option value="easy" ${st.mix === 'easy' ? 'selected' : ''}>Beginner (core concepts)</option><option value="std" ${st.mix === 'std' ? 'selected' : ''}>Standard (like the ${examWord(x)})</option><option value="hard" ${st.mix === 'hard' ? 'selected' : ''}>Challenge (mostly multi-step)</option></select></label></div>`}
       ${x.cr || st.cust.some(c => c.t === 'fr') ? `<fieldset class="frqpick"><legend>Free-response questions <span class="muted">(${st.fsel.length} chosen)</span></legend>
         ${shownF.length ? `<div class="frq-list">${shownF.map(frqRow).join('')}</div>` : '<p class="small muted" style="margin:0">No free-response questions for these units yet. Show all units to choose one.</p>'}
         ${st.cust.some(c => c.t === 'fr') ? `<div class="frq-list">${st.cust.map((c, i) => c.t === 'fr' ? `<label class="chk frq-opt"><input type="checkbox" data-utf="c:${i}" ${st.fsel.includes('c:' + i) ? 'checked' : ''}><span><b>Your question: ${esc(c.h || c.s.slice(0, 60))}</b><small>${c.p || '?'} points${c.r && c.r.length ? ' · scoring guide included' : ' · you score it'}</small></span></label>` : '').join('')}</div>` : ''}
@@ -13304,6 +13578,10 @@ function renderUtNew() {
           ${st.dm === 'pick' ? `<span class="small muted" style="align-self:end">${st.dsel.length} of ${dAll.length} terms picked</span>` : `<label>How many<input type="number" id="utDN" min="0" max="${Math.min(60, dAll.length)}" value="${st.dn || 0}"></label>`}</div>
         ${st.dm === 'pick' ? `<div class="df-pick">${defUnits.map(k => `<div><b class="small">Unit ${esc(k)}${x.CAT[k] ? ': ' + esc(x.CAT[k].short) : ''}</b>${((DEF_DB[x.id] || {})[k] || []).map(([term], i) => `<label class="chk small"><input type="checkbox" data-dfs="${k}.${i}" ${st.dsel.includes(k + '.' + i) ? 'checked' : ''}> ${esc(term)}</label>`).join('')}</div>`).join('')}</div><div class="row"><button class="linkbtn sm" type="button" id="utDAll">Select all</button><button class="linkbtn sm" type="button" id="utDNone">Clear</button></div>` : ''}
         <p class="small muted" style="margin:6px 0 0">Students read a definition and choose the matching term. They’re scored with the multiple choice and appear in their own section on paper.</p></fieldset>` : ''}
+      <fieldset class="sppick"><legend>Supports for students who need them</legend>
+        <div class="sp-opts">${SP_KINDS.map(([k, l]) => `<label class="chk small"><input type="checkbox" data-spk="${k}" ${(st.spm || []).includes(k) ? 'checked' : ''}> ${l}</label>`).join('')}</div>
+        <label class="small">Online, show the Supports button to<select id="utSpAll"><option value="0" ${st.spall ? '' : 'selected'}>Only students I turn on (with my teacher password)</option><option value="1" ${st.spall ? 'selected' : ''}>Every student taking this test</option></select></label>
+        <p class="small muted" style="margin:6px 0 0">After you generate the test you can also download a supports packet and a modified test (one wrong answer removed from each question, larger print) for printed tests. In “Teacher: accommodations” you can turn on supports or fewer answer choices for one student.</p></fieldset>
       <div class="row2"><label>Time limit (minutes, 0 = none)<input type="number" id="utM" min="0" max="240" value="${st.m == null ? autoMin : st.m}"></label>
         <label>Title<input id="utTitle" maxlength="80" value="${esc(st.title || utDefaultTitle(x, st.u, st.kind))}"></label></div>
       <label>Send results to (your school email)<input id="utE" type="email" value="${esc(st.e)}"></label>
@@ -13337,11 +13615,13 @@ function renderUtNew() {
   if ($('#utDAll')) $('#utDAll').onclick = () => { upd(); st.dsel = dAll.slice(0, 60); st.m = null; redo(true); };
   if ($('#utDNone')) $('#utDNone').onclick = () => { upd(); st.dsel = []; st.m = null; redo(true); };
   if (build) bindBuildPanel(x, st, upd, redo);
+  $$('[data-spk]').forEach(c => c.onchange = () => { const k = c.dataset.spk; st.spm = c.checked ? [...new Set((st.spm || []).concat(k))] : (st.spm || []).filter(o => o !== k); });
+  $('#utSpAll').onchange = () => { st.spall = $('#utSpAll').value === '1'; };
   $('#utK').onchange = () => { upd(); const was = st.kind; st.kind = $('#utK').value; if (was === 'build' || st.kind === 'build') st.fsel = st.fsel.filter(id => !/^c:/.test(id)); st.title = ''; st.m = null; redo(true); };
   ['#utMix', '#utM', '#utTitle', '#utE', '#utA', '#utO', '#utL', '#utPw'].forEach(s => $(s).onchange = upd);
   $('#utGen').onclick = async () => { upd(); const pw = (st.pw || teacherPw()).trim(); if (pw.length < 4) return $('#utErr').textContent = 'The teacher password needs at least 4 characters.'; LS.set('ap.lk.pw', pw);
     const lkx = lkModeOf(st.lk), sec = async z => ({ ...(lkx ? { lk: lkx } : {}), kh: await keyHash(pw, String(z)) });
-    const defSpec = () => st.dm === 'pick' ? (st.dsel.length ? { dp: st.dsel.slice() } : {}) : dCount ? { dn: dCount } : {};
+    const defSpec = () => ({ ...(st.dm === 'pick' ? (st.dsel.length ? { dp: st.dsel.slice() } : {}) : dCount ? { dn: dCount } : {}), sp: { m: SP_KINDS.map(o => o[0]).filter(k => (st.spm || []).includes(k)), all: st.spall ? 1 : 0 } });
     if (exam) {
       if (!isEmail(st.e)) return $('#utErr').textContent = 'Enter the email address where students should send results.';
       LS.set('ap.ut.email', normEmail(st.e));
@@ -13383,6 +13663,10 @@ function bindUtDraft(d, redraw) {
   $('#utDocTest').onclick = () => makeDocx(utPages(ut, 'test'), fileSafe(ut.n) + '.docx', $('#utDocTest'));
   $('#utDocKey').onclick = () => makeDocx(utPages(ut, 'key'), fileSafe(ut.n) + '-Answer-Key.docx', $('#utDocKey'));
   $('#utSgKey').onchange = () => LS.set('ap.sg.key', $('#utSgKey').checked);
+  $('#utSpPdf').onclick = () => makePdf(spPacketHTML(ut), fileSafe(ut.n) + '-Supports.pdf', $('#utSpPdf'));
+  $('#utSpDoc').onclick = () => makeDocx(spPacketHTML(ut), fileSafe(ut.n) + '-Supports.docx', $('#utSpDoc'));
+  $('#utModPdf').onclick = () => makePdf(spModPages(ut, 'both'), fileSafe(ut.n) + '-Modified.pdf', $('#utModPdf'));
+  $('#utModDoc').onclick = () => makeDocx(spModPages(ut, 'test'), fileSafe(ut.n) + '-Modified.docx', $('#utModDoc'));
   $('#utSgPdf').onclick = () => makePdf(studyGuideHTML(ut, $('#utSgKey').checked), fileSafe(ut.n) + '-Study-Guide.pdf', $('#utSgPdf'));
   $('#utSgDoc').onclick = () => makeDocx(studyGuideHTML(ut, $('#utSgKey').checked), fileSafe(ut.n) + '-Study-Guide.docx', $('#utSgDoc'));
   $('#utTry').onclick = () => go('ut-' + code);
@@ -13390,7 +13674,7 @@ function bindUtDraft(d, redraw) {
   if ($('#utSiteB')) $('#utSiteB').onclick = () => { const v = $('#utSite').value.trim(); if (/^https?:\/\/\S+$/.test(v)) { LS.set('ap.admin.siteurl', v.replace(/\/+$/, '')); redraw(); } else $('#utCopied').textContent = 'Enter the full address, starting with https://'; };
   $$('[data-swap]').forEach(b => b.onclick = () => { const i = +b.dataset.swap, x = BY_ID[ut.t], old = x.bank.find(q => q.id === ut.q[i]); if (!old) return;
     const cands = R.shuf(x.bank.filter(q => q.cat === old.cat && !ut.q.includes(q.id)));
-    const rep = cands.find(q => (q.lv || 1) === (old.lv || 1)) || cands[0]; if (!rep) return confirmBox('No other questions', 'Every question in this unit is already on the test.', 'OK', () => {});
+    const rep = cands.find(q => x.secure.has(q.id) && (q.lv || 1) === (old.lv || 1)) || cands.find(q => x.secure.has(q.id)) || cands.find(q => (q.lv || 1) === (old.lv || 1)) || cands[0]; if (!rep) return confirmBox('No other questions', 'Every question in this unit is already on the test.', 'OK', () => {});
     ut.q = ut.q.slice(); ut.q[i] = rep.id; delete ut.z; d.saved = false; redraw(); });
   $$('[data-frm]').forEach(b => b.onclick = () => { ut.f = ut.f.filter(f => f !== b.dataset.frm); delete ut.z; if (UTB) UTB.fsel = ut.f.slice(); d.saved = false; redraw(); });
 }
@@ -13473,7 +13757,7 @@ function renderUnitTests(err) {
 /* accommodations set on the intro page, applied when the test starts */
 const UTACC = {};
 function accStart(code) {
-  const A = UTACC[code]; if (!A || !T) return; T.acc = { log: A.log.slice(), big: !!A.big, nolock: !!A.nolock };
+  const A = UTACC[code]; if (!A || !T) return; T.acc = { log: A.log.slice(), big: !!A.big, nolock: !!A.nolock, sp: !!A.sp, r3: !!A.r3 };
   if (A.nolock && T.lk) T.lk.off = true;
   if (A.untimed) T.untimed = true;
   else { const mult = A.x ? Math.round((T.secs ? T.secs.reduce((s, x) => s + x.t, 0) : T.total) * (A.x - 1)) : 0, add = (A.add || 0) + mult;
@@ -13514,6 +13798,8 @@ function renderUtIntro(code) {
   if (!$('#utStartF')) return;
   $('#utAcc').onclick = () => accOpen(ut, o => { const A = UTACC[p.code] = UTACC[p.code] || { log: [], add: 0 }; if (o.big != null) { A.big = o.big; A.log.push(o.big ? 'larger text' : 'normal text'); }
     else if (o.nolock != null) { A.nolock = o.nolock; A.log.push(o.nolock ? 'lockdown off' : 'lockdown on'); }
+    else if (o.sp != null) { A.sp = o.sp; A.log.push(o.sp ? 'supports on' : 'supports off'); }
+    else if (o.r3 != null) { A.r3 = o.r3; A.log.push(o.r3 ? 'one wrong answer removed per question' : 'all answer choices'); }
     else if (o.time === 'none') { A.untimed = true; A.log.push('no time limit'); } else { A.x = /^x/.test(o.time) ? parseFloat(o.time.slice(1)) : A.x; if (!/^x/.test(o.time)) A.add += +o.time; A.log.push(o.label); }
     return 'Applied: ' + A.log.join('; '); }, () => UTACC[p.code] || {}, () => { renderUtIntro(code); bindNav(); });
   $('#utStartF').onsubmit = e => { e.preventDefault(); const nm = $('#utName').value.trim().replace(/\s+/g, ' ');
@@ -14514,6 +14800,8 @@ function accOpen(ut, onDone, pre, onClose) {
       <p class="small">${T && inExam ? (T.untimed ? 'This test has no time limit.' : `Time left now: <b class="mono">${fmtT(Math.max(0, T.remaining))}</b>.`) : 'These apply when the student starts the test.'}</p>
       <div class="acc-sec"><b>Extra time</b><div class="acc-btns">${ACC_TIME.map(([l, v]) => `<button class="btn sm" data-acct="${v}">${l}</button>`).join('')}</div></div>
       <div class="acc-sec"><label class="chk"><input type="checkbox" id="accBig" ${cur.big ? 'checked' : ''}> <span>Larger text</span></label>
+        <label class="chk"><input type="checkbox" id="accSp" ${cur.sp ? 'checked' : ''}> <span>Supports button (word bank, formulas, strategies, sentence starters)</span></label>
+        <label class="chk"><input type="checkbox" id="accR3" ${cur.r3 ? 'checked' : ''}> <span>Remove one wrong answer from each multiple-choice question</span></label>
         ${ut && ut.lk ? `<label class="chk"><input type="checkbox" id="accNoLk" ${cur.nolock ? 'checked' : ''}> <span>Turn off lockdown for this student (for example, for assistive technology)</span></label>` : ''}</div>
       <p class="small" id="accMsg" role="status">${(cur.log || []).length ? 'Applied: ' + esc(cur.log.join('; ')) : ''}</p>
       <div class="row" style="justify-content:center"><button class="btn primary" id="accDone">Done</button></div></div>`;
@@ -14521,6 +14809,7 @@ function accOpen(ut, onDone, pre, onClose) {
     ov.querySelectorAll('[data-acct]').forEach(b => b.onclick = () => { const r = onDone({ time: b.dataset.acct, label: b.textContent }); msg(r || ''); });
     ov.querySelector('#accBig').onchange = ev => onDone({ big: ev.target.checked });
     if (ov.querySelector('#accNoLk')) ov.querySelector('#accNoLk').onchange = ev => onDone({ nolock: ev.target.checked });
+    ov.querySelector('#accSp').onchange = ev => onDone({ sp: ev.target.checked }); ov.querySelector('#accR3').onchange = ev => onDone({ r3: ev.target.checked });
     ov.querySelector('#accDone').onclick = close; };
 }
 /* apply one accommodation to the running test; returns a short note */
@@ -14528,6 +14817,8 @@ function accApply(o) {
   if (!T) return ''; const A = T.acc = T.acc || { log: [] };
   if (o.big != null) { A.big = o.big; document.body.classList.toggle('acc-big', o.big); A.log.push(o.big ? 'larger text' : 'normal text'); save(); return 'Applied: ' + A.log.join('; '); }
   if (o.nolock != null) { A.nolock = o.nolock; if (T.lk) { T.lk.off = o.nolock; if (o.nolock) { T.lk.locked = false; lkStop(); } else lkStart(); } A.log.push(o.nolock ? 'lockdown off' : 'lockdown on'); save(); return 'Applied: ' + A.log.join('; '); }
+  if (o.sp != null) { A.sp = o.sp; A.log.push(o.sp ? 'supports on' : 'supports off'); save(); if (inExam) renderExam(); return 'Applied: ' + A.log.join('; '); }
+  if (o.r3 != null) { A.r3 = o.r3; A.log.push(o.r3 ? 'one wrong answer removed per question' : 'all answer choices'); save(); if (inExam) renderExam(); return 'Applied: ' + A.log.join('; '); }
   if (o.time === 'none') { T.untimed = true; A.log.push('no time limit'); }
   else { const base = T.secs ? T.secs[T.sec || 0].t : (T.total || 0); const add = /^x/.test(o.time) ? Math.round(base * (parseFloat(o.time.slice(1)) - 1)) : +o.time;
     T.remaining += add; T.total = (T.total || 0) + add; if (T.secs) T.secs[T.sec || 0].t += add; A.log.push(o.label + ` (+${Math.round(add / 60)} min)`); }
@@ -14992,9 +15283,11 @@ async function docxLines(buf) {
 /* ── HTML → Word: walks the same HTML used for PDFs and printing ── */
 const XE = s => String(s).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const DX_BLOCK = new Set(['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'UL', 'OL', 'LI', 'TABLE', 'SECTION', 'HEADER', 'FOOTER', 'ASIDE', 'PRE', 'BLOCKQUOTE', 'DL', 'DT', 'DD', 'FIELDSET', 'ARTICLE', 'FIGURE', 'DETAILS', 'SUMMARY']);
-function htmlToDocx(html, title) {
+function htmlToDocx(html, title, imgs = []) {
   const tpl = document.createElement('template'); tpl.innerHTML = html;
   const body = []; let pageBreak = false, nextPre = '';
+  const dxPic = i => { const im = imgs[i]; if (!im) return ''; const cx = Math.round(im.w * 9525), cy = Math.round(im.h * 9525);
+    return `<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="${i + 1}" name="Figure ${i + 1}"/><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="${i + 1}" name="fig${i + 1}.png"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdImg${i + 1}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>`; };
   const run = (text, f) => { if (!text) return ''; const rp = (f.b ? '<w:b/>' : '') + (f.i ? '<w:i/>' : '') + (f.u ? '<w:u w:val="single"/>' : '') + (f.sz ? `<w:sz w:val="${f.sz}"/>` : '') + (f.color ? `<w:color w:val="${f.color}"/>` : '') + (f.va ? `<w:vertAlign w:val="${f.va}"/>` : '');
     return text.split('\n').map((t, k) => (k ? '<w:r><w:br/></w:r>' : '') + (t ? `<w:r>${rp ? `<w:rPr>${rp}</w:rPr>` : ''}<w:t xml:space="preserve">${XE(t)}</w:t></w:r>` : '')).join(''); };
   const inl = (node, f) => { let out = '';
@@ -15002,6 +15295,7 @@ function htmlToDocx(html, title) {
       if (c.nodeType === 3) { out += run(c.textContent.replace(/\s+/g, ' '), f); continue; }
       if (c.nodeType !== 1) continue; const t = c.tagName;
       if (t === 'BR') { out += '<w:r><w:br/></w:r>'; continue; }
+      if ((t === 'svg' || t === 'SVG') && c.getAttribute('data-dx')) { out += dxPic(+c.getAttribute('data-dx')); continue; }
       if (t === 'STYLE' || t === 'SCRIPT' || t === 'svg' || t === 'SVG' || t === 'IMG' || t === 'BUTTON' || t === 'INPUT') continue;
       if (c.classList.contains('bub')) { out += run(' (' + c.textContent.trim() + ') ', { ...f, b: f.b || c.classList.contains('on') }); continue; }
       if (t === 'I' && !c.textContent.trim() && c.parentNode && c.parentNode.closest && c.parentNode.closest('.cv-fields,.ws-fields,.ws-ans')) { out += run(' ______________________________', f); continue; }
@@ -15027,6 +15321,7 @@ function htmlToDocx(html, title) {
   };
   function block(el, f, ctx = {}) {
     if (el.nodeType !== 1) return; const t = el.tagName, cl = el.classList;
+    if ((t === 'svg' || t === 'SVG') && el.getAttribute('data-dx')) return para(dxPic(+el.getAttribute('data-dx')), { ind: ctx.ind });
     if (t === 'STYLE' || t === 'SCRIPT' || t === 'BUTTON' || t === 'svg' || t === 'SVG') return;
     if (cl.contains('pb')) pageBreak = true;
     if (cl.contains('pp-lines')) { const n = Math.max(6, Math.min(24, el.querySelectorAll('i').length || +el.dataset.min || 10)); for (let i = 0; i < n; i++) para(run('_'.repeat(78), { color: '999999' }), { spacing: [0, 200] }); return; }
@@ -15051,21 +15346,36 @@ function htmlToDocx(html, title) {
   }
   for (const c of tpl.content.childNodes) { if (c.nodeType === 1) block(c, {}); else if (c.textContent.trim()) para(run(c.textContent.trim(), {})); }
   const P = PAPER[paperKind()], tw = v => Math.round(v * 1440);
-  const doc = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><w:body>${body.join('')}<w:sectPr><w:pgSz w:w="${tw(P.w)}" w:h="${tw(P.h)}"/><w:pgMar w:top="1080" w:right="1080" w:bottom="1080" w:left="1080" w:header="720" w:footer="720" w:gutter="0"/></w:sectPr></w:body></w:document>`;
+  const doc = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><w:body>${body.join('')}<w:sectPr><w:pgSz w:w="${tw(P.w)}" w:h="${tw(P.h)}"/><w:pgMar w:top="1080" w:right="1080" w:bottom="1080" w:left="1080" w:header="720" w:footer="720" w:gutter="0"/></w:sectPr></w:body></w:document>`;
   const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:eastAsia="Calibri" w:cs="Calibri"/><w:sz w:val="22"/><w:szCs w:val="22"/><w:lang w:val="en-US"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="100" w:line="264" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>
 <w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>
 <w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="240" w:after="120"/><w:outlineLvl w:val="0"/></w:pPr><w:rPr><w:b/><w:color w:val="13284A"/><w:sz w:val="32"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="200" w:after="80"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:b/><w:color w:val="13284A"/><w:sz w:val="26"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="Heading3"><w:name w:val="heading 3"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="160" w:after="60"/><w:outlineLvl w:val="2"/></w:pPr><w:rPr><w:b/><w:sz w:val="23"/></w:rPr></w:style></w:styles>`;
-  const ct = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>`;
+  const ct = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>`;
   const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>`;
-  const drels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
+  const drels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>${imgs.map((im, i) => `<Relationship Id="rIdImg${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/fig${i + 1}.png"/>`).join('')}</Relationships>`;
   const core = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>${XE(title || '')}</dc:title><dc:creator>${XE(BRAND)}</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">${new Date().toISOString().replace(/\.\d+Z$/, 'Z')}</dcterms:created></cp:coreProperties>`;
-  return zipStore([{ name: '[Content_Types].xml', data: ct }, { name: '_rels/.rels', data: rels }, { name: 'word/document.xml', data: doc }, { name: 'word/_rels/document.xml.rels', data: drels }, { name: 'word/styles.xml', data: styles }, { name: 'docProps/core.xml', data: core }]);
+  return zipStore([{ name: '[Content_Types].xml', data: ct }, { name: '_rels/.rels', data: rels }, { name: 'word/document.xml', data: doc }, { name: 'word/_rels/document.xml.rels', data: drels }, { name: 'word/styles.xml', data: styles }, { name: 'docProps/core.xml', data: core }, ...imgs.map((im, i) => ({ name: `word/media/fig${i + 1}.png`, data: im.data }))]);
+}
+/* drawings (inline SVG) become PNG pictures in the Word file */
+async function dxRaster(html) {
+  if (!/<svg/i.test(html)) return { html, imgs: [] };
+  const tpl = document.createElement('template'); tpl.innerHTML = html; const svgs = [...tpl.content.querySelectorAll('svg')], imgs = [];
+  for (const sv of svgs) { try {
+      const w = +sv.getAttribute('width') || 200, h = +sv.getAttribute('height') || 120, sc = 3, c = sv.cloneNode(true);
+      c.setAttribute('xmlns', 'http://www.w3.org/2000/svg'); c.setAttribute('color', '#111111');
+      const src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(c).replace(/currentColor/g, '#111111'));
+      const img = new Image(); await new Promise((ok, no) => { img.onload = ok; img.onerror = no; img.src = src; });
+      const cv = document.createElement('canvas'); cv.width = Math.round(w * sc); cv.height = Math.round(h * sc); const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height); g.drawImage(img, 0, 0, cv.width, cv.height);
+      const blob = await new Promise(r => cv.toBlob(r, 'image/png')), ch = sv.closest('.sk-pimgs'), k = Math.min(1, (ch ? 170 : 440) / w, ch ? 125 / h : 9);
+      imgs.push({ data: new Uint8Array(await blob.arrayBuffer()), w: w * k, h: h * k }); sv.setAttribute('data-dx', String(imgs.length - 1));
+    } catch (e) { console.error(e); } }
+  const box = document.createElement('div'); box.appendChild(tpl.content.cloneNode(true)); return { html: box.innerHTML, imgs };
 }
 async function makeDocx(html, filename, btn) {
   const lbl = btn ? btn.innerHTML : ''; if (btn) { btn.disabled = true; btn.textContent = 'Making Word file…'; }
-  try { await saveFile(filename, htmlToDocx(html, filename.replace(/\.docx$/, '').replace(/-/g, ' ')), 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'); }
+  try { const r = await dxRaster(html); await saveFile(filename, htmlToDocx(r.html, filename.replace(/\.docx$/, '').replace(/-/g, ' '), r.imgs), 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'); }
   catch (e) { console.error(e); confirmBox('Couldn’t make the Word file', 'Something went wrong building the file. Try again, or use the PDF instead.', 'OK', () => {}); }
   finally { if (btn) { btn.disabled = false; btn.innerHTML = lbl; } }
 }
@@ -15213,7 +15523,7 @@ const UNIT_GUIDE = (() => {
 const stripTags = h => String(h).replace(/<table[\s\S]*?<\/table>/g, ' [table] ').replace(/<[^>]+>/g, ' ').replace(/\{([^{}]+)\}/g, '$1').replace(/\s+/g, ' ').trim();
 function buildPanelHTML(x, st) {
   const bank = x.bank.filter(b => st.u.includes(b.cat)), chosen = new Set(st.bq), cnt = st.bq.length + st.fsel.length;
-  const row = b => `<li data-txt="${esc(stripTags(b.stem + ' ' + b.ch.join(' ')).toLowerCase())}" data-lv="${b.lv || 1}"><label class="chk"><input type="checkbox" data-bq="${esc(b.id)}" ${chosen.has(b.id) ? 'checked' : ''}><span><small class="muted">Unit ${esc(b.cat)} · ${(b.lv || 1) === 2 ? 'Challenge' : 'Core'}</small> ${esc(stripTags(b.stem).slice(0, 190))}${stripTags(b.stem).length > 190 ? '…' : ''}</span></label></li>`;
+  const row = b => `<li data-txt="${esc(stripTags(b.stem + ' ' + b.ch.join(' ')).toLowerCase())}" data-lv="${b.lv || 1}"><label class="chk"><input type="checkbox" data-bq="${esc(b.id)}" ${chosen.has(b.id) ? 'checked' : ''}><span><small class="muted">Unit ${esc(b.cat)} · ${(b.lv || 1) === 2 ? 'Challenge' : 'Core'}${x.secure.has(b.id) ? ' · <b class="sec-t">Teacher-only</b>' : ''}</small> ${esc(stripTags(b.stem).slice(0, 190))}${stripTags(b.stem).length > 190 ? '…' : ''}</span></label></li>`;
   const sel = st.bq.map((id, i) => { const own = /^c:\d+$/.test(id), c = own ? st.cust[+id.slice(2)] : null, b = own ? null : x.bank.find(q => q.id === id);
     if (!c && !b) return ''; return `<li><span class="u-n ${own ? 'own' : ''}">${own ? 'Yours' : 'Unit ' + esc(b.cat)}</span><span class="ut-stem">${esc((own ? c.s : stripTags(b.stem)).slice(0, 120))}</span><span class="bp-mv"><button class="linkbtn sm" data-bmv="${i}|-1" aria-label="Move up" ${i ? '' : 'disabled'}>↑</button><button class="linkbtn sm" data-bmv="${i}|1" aria-label="Move down" ${i < st.bq.length - 1 ? '' : 'disabled'}>↓</button><button class="linkbtn sm" data-brm="${i}" style="color:var(--bad)">Remove</button></span></li>`; }).join('');
   const ownFr = st.cust.map((c, i) => c.t === 'fr' ? `<li><span class="u-n frq">Your FRQ</span><span class="ut-stem">${esc(c.s.slice(0, 120))} <span class="muted">(${c.p} pts${st.fsel.includes('c:' + i) ? '' : ', not on the test'})</span></span></li>` : '').join('');
@@ -15316,7 +15626,7 @@ function bindBuildPanel(x, st, upd, redo) {
 /* ── study guide: what the test covers, without its answers ── */
 function sgPractice(x, ut, k, n) {
   const avoid = new Set(ut.q), r = rng((ut.s + k.charCodeAt(0) * 7919) >>> 0);
-  return shufR(x.bank.filter(b => b.cat === k && !avoid.has(b.id) && !b.psg), r).slice(0, n).map(b => { const ord = shufR([...b.ch.keys()], r); return { b, ch: ord.map(i => b.ch[i]), ans: [...Array(b.k || 1).keys()].map(c => ord.indexOf(c)).sort() }; });
+  return shufR(x.pub.filter(b => b.cat === k && !avoid.has(b.id) && !b.psg), r).slice(0, n).map(b => { const ord = shufR([...b.ch.keys()], r); return { b, ch: ord.map(i => b.ch[i]), ans: [...Array(b.k || 1).keys()].map(c => ord.indexOf(c)).sort() }; });
 }
 function studyGuideHTML(ut, withKey) {
   const x = BY_ID[ut.t], items = utItems(ut), cnt = utCounts(ut, items), frs = items.filter(q => q.type === 'cr');
@@ -15348,6 +15658,67 @@ function studyGuideHTML(ut, withKey) {
   return `<div class="pp sg">${head}${fmt}</div>` + units.map(k => `<div class="pp pb">${unitSec(k).replace('sg-unit pb', 'sg-unit')}</div>`).join('') + (frSec ? `<div class="pp pb">${frSec.replace('sg-sec pb', 'sg-sec')}</div>` : '') + (keySec ? `<div class="pp pb">${keySec.replace('sg-sec pb', 'sg-sec')}</div>` : '');
 }
 const SG_CSS = `.sg-eq{border:1.5px solid #13284a;border-radius:8px;padding:6px 12px;margin:8px 0;background:#f6f8fc}.sg-eq h3{margin:2px 0 4px!important}.sg-eq ul{margin:0;padding-left:18px}.sg-core{margin:0;padding-left:18px;font-size:10.5pt}.sg-core li{margin:0 0 3px}.sg h2,.sg-unit h2,.sg-sec h2{font:700 14pt Arial,sans-serif;margin:0 0 6px;color:#13284a}.sg-unit h3,.sg-sec h3,.sg h3{font:700 11pt Arial,sans-serif;margin:12px 0 4px}.sg-ideas{margin:0;padding-left:18px;font-size:10.5pt}.sg-ideas li{margin:0 0 4px}.sg-terms{width:100%}.sg-terms td:first-child{width:30%}.sg-f span{white-space:nowrap}.sg-can{list-style:none;padding-left:4px;margin:0}.sg-can li{margin:3px 0}.sg-sec ul,.sg-sec ol,.sg ul,.sg ol:not(.pp-q):not(.pp-ch){padding-left:20px}`;
+
+/* ═════ SUPPORTS (DIFFERENTIATION) ═════
+   Teachers choose supports when they make a test: a word bank, formulas, a strategy card, and sentence starters.
+   Printed: a supports packet and a modified test (one wrong answer removed from each question, larger print), with its own key.
+   Online: a Supports button in the test's toolbar, for every student or only students the teacher turns on with the password.
+   An accommodation can also remove one wrong answer per question online. */
+const SP_KINDS = [['wb', 'Word bank (key terms)'], ['fs', 'Formulas and reference'], ['st', 'Strategy card'], ['ss', 'Sentence starters for written answers']];
+const spOf = ut => (ut && ut.sp) || { m: ['wb', 'fs', 'st', 'ss'], all: 0 };
+const spUnits = ut => { const x = BY_ID[ut.t]; return (ut.ex || ut.k === 'exam' ? srCatsOf(x).map(c => c.k) : [...new Set(ut.u || [])]).filter(k => x.CAT[k]); };
+const SP_TIPS = [
+  ['Read twice', 'Read each question two times. Underline what it is asking for (for example “NOT,” “best,” or the unit you need).'],
+  ['Cover the choices', 'Try to answer in your head first, then find the choice that matches.'],
+  ['Cross out', 'Cross out choices you know are wrong. Then choose from what is left.'],
+  ['Use the word bank', 'Find key words from the question in the word bank and reread their meaning.'],
+  ['Show your work', 'For calculations, write the formula, put in the numbers with units, then check that the answer makes sense.'],
+  ['Skip and come back', 'If you are stuck, mark the question and move on. Come back at the end with fresh eyes.'],
+  ['Check your time', 'Glance at the clock after every few questions. Leave a few minutes to check your answers.'],
+];
+const SP_FRAMES = ['The answer is ___ because ___.', 'This happens because ___. As a result, ___.', 'The data show that ___, which means ___.', 'First, ___. Next, ___. Finally, ___.', 'I know this because the formula ___ shows that ___.', 'One example of ___ is ___.', 'If ___ increases, then ___ will ___ because ___.'];
+function spData(ut) {
+  const x = BY_ID[ut.t], units = spUnits(ut), defTerms = new Set(utDefRefs(ut).map(ref => { const [k, i] = ref.split('.'); return ((DEF_DB[x.id] || {})[k] || [])[+i]; }).filter(Boolean).map(e => e[0]));
+  const terms = units.flatMap(k => ((DEF_DB[x.id] || {})[k] || []).map(([t, d]) => [t, d, k])).sort((a, b) => a[0].localeCompare(b[0]));
+  const forms = (typeof UNIT_FORMULAS !== 'undefined' && UNIT_FORMULAS[x.id]) || {};
+  const guide = LAB_GUIDES[x.labKind || ''];
+  return { x, units, terms, defTerms, formulas: units.filter(k => forms[k] && forms[k].e.length).map(k => [k, forms[k].e, forms[k].c || []]), ref: x.reference || '', frames: (guide && guide.frames ? guide.frames.slice(0, 6) : []).concat(SP_FRAMES).slice(0, 8) };
+}
+/* the supports content (online panel and printed packet share it) */
+function spSections(ut, print) {
+  const d = spData(ut), m = spOf(ut).m, out = [];
+  if (m.includes('wb') && d.terms.length) out.push(['wb', 'Word bank', `<p class="sp-note">Key terms for this test.${d.defTerms.size ? ' Terms used in the definition questions are listed without their meaning.' : ''}</p><table class="sp-wb"><thead><tr><th>Term</th><th>Meaning</th></tr></thead><tbody>${d.terms.map(([t, def]) => `<tr><td><b>${esc(t)}</b></td><td>${d.defTerms.has(t) ? '<i>(on the test)</i>' : esc(def)}</td></tr>`).join('')}</tbody></table>`]);
+  if (m.includes('fs') && (d.formulas.length || d.ref)) out.push(['fs', 'Formulas', `${d.formulas.length ? `<table class="sp-wb"><tbody>${d.formulas.map(([k, e]) => `<tr><td><b>Unit ${esc(k)}</b></td><td>${e.map(f => `<span class="sp-f">${f}</span>`).join(' · ')}</td></tr>`).join('')}</tbody></table>` : ''}${d.formulas.some(f => f[2].length) ? `<p class="sp-note">Constants: ${[...new Set(d.formulas.flatMap(f => f[2]))].join(' · ')}</p>` : ''}${d.ref ? `<div class="sp-ref">${d.ref}</div>` : ''}`]);
+  if (m.includes('st')) out.push(['st', 'Strategies', `<ol class="sp-tips">${SP_TIPS.map(([h, t]) => `<li><b>${h}.</b> ${t}</li>`).join('')}</ol>`]);
+  if (m.includes('ss')) out.push(['ss', 'Sentence starters', `<p class="sp-note">Use these to start your written answers.</p><ul class="sp-frames">${d.frames.map(f => `<li>${esc(f)}</li>`).join('')}</ul>`]);
+  return out;
+}
+function spPacketHTML(ut) {
+  const x = BY_ID[ut.t], secs = spSections(ut, true);
+  return `<div class="pp sp-pk"><header class="pp-h"><div><h1>Student supports</h1><p>${esc(ut.n)}${ut.n.includes(x.subject) ? "" : " · " + esc(x.subject)}</p></div><div class="pp-meta"><p>Name ______________________</p></div></header>
+    <p class="pp-i">Use these supports while you take the test. They don’t give you the answers; they help you show what you know.</p>
+    ${secs.map(([k, h, body], i) => `<section class="sp-sec ${i && k !== 'st' ? 'pb' : ''}"><h2>${h}</h2>${body}</section>`).join('')}</div>`;
+}
+/* remove one wrong answer from each single-answer question with 4+ choices (same choice every time, so the key stays fixed) */
+const spDropIdx = q => { if (!q || q.type === 'cr' || q.type === 'num' || (q.k || 1) > 1 || !q.choices || q.choices.length < 4) return -1; const wrong = q.choices.map((c, i) => i).filter(i => !q.correct.includes(i)); return wrong[parseInt(hashStr('drop|' + q.id), 36) % wrong.length]; };
+function spReduce(items) { return items.map(q => { const d = spDropIdx(q); if (d < 0) return q; const keep = q.choices.map((c, i) => i).filter(i => i !== d); return { ...q, choices: keep.map(i => q.choices[i]), correct: q.correct.map(c => keep.indexOf(c)) }; }); }
+function spModPages(ut, which) {
+  const m = { ...ut, _r3: 1, n: ut.n + ' (modified)' };
+  const html = utPages(m, which).replace(/class="pp( |")/g, 'class="pp lp$1');
+  return html;
+}
+/* online: the Supports button and panel */
+const spOn = () => { if (!T) return false; const ut = T.unit ? T.unit.ut : T.assign ? T.assign.ut : null; return !!((T.acc && T.acc.sp) || (ut && ut.sp && ut.sp.all)); };
+function openSupports() {
+  const ut = T.unit ? T.unit.ut : T.assign.ut, secs = spSections(ut, false); let cur = secs[0] ? secs[0][0] : null;
+  const draw = () => { $('#modal-root').innerHTML = `<div class="scrim" id="scrim"><div class="modal sp-modal" role="dialog" aria-modal="true" aria-labelledby="spH"><div class="mhead"><h3 id="spH">Supports</h3><button class="tb link" id="spX" aria-label="Close">Close</button></div>
+      <div class="sp-tabs" role="tablist">${secs.map(([k, h]) => `<button role="tab" data-spt="${k}" aria-selected="${k === cur}">${h}</button>`).join('')}</div>
+      <div class="mbody sp-body">${secs.length ? F(secs.find(s => s[0] === cur)[2]) : '<p>No supports were chosen for this test.</p>'}</div></div></div>`;
+    $('#spX').onclick = closeModal; $('#scrim').onclick = e => { if (e.target.id === 'scrim') closeModal(); };
+    $$('[data-spt]').forEach(b => b.onclick = () => { cur = b.dataset.spt; draw(); }); };
+  draw();
+}
+const SP_CSS = `.lp{font-size:15pt}.lp .pp-stem{font-size:15pt;line-height:1.55}.lp .pp-ch li{font-size:14.5pt;margin:7px 0}.lp .pp-q>li{margin-bottom:26px}.sp-pk h2{font:700 14pt Arial,sans-serif;margin:0 0 8px;color:#13284a}.sp-sec{margin-top:14px}.sp-wb{width:100%}.sp-wb td:first-child{width:28%}.sp-note{font:10pt Arial,sans-serif;color:#333;margin:0 0 8px}.sp-tips{padding-left:20px;font-size:12pt;line-height:1.6}.sp-tips li{margin:0 0 6px}.sp-frames{font-size:12.5pt;line-height:1.9}.sp-f{white-space:nowrap}.sp-ref{font-size:10.5pt}`;
 
 /* ═════ SKILL BUILDER ═════
    Focused drills on the topics students struggle with most, by subject. Most questions are generated fresh each time
@@ -15787,14 +16158,6 @@ const SK_SUBJ = [
   ] },
 ];
 const SK_TOPIC = Object.fromEntries(SK_SUBJ.flatMap(s => s.topics.map(t => [t.id, { ...t, subj: s }])));
-function skDraw(id, n) {
-  const T = SK_TOPIC[id], out = [], seen = new Set(); let tries = 0;
-  while (out.length < n && tries < n * 25) { tries++; let q = null; try { q = T.gen(); } catch (e) { q = null; }
-    if (!q || q.type === 'num' || !q.choices || q.choices.length < 4 || new Set(q.choices).size < q.choices.length || seen.has(q.stem + q.choices[q.correct[0]])) continue;
-    if (/NaN|Infinity|undefined/.test(q.stem + q.choices.join('') + q.expl)) continue;
-    seen.add(q.stem + q.choices[q.correct[0]]); out.push(instantiate({ ...q, id: 'sk-' + id + '-' + out.length, cat: id, choices: q.choices.slice(0, 5), correct: q.correct })); }
-  return out;
-}
 let SK = { sub: null, topic: null, items: null, i: 0, ans: [], n: 10, done: false, pn: 10, key: true };
 const skKey = () => `ap.${PID || 'anon'}.skills.v1`;
 function renderSkills(arg) {
@@ -15808,41 +16171,390 @@ function renderSkills(arg) {
     ${foot()}</div>`;
   bindNav(); $$('[data-sks]').forEach(b => b.onclick = () => { SK.sub = b.dataset.sks; renderSkills(); });
 }
+
+
+/* ═════ SKILL BUILDER: HANDS-ON QUESTIONS ═════
+   Most drill questions are now worked, not picked: students type numbers (with a tolerance), enter coefficients to
+   balance equations, type names, formulas, and configurations, fill in Punnett squares, and label pathway diagrams.
+   Drawings (Lewis structures, functional groups, vectors, circuits, cycles) are SVG, so they print and export too.
+   Item shapes: { kind: 'mc', stem, fig?, choices, correct, imgs? } or { kind: 'in', stem, fig?, fields, layout, eq?, pn?, bank? }.
+   A field is { t: 'int' | 'num' | 'txt' | 'sel', a, show, lab?, unit?, pre?, n? (text normalizer), tol?, opts? }. */
+
+/* ── reading typed answers ── */
+const SK_SUBS = '₀₁₂₃₄₅₆₇₈₉', SK_SUPS = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+const skDig = s => String(s == null ? '' : s).replace(/[₀-₉]/g, c => SK_SUBS.indexOf(c)).replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, c => SK_SUPS.indexOf(c)).replace(/⁻/g, '-').replace(/⁺/g, '+');
+function skNum(s) {
+  let t = skDig(s).replace(/[−–—]/g, '-').replace(/,/g, '').replace(/\s+/g, '').replace(/^\$/, '');
+  t = t.replace(/(?:×|x|X|\*|·)10\^?\(?([-+]?\d+)\)?/, 'e$1').replace(/^10\^\(?([-+]?\d+)\)?/, '1e$1');
+  let m = t.match(/^([-+]?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)/); if (m) return +m[2] ? +m[1] / +m[2] : null;
+  m = t.match(/^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?/i); if (!m) return null;
+  return parseFloat(m[0]) / (/%$/.test(t) ? 100 : 1);
+}
+const SK_CORE = { he: '1s2', ne: '1s2 2s2 2p6', ar: '1s2 2s2 2p6 3s2 3p6', kr: '1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6' };
+function skCfgSet(s) {
+  let t = skDig(s).toLowerCase().replace(/[\s^()]/g, ''); const core = t.match(/^\[(he|ne|ar|kr)\]/); let out = [];
+  if (core) { out = SK_CORE[core[1]].split(' '); t = t.slice(core[0].length); }
+  let i = 0; while (i < t.length) { const m = t.slice(i).match(/^(\d)([spdf])/); if (!m) return null; i += 2;
+    let n = ''; if (m[2] === 'd' && t.slice(i, i + 2) === '10') n = '10'; else if (m[2] === 'f' && /^1[0-4]/.test(t.slice(i, i + 2))) n = t.slice(i, i + 2); else n = t[i] || ''; if (!/^\d+$/.test(n)) return null; i += n.length; out.push(m[1] + m[2] + n); }
+  return out.sort().join(' ');
+}
+const SK_NORM = {
+  formula: s => skDig(s).replace(/[\s{}·_]/g, ''),
+  comp: s => { const f = skDig(s).replace(/[\s{}·_]/g, ''); if (!/^[A-Z]/.test(f)) return f; try { const a = skAtoms(f); return Object.keys(a).sort().map(k => k + a[k]).join(''); } catch (e) { return f; } },
+  name: s => String(s || '').toLowerCase().replace(/\s+/g, ' ').replace(/\s*\(\s*/g, '(').replace(/\s*\)/g, ')').replace(/aox/g, 'ox').replace(/oox/g, 'ox').replace(/[.]/g, '').trim(),
+  cfg: s => skCfgSet(s),
+  seq: s => String(s || '').toUpperCase().replace(/[53][′'’]/g, '').replace(/[^A-Z]/g, ''),
+  aa: s => String(s || '').toLowerCase().replace(/[^a-z]/g, ''),
+  geno: s => [...String(s || '').replace(/[^A-Za-z]/g, '')].sort((x, y) => (x.toLowerCase() === x) - (y.toLowerCase() === y) || x.toLowerCase().localeCompare(y.toLowerCase())).join(''),
+  plain: s => String(s || '').toLowerCase().replace(/[^a-z0-9.+-]/g, ''),
+};
+function skFieldOK(f, v) {
+  if (v == null || String(v).trim() === '') return false;
+  if (f.t === 'sel') return v === f.a;
+  if (f.t === 'int') { const x = skNum(v); return x != null && Math.abs(x - f.a) < 1e-9; }
+  if (f.t === 'num') { const x = skNum(v); if (x == null) return false; const tol = f.tol != null ? f.tol : skTol(f); return Math.abs(x - f.a) <= tol; }
+  const n = SK_NORM[f.n || 'plain'], got = n(v); return got != null && [].concat(f.a).some(a => n(a) === got);
+}
+/* tolerance from the displayed answer: about 1%, and never tighter than half of its last digit */
+function skTol(f) { const sh = skDig(f.show || '').replace(/[−–]/g, '-'), m = sh.match(/^[^\d]*\d*\.?(\d*)/), d = m ? m[1].length : 0, e = sh.match(/10\^\(?([-+]?\d+)/);
+  return Math.max(Math.abs(f.a) * 0.01, 0.5 * 10 ** (-d + (e ? +e[1] : 0)) * 1.05, 1e-15); }
+function skGrade(q, vals) {
+  if (q.bal) { const nums = vals.map(v => String(v || '').trim() === '' ? 1 : skNum(v)); const typed = vals.some(v => String(v || '').trim() !== '');
+    if (!typed || nums.some(x => x == null || x < 1 || x % 1)) return { ok: false, okf: q.fields.map((f, i) => skFieldOK(f, vals[i])), note: typed ? 'Use positive whole numbers for every coefficient.' : '' };
+    const bal = skBalanced(q.eq.re, q.eq.pr, nums), g = nums.reduce((a, b) => gcd(a, b)), ok = bal && g === 1;
+    return { ok, okf: q.fields.map((f, i) => ok || nums[i] === f.a), note: bal && g > 1 ? `Your equation is balanced, but not with the smallest whole numbers. Divide every coefficient by ${g}.` : bal ? '' : 'Count each element on both sides: they don’t match yet.' }; }
+  const okf = q.fields.map((f, i) => skFieldOK(f, vals[i])); return { ok: okf.every(Boolean), okf };
+}
+
+/* ── drawings ── */
+const SK_FONT = 'font-family="Arial, Helvetica, sans-serif"';
+const skP = v => +v.toFixed(1);
+function skSvg(minX, minY, w, h, body, scale = 1, cls = 'skfig') {
+  return `<svg class="${cls}" xmlns="http://www.w3.org/2000/svg" viewBox="${skP(minX)} ${skP(minY)} ${skP(w)} ${skP(h)}" width="${Math.round(w * scale)}" height="${Math.round(h * scale)}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" ${SK_FONT} role="img">${body}</svg>`;
+}
+const skText = (x, y, t, o = {}) => `<text x="${skP(x)}" y="${skP(y)}" dy=".35em" text-anchor="${o.a || 'middle'}" font-size="${o.s || 17}" font-weight="${o.w || 600}" fill="currentColor" stroke="none"${o.i ? ' font-style="italic"' : ''}>${t}</text>`;
+const skDots = (x, y, ang) => { const r = ang * Math.PI / 180, px = -Math.sin(r) * 4.2, py = Math.cos(r) * 4.2; return `<circle cx="${skP(x + px)}" cy="${skP(y + py)}" r="2.3" fill="currentColor" stroke="none"/><circle cx="${skP(x - px)}" cy="${skP(y - py)}" r="2.3" fill="currentColor" stroke="none"/>`; };
+const skLbl = a => a.replace(/(\d+)/g, '<tspan dy="4" font-size="12">$1</tspan><tspan dy="-4"></tspan>');
+/* a Lewis structure: [central, [[atom, bond order, lone pairs], …], central lone pairs, charge] */
+const SK_LEW = {
+  CH4: ['C', [['H', 1, 0], ['H', 1, 0], ['H', 1, 0], ['H', 1, 0]], 0], NH3: ['N', [['H', 1, 0], ['H', 1, 0], ['H', 1, 0]], 1], H2O: ['O', [['H', 1, 0], ['H', 1, 0]], 2],
+  CO2: ['C', [['O', 2, 2], ['O', 2, 2]], 0], BF3: ['B', [['F', 1, 3], ['F', 1, 3], ['F', 1, 3]], 0], SO2: ['S', [['O', 2, 2], ['O', 1, 3]], 1],
+  PCl5: ['P', Array(5).fill(['Cl', 1, 3]), 0], SF6: ['S', Array(6).fill(['F', 1, 3]), 0], XeF4: ['Xe', Array(4).fill(['F', 1, 3]), 2], SF4: ['S', Array(4).fill(['F', 1, 3]), 1],
+  ClF3: ['Cl', Array(3).fill(['F', 1, 3]), 2], XeF2: ['Xe', Array(2).fill(['F', 1, 3]), 3], HCN: ['C', [['H', 1, 0], ['N', 3, 1]], 0], CH2O: ['C', [['H', 1, 0], ['H', 1, 0], ['O', 2, 2]], 0],
+  PCl3: ['P', Array(3).fill(['Cl', 1, 3]), 1], CCl4: ['C', Array(4).fill(['Cl', 1, 3]), 0], 'NO3^-': ['N', [['O', 2, 2], ['O', 1, 3], ['O', 1, 3]], 0, '−'], 'CO3^2-': ['C', [['O', 2, 2], ['O', 1, 3], ['O', 1, 3]], 0, '2−'],
+  'SO4^2-': ['S', Array(4).fill(['O', 1, 3]), 0, '2−'], 'NH4^+': ['N', Array(4).fill(['H', 1, 0]), 0, '+'], O3: ['O', [['O', 2, 2], ['O', 1, 3]], 1], H2S: ['S', [['H', 1, 0], ['H', 1, 0]], 2],
+  BeCl2: ['Be', [['Cl', 1, 3], ['Cl', 1, 3]], 0], IF5: ['I', Array(5).fill(['F', 1, 3]), 1], CHCl3: ['C', [['Cl', 1, 3], ['Cl', 1, 3], ['Cl', 1, 3], ['H', 1, 0]], 0],
+  'PO4^3-': ['P', Array(4).fill(['O', 1, 3]), 0, '3−'], 'ClO3^-': ['Cl', Array(3).fill(['O', 1, 3]), 1, '−'],
+};
+const skLewE = L => L[1].reduce((s, [, o, lp]) => s + 2 * o + 2 * lp, 0) + 2 * L[2];
+function skLewisSVG(L, scale = 1) {
+  const [ca, bs, clp, chg] = L, n = bs.length, d = n + clp, BL = d > 4 ? 60 : 52;
+  /* 2D layouts: up to 4 domains on a cross; 5 as axial (up, down) + equatorial (left, two right), lone pairs equatorial; 6 as a hexagon, lone pairs opposite */
+  const slots = d <= 4 ? null : d === 5 ? [270, 90, 180, 35, 325] : [150, 210, 30, 330, 270, 90, 0, 180];
+  const bAng = d <= 4 ? [[0], [180, 0], [180, 0, 90], [180, 0, 270, 90]][n - 1] : slots.slice(0, n);
+  const lpAng = d <= 4 ? [270, 90, 180, 0].filter(a => !bAng.includes(a)).slice(0, clp) : slots.slice(n, n + clp).reverse();
+  let body = '', pts = [[0, 0]];
+  bs.forEach(([el, ord, lp], i) => { const a = bAng[i] * Math.PI / 180, ux = Math.cos(a), uy = Math.sin(a), tx = ux * BL, ty = uy * BL, offs = [[0], [-3.4, 3.4], [-5.5, 0, 5.5]][ord - 1];
+    const tr0 = ca.length > 1 ? 15 : 12, tr1 = el.length > 1 ? 15 : 12;
+    offs.forEach(o => { const px = -uy * o, py = ux * o; body += `<line x1="${skP(ux * tr0 + px)}" y1="${skP(uy * tr0 + py)}" x2="${skP(tx - ux * tr1 + px)}" y2="${skP(ty - uy * tr1 + py)}"/>`; });
+    body += skText(tx, ty, el); pts.push([tx, ty]);
+    const dirs = lp === 3 ? [-90, 0, 90] : lp === 2 ? [-70, 70] : lp === 1 ? [0] : [];
+    dirs.forEach(dd => { const b = (bAng[i] + dd) * Math.PI / 180, r = el.length > 1 ? 18 : 15, x = tx + Math.cos(b) * r, y = ty + Math.sin(b) * r; body += skDots(x, y, bAng[i] + dd); pts.push([x, y]); }); });
+  lpAng.forEach(a => { const b = a * Math.PI / 180, r = ca.length > 1 ? 21 : 17, x = Math.cos(b) * r, y = Math.sin(b) * r; body += skDots(x, y, a); pts.push([x, y]); });
+  body += skText(0, 0, ca);
+  let x0 = Math.min(...pts.map(p => p[0])) - 16, x1 = Math.max(...pts.map(p => p[0])) + 16, y0 = Math.min(...pts.map(p => p[1])) - 14, y1 = Math.max(...pts.map(p => p[1])) + 14;
+  if (chg) { body += `<path d="M${skP(x0 + 6)} ${skP(y0)} h-6 v${skP(y1 - y0)} h6 M${skP(x1 - 6)} ${skP(y0)} h6 v${skP(y1 - y0)} h-6"/>` + skText(x1 + 4, y0 + 2, chg, { a: 'start', s: 14 }); x1 += 22; }
+  return skSvg(x0 - 4, y0 - 6, x1 - x0 + 8, y1 - y0 + 12, body, scale);
+}
+/* a small structure drawn on a grid: atoms [[label, x, y]], bonds [[i, j, order]] */
+function skStructSVG(atoms, bonds, scale = 1) {
+  const G = 48; let body = '';
+  bonds.forEach(([i, j, o]) => { const [, ax, ay] = atoms[i], [, bx, by] = atoms[j], dx = (bx - ax), dy = (by - ay), L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L;
+    const r0 = atoms[i][0].length > 1 ? 15 : 11, r1 = atoms[j][0].length > 1 ? 16 : 11; [[0], [-3.4, 3.4]][o - 1].forEach(off => { const px = -uy * off, py = ux * off;
+      body += `<line x1="${skP(ax * G + ux * r0 + px)}" y1="${skP(ay * G + uy * r0 + py)}" x2="${skP(bx * G - ux * r1 + px)}" y2="${skP(by * G - uy * r1 + py)}"/>`; }); });
+  atoms.forEach(([t, x, y]) => { body += skText(x * G, y * G, t.replace(/⁻/, '<tspan dy="-7" font-size="12">−</tspan>'), { i: t === 'R', w: t === 'R' ? 500 : 600 }); });
+  const xs = atoms.map(a => a[1] * G), ys = atoms.map(a => a[2] * G);
+  return skSvg(Math.min(...xs) - 20, Math.min(...ys) - 18, Math.max(...xs) - Math.min(...xs) + 44, Math.max(...ys) - Math.min(...ys) + 36, body, scale);
+}
+const SK_FGS = [
+  ['Hydroxyl', [['R', 0, 0], ['O', 1, 0], ['H', 2, 0]], [[0, 1, 1], [1, 2, 1]]],
+  ['Carbonyl (aldehyde or ketone)', [['R', 0, 0], ['C', 1, 0], ['R', 2, 0], ['O', 1, -1]], [[0, 1, 1], [1, 2, 1], [1, 3, 2]]],
+  ['Carbonyl (aldehyde or ketone)', [['R', 0, 0], ['C', 1, 0], ['H', 2, 0], ['O', 1, -1]], [[0, 1, 1], [1, 2, 1], [1, 3, 2]]],
+  ['Carboxyl', [['R', 0, 0], ['C', 1, 0], ['O', 1, -1], ['O', 2, 0], ['H', 3, 0]], [[0, 1, 1], [1, 2, 2], [1, 3, 1], [3, 4, 1]]],
+  ['Amino', [['R', 0, 0], ['N', 1, 0], ['H', 2, 0], ['H', 1, 1]], [[0, 1, 1], [1, 2, 1], [1, 3, 1]]],
+  ['Sulfhydryl', [['R', 0, 0], ['S', 1, 0], ['H', 2, 0]], [[0, 1, 1], [1, 2, 1]]],
+  ['Phosphate', [['R', 0, 0], ['O', 1, 0], ['P', 2, 0], ['O', 2, -1], ['O⁻', 3, 0], ['O⁻', 2, 1]], [[0, 1, 1], [1, 2, 1], [2, 3, 2], [2, 4, 1], [2, 5, 1]]],
+  ['Methyl', [['R', 0, 0], ['C', 1, 0], ['H', 2, 0], ['H', 1, -1], ['H', 1, 1]], [[0, 1, 1], [1, 2, 1], [1, 3, 1], [1, 4, 1]]],
+];
+const skArrow = (x1, y1, x2, y2) => { const a = Math.atan2(y2 - y1, x2 - x1), h = 8; return `<line x1="${skP(x1)}" y1="${skP(y1)}" x2="${skP(x2)}" y2="${skP(y2)}"/><path d="M${skP(x2)} ${skP(y2)} L${skP(x2 - h * Math.cos(a - 0.42))} ${skP(y2 - h * Math.sin(a - 0.42))} L${skP(x2 - h * Math.cos(a + 0.42))} ${skP(y2 - h * Math.sin(a + 0.42))} Z" fill="currentColor"/>`; };
+/* a pathway: boxes in a circle (cycle) or a column, with lettered blanks */
+function skPathSVG(steps, blanks, circular, extra = {}) {
+  const BW = circular ? 150 : 168, BH = 32, lab = i => blanks.includes(i) ? `<tspan font-weight="700">${'ABCDEFGH'[blanks.indexOf(i)]}</tspan>` : steps[i];
+  let body = '', pos;
+  if (circular) { const n = steps.length, R = n > 5 ? 185 : 110; pos = steps.map((s, i) => { const a = -Math.PI / 2 + i * 2 * Math.PI / n; return [Math.cos(a) * R * (n > 5 ? 1.12 : 1.25), Math.sin(a) * R]; }); }
+  else pos = steps.map((s, i) => [0, i * 58]);
+  pos.forEach(([x, y], i) => { const j = i + 1; if (j >= steps.length && !circular) return; const [x2, y2] = pos[j % steps.length], dx = x2 - x, dy = y2 - y, L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L;
+    const t = (ax, ay) => Math.min(Math.abs(ax) > 1e-6 ? (BW / 2 + 6) / Math.abs(ax) : 1e9, Math.abs(ay) > 1e-6 ? (BH / 2 + 6) / Math.abs(ay) : 1e9);
+    body += skArrow(x + ux * t(ux, uy), y + uy * t(ux, uy), x2 - ux * t(ux, uy), y2 - uy * t(ux, uy)); });
+  pos.forEach(([x, y], i) => { const b = blanks.includes(i); body += `<rect x="${skP(x - BW / 2)}" y="${skP(y - BH / 2)}" width="${BW}" height="${BH}" rx="8" ${b ? 'stroke-dasharray="5 4"' : ''} fill="none"/>` + skText(x, y, lab(i), { s: 13.5, w: b ? 700 : 500 }); });
+  const xs = pos.map(p => p[0]), ys = pos.map(p => p[1]);
+  if (extra.inLabel != null) { const [x, y] = pos[extra.inAt], [x2, y2] = pos[(extra.inAt + 1) % steps.length], mx = (x + x2) / 2, my = (y + y2) / 2, k = steps.length > 5 ? 1.75 : 2.15, ox = mx * k, oy = my * k;
+    const mL = Math.hypot(mx, my) || 1, tx = mx + mx / mL * 6, ty = my + my / mL * 6, L = Math.hypot(tx - ox, ty - oy) || 1, ux = (tx - ox) / L, uy = (ty - oy) / L, off = Math.abs(ux) * 52 + Math.abs(uy) * 12;
+    body += skText(ox, oy, extra.inLabel, { s: 13, w: 700 }) + skArrow(ox + ux * off, oy + uy * off, tx, ty); xs.push(ox - 60, ox + 60); ys.push(oy - 8, oy + 8); }
+  return skSvg(Math.min(...xs) - BW / 2 - 8, Math.min(...ys) - BH / 2 - 8, Math.max(...xs) - Math.min(...xs) + BW + 16, Math.max(...ys) - Math.min(...ys) + BH + 16, body, 1);
+}
+function skVectorSVG(mag, unit, th) {
+  const r = th * Math.PI / 180, L = 120, x = Math.cos(r) * L, y = -Math.sin(r) * L;
+  let b = `<line x1="0" y1="0" x2="150" y2="0" stroke-dasharray="4 4" stroke-width="1.2"/><line x1="0" y1="0" x2="0" y2="-140" stroke-dasharray="4 4" stroke-width="1.2"/>` + skText(158, 0, 'x', { a: 'start', s: 13, w: 500, i: 1 }) + skText(0, -150, 'y', { s: 13, w: 500, i: 1 });
+  b += skArrow(0, 0, x, y).replace(/<line/, '<line stroke-width="2.6"') + `<path d="M34 0 A34 34 0 0 0 ${skP(Math.cos(r) * 34)} ${skP(-Math.sin(r) * 34)}" stroke-width="1.3"/>` + skText(Math.cos(r / 2) * 50, -Math.sin(r / 2) * 50, th + '°', { s: 13, w: 600 });
+  b += skText(x * 0.62 + Math.sin(r) * 16, y * 0.62 + Math.cos(r) * 16, mag + ' ' + unit, { s: 14, w: 700, a: 'start' });
+  return skSvg(-90, -165, 270, 185, b, 1);
+}
+const skZig = (x, y, len, vert) => { let d = `M${x} ${y}`; const seg = len / 8; for (let i = 1; i <= 8; i++) { const o = i === 8 ? 0 : (i % 2 ? 7 : -7); d += vert ? ` L${x + o} ${y + seg * i}` : ` L${x + seg * i} ${y + o}`; } return `<path d="${d}" stroke-linejoin="round"/>`; };
+function skCircuitSVG(V, Rs, par) {
+  const W = par ? 120 + Rs.length * 70 : 120 + Rs.length * 80, H = 150; let b = '';
+  b += `<line x1="0" y1="${H / 2 - 12}" x2="0" y2="0"/><line x1="0" y1="${H / 2 + 12}" x2="0" y2="${H}"/><line x1="-14" y1="${H / 2 - 6}" x2="14" y2="${H / 2 - 6}" stroke-width="2.6"/><line x1="-7" y1="${H / 2 + 6}" x2="7" y2="${H / 2 + 6}" stroke-width="2.6"/>` + skText(-20, H / 2, V + ' V', { a: 'end', s: 14 });
+  if (!par) { let x = 0; b += `<line x1="0" y1="0" x2="30" y2="0"/>`; x = 30; Rs.forEach((R, i) => { b += skZig(x, 0, 50) + skText(x + 25, -20, `R${'₁₂₃'[i]} = ${R} Ω`, { s: 13 }); x += 50; b += `<line x1="${x}" y1="0" x2="${x + 30}" y2="0"/>`; x += 30; });
+    b += `<line x1="${x}" y1="0" x2="${x}" y2="${H}"/><line x1="0" y1="${H}" x2="${x}" y2="${H}"/>`; return skSvg(-62, -36, x + 76, H + 50, b, 1); }
+  let x = 0; b += `<line x1="0" y1="0" x2="${60 + (Rs.length - 1) * 80}" y2="0"/><line x1="0" y1="${H}" x2="${60 + (Rs.length - 1) * 80}" y2="${H}"/>`;
+  Rs.forEach((R, i) => { x = 60 + i * 80; b += `<line x1="${x}" y1="0" x2="${x}" y2="${H / 2 - 28}"/>` + skZig(x, H / 2 - 28, 56, true) + `<line x1="${x}" y1="${H / 2 + 28}" x2="${x}" y2="${H}"/>` + skText(x + 12, H / 2, `R${'₁₂₃'[i]} = ${R} Ω`, { a: 'start', s: 13 }); });
+  return skSvg(-62, -14, x + 150, H + 28, b, 1);
+}
+
+/* ── hands-on generators ── */
+const skIn = (stem, fields, expl, o = {}) => ({ kind: 'in', stem, fields, expl, layout: o.layout || 'list', ...o });
+const skNumF = (a, show, lab, unit = '', o = {}) => ({ t: Number.isInteger(a) && String(show).replace(/^\+/, '').replace('−', '-') === String(a) ? 'int' : 'num', a, show: String(show), lab, unit, ...o });
+const skSel = (a, opts, lab) => ({ t: 'sel', a, opts: [...new Set(opts)], show: a, lab });
+const skTxt = (a, n, lab, w) => ({ t: 'txt', a: [].concat(a), n, show: [].concat(a)[0], lab, w });
+const skMolOf = f => SK_MOL.find(m => m[0] === f);
+function skLewisVariants(L) {
+  const clone = () => JSON.parse(JSON.stringify(L)), out = [], heavy = L[1].map((b, i) => b[0] !== 'H' ? i : -1).filter(i => i >= 0);
+  { const v = clone(); v[2] = L[2] > 0 ? L[2] - 1 : L[2] + 1; out.push(v); }
+  { const v = clone(), i = v[1].findIndex(b => b[1] > 1); if (i >= 0) v[1][i][1] = 1; else if (heavy.length) { const j = SK_PICK(heavy); v[1][j][1] = 2; } out.push(v); }
+  if (heavy.length) { const v = clone(), j = SK_PICK(heavy.filter(i => L[1][i][2] > 0).concat([-1]).filter(i => i >= 0)); if (j != null) { v[1][j][2]--; out.push(v); } }
+  if (heavy.length) { const v = clone(), js = heavy.filter(i => L[1][i][2] > 0); if (js.length) { const j = SK_PICK(js); v[1][j][2]--; v[2]++; out.push(v); } }
+  { const v = clone(), i = v[1].findIndex(b => b[0] === 'H'); if (i >= 0) { v[1][i][2] = 1; v[2] = Math.max(0, v[2] - 1); out.push(v); } }
+  { const v = clone(); if (heavy.length) { const j = SK_PICK(heavy); v[1][j][2]++; out.push(v); } }
+  const seen = new Set([JSON.stringify(L)]); return R.shuf(out).filter(v => v[1].length + v[2] <= 6 && (v[1].length + v[2] > 4) === (L[1].length + L[2] > 4 || v[1].length + v[2] === 5)).filter(v => { const s = JSON.stringify(v); if (seen.has(s)) return false; seen.add(s); return true; });
+}
+function genLewis2() {
+  const keys = Object.keys(SK_LEW), f = SK_PICK(keys), L = SK_LEW[f], M = skMolOf(f), F_ = `{${f}}`, t = SK_RI(0, 5), ion = /\^/.test(f);
+  const bp = L[1].reduce((s, b) => s + b[1], 0), lps = L[1].reduce((s, b) => s + b[2], 0) + L[2], ve = skLewE(L);
+  if (t === 0 && !ion) return skIn('Which molecule does this Lewis structure show? Type its formula (for example, CH4).', [skTxt(f, 'comp', 'Formula', 9)], `This structure has ${L[0]} in the center bonded to ${L[1].map(b => b[0]).join(', ')}: ${F_}.`, { fig: skLewisSVG(L) });
+  if (t <= 1) return skIn(`Look at the Lewis structure of ${F_}. Count the electrons.`, [skNumF(bp, bp, 'Bonding pairs (shared pairs)'), skNumF(lps, lps, 'Lone pairs (on all atoms)'), skNumF(ve, ve, 'Total valence electrons')], `Each line is one shared pair (a double bond is 2 pairs, a triple bond 3). Dots come in pairs. ${bp} bonding pairs + ${lps} lone pairs = ${bp + lps} pairs = ${ve} electrons.`, { fig: skLewisSVG(L) });
+  if (t === 2) { const vs = skLewisVariants(L).slice(0, 3); if (vs.length < 3) return null;
+    return { kind: 'mc', imgs: true, stem: `Which is the correct Lewis structure for ${F_}?`, choices: [skLewisSVG(L, 0.85), ...vs.map(v => skLewisSVG(v, 0.85))], correct: [0], expl: `${F_} has ${ve} valence electrons. The correct structure uses all ${ve} (${bp} bonding pairs and ${lps} lone pairs), and every atom except H${/^(P|S|Xe|Cl|I|B|Be)$/.test(L[0]) && (L[1].length + L[2] !== 4) ? ` (and the central ${L[0]}, which can have more or fewer than eight)` : ''} has a full octet.` }; }
+  if (t === 3 && M) { const dom = L[1].length + L[2];
+    return skIn(`Use the Lewis structure of ${F_} to find its geometry.`, [skNumF(dom, dom, 'Electron domains around the central atom'), skSel(M[5], SK_SHAPES, 'Molecular shape'), skSel(SK_HYB[dom], Object.values(SK_HYB), 'Hybridization of the central atom')],
+      `${L[0]} has ${L[1].length} bonded atom${L[1].length > 1 ? 's' : ''} and ${L[2]} lone pair${L[2] === 1 ? '' : 's'}: ${dom} domains (${SK_EGEOM[dom]} electron geometry), so the shape is ${M[5]} and the hybridization is ${SK_HYB[dom]}.`, { fig: skLewisSVG(L) }); }
+  if (t === 4) return skIn(`How many valence electrons are in the Lewis structure of ${F_}?`, [skNumF(ve, ve, 'Valence electrons')], `Add the valence electrons of every atom${ion ? ', then add one electron for each negative charge or remove one for each positive charge' : ''}: ${ve}.`);
+  return genLewis();
+}
+function genBalance2() {
+  const [re, pr, c] = SK_PICK(SK_RXN), all = re.concat(pr), t = SK_RI(0, 9);
+  if (t <= 6) return { kind: 'in', bal: true, layout: 'eq', eq: { re, pr }, stem: 'Balance the equation. Type the smallest whole-number coefficient in every box (type 1 where you would normally leave it blank).', pstem: 'Balance the equation with the smallest whole-number coefficients.', fields: all.map((s, i) => ({ t: 'int', a: c[i], show: String(c[i]), lab: s, w: 3 })), expl: `Balanced: ${skEq(re, pr, c)}.` };
+  if (t <= 8) { const els = [...new Set(all.flatMap(f => Object.keys(skAtoms(f))))], e = SK_PICK(els), cnt = (fs, cs) => fs.reduce((s, f, i) => s + (skAtoms(f)[e] || 0) * cs[i], 0), w = c.slice(), j = SK_RI(0, w.length - 1); w[j] = w[j] + 1;
+    const l = cnt(re, w.slice(0, re.length)), r = cnt(pr, w.slice(re.length));
+    return skIn(`Count the ${e} atoms on each side of ${skEq(re, pr, w)}. Is it balanced?`, [skNumF(l, l, `${e} atoms on the left (reactants)`), skNumF(r, r, `${e} atoms on the right (products)`), skSel(skBalanced(re, pr, w) ? 'Yes' : 'No', ['Yes', 'No'], 'Is the whole equation balanced?')],
+      `Multiply each subscript by the coefficient in front of the formula. ${e}: ${l} on the left, ${r} on the right. ${skBalanced(re, pr, w) ? 'Every element matches, so it is balanced.' : 'At least one element doesn’t match, so it is not balanced. Correct: ' + skEq(re, pr, c) + '.'}`); }
+  return genBalance();
+}
+function genNames2() {
+  const t = SK_RI(0, 7);
+  if (t <= 2) { const tm = t === 1, [cA, cc, cn] = tm ? SK_PICK(SK_TM) : SK_PICK(SK_CAT), [a, ac, an] = SK_PICK(SK_AN), f = skFormula(cA, cc, a, ac), name = cn + ' ' + an, alt = name.replace('hydrogen carbonate', 'bicarbonate');
+    return t === 2 ? skIn(`Write the formula of ${name}.`, [skTxt(f, 'formula', 'Formula', 12)], `${cA} has a ${cc}+ charge and ${a} has a ${ac}− charge. Balance the charges${skPoly(a) || skPoly(cA) ? ' (use parentheses around a polyatomic ion when you need more than one)' : ''}: {${f}}.`)
+      : skIn(`Name the compound {${f}}.`, [skTxt([name, alt], 'name', 'Name', 26)], `Ionic: cation first, then anion${tm ? '; the Roman numeral gives the metal’s charge (' + cc + '+)' : ''}. {${f}} is ${name}.`); }
+  if (t <= 5) { const [f, name] = SK_PICK(SK_COVREAL), alts = { 'nitrogen monoxide': ['nitric oxide'], 'dinitrogen monoxide': ['nitrous oxide'] }[name] || [];
+    return t <= 4 ? skIn(`Name the covalent compound {${f}}.`, [skTxt([name, ...alts], 'name', 'Name', 26)], `Two nonmetals: use prefixes for the number of each atom and drop “mono-” on the first element. {${f}} is ${name}.`)
+      : skIn(`Write the formula of ${name}.`, [skTxt(f, 'formula', 'Formula', 10)], `The prefixes give the subscripts: ${name} = {${f}}.`); }
+  const [f, n] = SK_PICK(SK_ACIDS);
+  return t === 6 ? skIn(`Name the acid {${f}}.`, [skTxt(n, 'name', 'Name', 24)], 'Binary acids: hydro- + root + -ic acid. Oxyacids: an -ate ion becomes -ic acid; an -ite ion becomes -ous acid.') : skIn(`Write the formula of ${n}.`, [skTxt(f, 'formula', 'Formula', 10)], 'Binary acids: hydro- + root + -ic acid. Oxyacids: an -ate ion becomes -ic acid; an -ite ion becomes -ous acid.');
+}
+function genConfig2() {
+  if (Math.random() < 0.3) return genConfig();
+  const z = SK_RI(3, 36), el = ELEMENTS[z - 1].sym, cfg = skConfig(z), ng = z > 18 ? '[Ar]' : z > 10 ? '[Ne]' : '[He]', short = ng + ' ' + cfg.split(' ').slice({ '[Ar]': 5, '[Ne]': 3, '[He]': 1 }[ng]).join(' ');
+  return skIn(`Write the ground-state electron configuration of ${el} (Z = ${z}). Type it like 1s2 2s2 2p6; noble-gas shorthand like [Ne] 3s2 is fine too.`, [skTxt([cfg, short], 'cfg', 'Configuration', 30)],
+    `Fill 1s, 2s, 2p, 3s, 3p, 4s, 3d, 4p in order until ${z} electrons are placed${z === 24 || z === 29 ? ' (chromium and copper are exceptions: one 4s electron moves to 3d)' : ''}: ${skSup(cfg)}, or ${skSup(short)}.`);
+}
+function genDNA2() {
+  const t = SK_RI(0, 3), comp = { A: 'U', T: 'A', G: 'C', C: 'G' };
+  if (t === 0) { const d = Array.from({ length: 12 }, () => SK_PICK([...'ATGC'])).join(''), m = [...d].map(b => comp[b]).join('');
+    return skIn(`A DNA template strand reads 3′-${d.match(/.{3}/g).join(' ')}-5′. Type the mRNA made from it (5′ → 3′).`, [skTxt(m, 'seq', 'mRNA', 24)], `Pair each base: A → U, T → A, G → C, C → G. mRNA: 5′-${m.match(/.{3}/g).join(' ')}-3′.`); }
+  const cods = Object.keys(CODON).filter(c => CODON[c] !== '*' && c !== 'AUG');
+  if (t === 1) { const seq = ['AUG', SK_PICK(cods), SK_PICK(cods), SK_PICK(cods), SK_PICK(['UAA', 'UAG', 'UGA'])], aa = seq.slice(0, 4).map(c => AA3[CODON[c]]);
+    return skIn(`Use the codon table to translate 5′-${seq.join(' ')}-3′. Type the amino acids in order with their three-letter names (for example, Met-Gly-…).`, [skTxt(aa.join('-'), 'aa', 'Polypeptide', 26)], `Start at AUG and read in threes until the stop codon ${seq[4]}: ${aa.join('–')}.`, { codon: true }); }
+  if (t === 2) { const c = SK_PICK(cods), anti = [...c].map(b => ({ A: 'U', U: 'A', G: 'C', C: 'G' })[b]).join('');
+    return skIn(`Type the tRNA anticodon (3′ → 5′) that pairs with the mRNA codon 5′-${c}-3′.`, [skTxt(anti, 'seq', 'Anticodon', 6)], `Anticodons pair with codons: A–U, G–C, antiparallel. 5′-${c}-3′ pairs with 3′-${anti}-5′.`); }
+  return genDNA();
+}
+function genPunnett2() {
+  if (Math.random() < 0.3) return genPunnett();
+  const g = SK_PICK(['A', 'B', 'R', 'T', 'P', 'G']), lo = g.toLowerCase(), G3 = [g + g, g + lo, lo + lo], p1 = SK_PICK([G3[1], G3[1], G3[0], G3[2]]), p2 = SK_PICK(G3.filter(x => x !== G3[2] || p1 !== G3[2]));
+  const cells = [p1[0] + p2[0], p1[0] + p2[1], p1[1] + p2[0], p1[1] + p2[1]].map(SK_NORM.geno), rec = cells.filter(c => c === lo + lo).length / 4, het = cells.filter(c => c === g + lo).length / 4;
+  const ask = SK_PICK([['recessive', rec, `show the recessive phenotype (${lo}${lo})`], ['het', het, `are heterozygous (${g}${lo})`], ['dom', 1 - rec, 'show the dominant phenotype']]), fr = v => ({ 0: '0', 0.25: '1/4', 0.5: '1/2', 0.75: '3/4', 1: '1' })[v];
+  return { kind: 'in', layout: 'punnett', pn: { a: [...p1], b: [...p2] }, stem: `Complete the Punnett square for the cross ${p1} × ${p2}. Then answer the question below it.`,
+    fields: [...cells.map((c, i) => ({ t: 'txt', n: 'geno', a: [c], show: c, lab: 'Box ' + (i + 1), w: 4 })), { t: 'num', a: ask[1], show: fr(ask[1]), tol: 0.01, lab: `Fraction of offspring that ${ask[2]}`, w: 6 }],
+    expl: `Gametes ${p1[0]}, ${p1[1]} and ${p2[0]}, ${p2[1]} give ${cells.join(', ')}. ${cells.filter(c => ask[0] === 'recessive' ? c === lo + lo : ask[0] === 'het' ? c === g + lo : c !== lo + lo).length} of 4 boxes match, so the fraction is ${fr(ask[1])}.` };
+}
+const SK_PATHS = {
+  krebs: { steps: ['Oxaloacetate', 'Citrate', 'Isocitrate', 'α-Ketoglutarate', 'Succinyl-CoA', 'Succinate', 'Fumarate', 'Malate'], circ: true, inLabel: 'Acetyl-CoA', inAt: 0, title: 'the Krebs (citric acid) cycle',
+    extra: [() => skNumF(2, 2, 'CO₂ released per turn'), () => skNumF(3, 3, 'NADH made per turn'), () => skNumF(1, 1, 'FADH₂ made per turn'), () => skNumF(2, 2, 'Turns of the cycle per glucose')] },
+  glycolysis: { steps: ['Glucose', 'Glucose-6-phosphate', 'Fructose-6-phosphate', 'Fructose-1,6-bisphosphate', 'G3P', '1,3-Bisphosphoglycerate', '3-Phosphoglycerate', '2-Phosphoglycerate', 'PEP', 'Pyruvate'], title: 'glycolysis', blankFrom: 1,
+    extra: [() => skNumF(2, 2, 'Net ATP per glucose'), () => skNumF(2, 2, 'NADH made per glucose'), () => skNumF(2, 2, 'Pyruvate molecules per glucose'), () => skNumF(2, 2, 'ATP invested at the start')] },
+  calvin: { steps: ['RuBP', '3-PGA', '1,3-BPG', 'G3P'], circ: true, inLabel: 'CO₂ (rubisco)', inAt: 0, title: 'the Calvin cycle',
+    extra: [() => skNumF(3, 3, 'CO₂ fixed to make one G3P that leaves the cycle'), () => skNumF(9, 9, 'ATP used per G3P that leaves'), () => skNumF(6, 6, 'NADPH used per G3P that leaves')] },
+  etc: { steps: ['NADH', 'Complex I', 'Ubiquinone (Q)', 'Complex III', 'Cytochrome c', 'Complex IV', 'O₂ → H₂O'], title: 'the electron transport chain (the path of electrons from NADH)', blankFrom: 1,
+    extra: [() => skSel('Oxygen', ['Oxygen', 'NAD⁺', 'Carbon dioxide', 'Water'], 'Final electron acceptor'), () => skSel('Intermembrane space', ['Intermembrane space', 'Matrix', 'Cytoplasm', 'Stroma'], 'H⁺ is pumped into the')] },
+  light: { steps: ['H₂O', 'Photosystem II', 'Plastoquinone', 'Cytochrome b6f', 'Plastocyanin', 'Photosystem I', 'Ferredoxin', 'NADPH'], title: 'the light reactions (the path of electrons from water)', blankFrom: 1,
+    extra: [() => skSel('O₂', ['O₂', 'CO₂', 'Glucose', 'NADP⁺'], 'Released when water is split'), () => skSel('Thylakoid membrane', ['Thylakoid membrane', 'Stroma', 'Inner mitochondrial membrane', 'Cytoplasm'], 'Where these reactions happen')] },
+};
+function genPath(k) {
+  const P = SK_PATHS[k], idx = [...P.steps.keys()].slice(P.blankFrom || 0), bl = R.sample(idx, Math.min(3, idx.length - 1)).sort((a, b) => a - b), ex = R.sample(P.extra, 2).map(f => f());
+  const bank = P.steps.slice().sort((a, b) => a.localeCompare(b));
+  return { kind: 'in', layout: 'path', stem: `Label the blanks in ${P.title}, then answer the questions.`, fig: skPathSVG(P.steps, bl, P.circ, P.circ ? { inLabel: P.inLabel, inAt: P.inAt } : {}), bank,
+    fields: [...bl.map((i, j) => skSel(P.steps[i], bank, 'Blank ' + 'ABC'[j])), ...ex], expl: `In order: ${P.steps.join(' → ')}${P.circ ? ' → (back to ' + P.steps[0] + ')' : ''}.` };
+}
+function genFG2() {
+  const t = SK_RI(0, 3), names = [...new Set(SK_FGS.map(o => o[0]))];
+  if (t <= 1) { const [n, at, bd] = SK_PICK(SK_FGS); return { kind: 'mc', stem: 'Which functional group is shown? (R stands for the rest of the molecule.)', fig: skStructSVG(at, bd), choices: [n, ...R.sample(names.filter(x => x !== n), 3)], correct: [0], expl: `${n}: ${(SK_FG.find(o => o[0] === n) || ['', '', ''])[2]}.` }; }
+  if (t === 2) { const n = SK_PICK(names), s = SK_PICK(SK_FGS.filter(o => o[0] === n)), others = R.sample(names.filter(x => x !== n), 3).map(m => SK_PICK(SK_FGS.filter(o => o[0] === m)));
+    return { kind: 'mc', imgs: true, stem: `Which structure contains a ${n.toLowerCase().replace(' (aldehyde or ketone)', '')} group?`, choices: [s, ...others].map(o => skStructSVG(o[1], o[2], 0.85)), correct: [0], expl: `${n}: ${(SK_FG.find(o => o[0] === n) || ['', '', ''])[2]}.` }; }
+  return genFG();
+}
+function genVectors2() {
+  if (Math.random() < 0.25) return genVectors();
+  const m = SK_RI(8, 60), th = SK_PICK([20, 25, 30, 35, 37, 40, 50, 53, 55, 60, 65, 70]), r = th * Math.PI / 180, u = SK_PICK([['N', 'force'], ['m/s', 'velocity'], ['m', 'displacement']]);
+  const x = m * Math.cos(r), y = m * Math.sin(r);
+  return skIn(`The ${u[1]} vector shown has magnitude ${m} ${u[0]} at ${th}° above the +x axis. Find its components.`, [skNumF(x, sig(x, 3), 'x-component', u[0]), skNumF(y, sig(y, 3), 'y-component', u[0])],
+    `x = ${m} cos ${th}° = ${sig(x, 3)} ${u[0]}; y = ${m} sin ${th}° = ${sig(y, 3)} ${u[0]}.`, { fig: skVectorSVG(m, u[0], th) });
+}
+function genCircuit() {
+  if (Math.random() < 0.3) return SK_PICK([skRef('hsphys', 'hpohm'), skRef('hsphys', 'hppar'), skRef('p2', 'series'), skRef('p2', 'parallel')])();
+  const par = Math.random() < 0.5, n = SK_RI(2, 3), V = SK_PICK([6, 9, 12, 18, 24]), Rs = Array.from({ length: n }, () => SK_PICK([2, 3, 4, 5, 6, 8, 10, 12, 15, 20]));
+  const Req = par ? 1 / Rs.reduce((s, r) => s + 1 / r, 0) : Rs.reduce((s, r) => s + r, 0), I = V / Req, P = V * I;
+  const third = par ? skNumF(V / Rs[0], sig(V / Rs[0], 3), 'Current through R₁', 'A') : skNumF(I * Rs[0], sig(I * Rs[0], 3), 'Voltage across R₁', 'V');
+  return skIn(`The resistors in this circuit are in ${par ? 'parallel' : 'series'}. Find the values below.`, [skNumF(Req, sig(Req, 3), 'Equivalent resistance', 'Ω'), skNumF(I, sig(I, 3), 'Current from the battery', 'A'), third],
+    `${par ? `1/R = ${Rs.map(r => '1/' + r).join(' + ')} → R = ${sig(Req, 3)} Ω` : `R = ${Rs.join(' + ')} = ${Req} Ω`}. I = V/R = ${V}/${sig(Req, 3)} = ${sig(I, 3)} A. ${par ? `Each branch has the full ${V} V, so I₁ = ${V}/${Rs[0]} = ${sig(V / Rs[0], 3)} A` : `Series resistors share the current, so V₁ = IR₁ = ${sig(I * Rs[0], 3)} V`}. (Power from the battery: ${sig(P, 3)} W.)`, { fig: skCircuitSVG(V, Rs, par) });
+}
+function genOx2() { const [el, f, v] = SK_PICK(SK_OX); return skIn(`What is the oxidation number of ${el} in {${f}}? (Include the sign, for example +3 or −2.)`, [skNumF(v, (v > 0 ? '+' : '') + neg(String(v)), 'Oxidation number')], `O is −2 (−1 in peroxides), H is +1, Group 1 is +1. The sum equals the overall charge, so ${el} is ${v > 0 ? '+' : ''}${neg(String(v))}.`); }
+function genSigFigs2() {
+  const t = SK_RI(0, 2);
+  if (t === 0) { const as = (SK_RI(101, 999) / 10).toFixed(1), bs = (SK_RI(11, 99) / 100).toFixed(2), p = +as * +bs, ans = String(+p.toPrecision(2));
+    return skIn(`Calculate ${as} × ${bs}. Type the answer with the correct number of significant figures.`, [skTxt(ans, 'plain', 'Answer', 8)], `Multiplying: keep the fewest significant figures in the data (${bs} has 2). ${as} × ${bs} = ${p.toPrecision(5)} → ${ans}.`); }
+  if (t === 1) { const a = (SK_RI(1001, 9999) / 100).toFixed(2), b = (SK_RI(11, 99) / 10).toFixed(1), s = +a + +b, ans = s.toFixed(1);
+    return skIn(`Calculate ${a} + ${b}. Type the answer with the correct number of significant figures.`, [skTxt(ans, 'plain', 'Answer', 8)], `Adding: keep the fewest decimal places (${b} has one). ${a} + ${b} = ${s.toFixed(2)} → ${ans}.`); }
+  return genSigFigs();
+}
+
+/* ── turning any generated question into a drill item ── */
+function skParseShow(cs) { const m = String(cs).match(/^\s*(\$?)([+−-]?\d[\d,]*(?:\.\d+)?(?:\s*×\s*10\^\([−-]?\d+\))?)\s*(.*)$/); return m ? { pre: m[1], show: m[2], unit: m[3].trim() } : null; }
+function skPrep(q) {
+  if (!q) return null;
+  if (q.kind === 'in') return q.fields.length ? q : null;
+  if (q.kind === 'mc') return q;
+  if (typeof q.val === 'number' && isFinite(q.val) && q.cs != null && Math.random() < 0.8) { const p = skParseShow(q.cs);
+    if (p && !/[a-z]{4,}/i.test(p.unit.replace(/[a-z]+\/[a-z]+|mol|atm|mmHg|kPa|years?|units?|workers?|seconds?|minutes?|hours?|days?/gi, ''))) return skIn(q.stem, [{ ...skNumF(q.val, p.show, 'Answer', p.unit), pre: p.pre }], q.expl); }
+  if (!q.choices || q.choices.length < 4) return null;
+  return { kind: 'mc', stem: q.stem, choices: q.choices, correct: q.correct, expl: q.expl, ordered: q.ordered };
+}
+function skDraw(id, n) {
+  const T = SK_TOPIC[id], out = [], seen = new Set(); let tries = 0;
+  while (out.length < n && tries < n * 30) { tries++; let q = null; try { q = skPrep(T.gen()); } catch (e) { q = null; }
+    if (!q) continue;
+    const txt = q.stem + JSON.stringify(q.fields || q.choices || '') + q.expl; if (/NaN|Infinity|undefined/.test(txt)) continue;
+    const key = q.stem + (q.fig || '') + JSON.stringify(q.kind === 'in' ? q.fields.map(f => f.a) : q.choices[q.correct[0]]); if (seen.has(key)) continue;
+    if (q.kind === 'mc') { if (q.correct.length !== 1) continue; const ch = q.choices.slice(), c = q.correct[0]; let keep = [c, ...[...ch.keys()].filter(i => i !== c).slice(0, 3)]; if (keep.length < 4 || new Set(keep.map(i => ch[i])).size < 4) continue;
+      keep = q.ordered ? keep.sort((a, b) => a - b) : R.shuf(keep); q = { ...q, choices: keep.map(i => ch[i]), correct: [keep.indexOf(c)] }; }
+    seen.add(key); out.push({ ...q, id: 'sk-' + id + '-' + out.length, cat: id }); }
+  return out;
+}
+
+/* ── showing an item (online) ── */
+function skFieldHTML(f, i, val, res, live) {
+  const st = res ? (res.okf[i] ? ' ok' : ' no') : '', dis = res ? 'disabled' : '';
+  if (f.t === 'sel') return `<select class="sk-in sk-sel${st}" data-skf="${i}" ${dis} aria-label="${esc(stripTags(f.lab || 'Answer'))}"><option value="">Choose…</option>${f.opts.map(o => `<option ${val === o ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
+  const w = f.w || (f.t === 'int' ? 5 : f.t === 'num' ? 10 : 14);
+  return `${f.pre ? `<span class="sk-u">${f.pre}</span>` : ''}<input class="sk-in${st}" data-skf="${i}" ${dis} type="text" inputmode="${f.t === 'txt' ? 'text' : 'decimal'}" autocomplete="off" autocapitalize="off" spellcheck="false" style="width:${w + 2}ch" value="${esc(val || '')}" aria-label="${esc(stripTags(f.lab || 'Answer'))}">${f.unit ? `<span class="sk-u">${F(f.unit)}</span>` : ''}`;
+}
+const skFix = (f, i, res) => res && !res.okf[i] ? `<span class="sk-fix">${f.pre || ''}${F(f.show)}${f.unit ? ' ' + F(f.unit) : ''}</span>` : '';
+function skItemHTML(q, a) {
+  const res = a ? a.res : null, vals = a ? a.v : [];
+  let h = `<div class="sk-stem">${F(q.stem)}</div>${q.fig ? `<figure class="sk-fig${q.layout === 'path' ? ' wide' : ''}">${q.fig}</figure>` : ''}`;
+  if (q.kind === 'mc') return h + `<div class="sk-ch${q.imgs ? ' sk-imgs' : ''}">${q.choices.map((c, j) => `<button class="sk-opt ${a ? (q.correct.includes(j) ? 'c' : a.v === j ? 'w' : '') : ''}" data-ska="${j}" ${a ? 'disabled' : ''}><b>${LETTERS[j]}</b><span>${q.imgs ? c : F(c)}</span></button>`).join('')}</div>`;
+  if (q.layout === 'eq') { const n = q.eq.re.length, part = (fs, off) => fs.map((s, k) => `<span class="sk-sp">${skFieldHTML(q.fields[off + k], off + k, vals[off + k], res)}<span class="sk-f">${F('{' + s + '}')}</span></span>`).join('<span class="sk-op">+</span>');
+    return h + `<div class="sk-eq">${part(q.eq.re, 0)}<span class="sk-op">→</span>${part(q.eq.pr, n)}</div>`; }
+  if (q.layout === 'punnett') { const { a: A, b: B } = q.pn, cell = i => `<td>${skFieldHTML(q.fields[i], i, vals[i], res)}${skFix(q.fields[i], i, res)}</td>`, last = q.fields.length - 1;
+    return h + `<table class="sk-pun"><tr><th></th><th>${B[0]}</th><th>${B[1]}</th></tr><tr><th>${A[0]}</th>${cell(0)}${cell(1)}</tr><tr><th>${A[1]}</th>${cell(2)}${cell(3)}</tr></table>
+      <div class="sk-fields"><label class="sk-fl"><span>${F(q.fields[last].lab)} <span class="muted small">(a fraction like 1/4, a decimal, or a percent)</span></span><span class="sk-row">${skFieldHTML(q.fields[last], last, vals[last], res)}${skFix(q.fields[last], last, res)}</span></label></div>`; }
+  return h + `<div class="sk-fields">${q.fields.map((f, i) => `<label class="sk-fl"><span>${F(f.lab || 'Answer')}</span><span class="sk-row">${skFieldHTML(f, i, vals[i], res)}${skFix(f, i, res)}</span></label>`).join('')}</div>`;
+}
+const skAnsText = (q, a) => q.kind === 'mc' ? (a == null ? '—' : q.imgs ? 'Choice ' + LETTERS[a.v] : F(q.choices[a.v])) : q.fields.map((f, i) => (a && a.v[i] ? esc(a.v[i]) : '—')).join(', ');
+const skKeyText = q => q.kind === 'mc' ? (q.imgs ? 'Choice ' + LETTERS[q.correct[0]] : F(q.choices[q.correct[0]])) : q.fields.map(f => (q.fields.length > 1 ? `${F(f.lab)}: ` : '') + (f.pre || '') + F(f.show) + (f.unit ? ' ' + F(f.unit) : '')).join(' · ');
+
 function renderSkillTopic(id) {
   const T = SK_TOPIC[id]; setAccent({ accent: T.subj.accent }); SK.sub = T.subj.k;
   if (SK.topic !== id) SK = { ...SK, topic: id, items: null, i: 0, ans: [], done: false };
   const tch = isTeacher(), it = SK.items, cur = it && !SK.done ? it[SK.i] : null, a = SK.ans[SK.i];
-  const runner = !it ? `<div class="row"><label class="small">Questions <select id="skN">${[5, 10, 15, 20].map(n => `<option ${n === SK.n ? 'selected' : ''}>${n}</option>`).join('')}</select></label><button class="btn primary big" id="skGo">Start the drill</button></div>`
-    : SK.done ? (() => { const c = it.filter((q, i) => SK.ans[i] != null && q.correct.includes(SK.ans[i])).length, p = Math.round(c / it.length * 100);
-      return `<div class="sk-done"><h3>${c} of ${it.length} correct · ${p}%</h3><p class="muted">${p >= 80 ? 'Strong. Try another drill to make sure it sticks.' : p >= 60 ? 'Getting there. Read the explanations for the ones you missed, then go again.' : 'Review the method above and the explanations, then try a new set.'}</p><div class="row"><button class="btn primary" id="skAgain">New set of questions</button><a class="btn" href="#skills">All topics</a></div>
-        <ol class="sk-rev">${it.map((q, i) => { const ok = SK.ans[i] != null && q.correct.includes(SK.ans[i]); return `<li class="${ok ? 'ok' : 'no'}"><div>${F(q.stem)}</div><div class="small">${ok ? '✓' : '✕'} Your answer: ${SK.ans[i] == null ? '—' : F(q.choices[SK.ans[i]])}${ok ? '' : ` · Correct: <b>${F(q.choices[q.correct[0]])}</b>`}</div><div class="small muted">${F(q.expl)}</div></li>`; }).join('')}</ol></div>`; })()
-    : `<div class="sk-q"><div class="small muted">Question ${SK.i + 1} of ${it.length}</div><div class="sk-stem">${F(cur.stem)}</div>
-      <div class="sk-ch">${cur.choices.map((c, j) => `<button class="sk-opt ${a != null ? (cur.correct.includes(j) ? 'c' : a === j ? 'w' : '') : ''}" data-ska="${j}" ${a != null ? 'disabled' : ''}><b>${LETTERS[j]}</b><span>${F(c)}</span></button>`).join('')}</div>
-      ${a != null ? `<div class="rat"><div class="rat-h">${cur.correct.includes(a) ? '✓ Correct' : '✕ Not quite'}</div><p>${F(cur.expl)}</p></div><div class="row"><button class="btn primary" id="skNext">${SK.i + 1 < it.length ? 'Next question' : 'See my score'}</button></div>` : ''}</div>`;
-  $('#hub').innerHTML = nav('skills') + `<div class="page" style="max-width:860px"><div class="crumb"><a href="#skills">Skill Builder</a> / ${esc(T.subj.name)}</div>${pageHead(T.subj.name, T.name, '')}
+  const nOK = () => it.filter((q, i) => SK.ans[i] && SK.ans[i].ok).length;
+  const runner = !it ? `<div class="row"><label class="small">Questions <select id="skN">${[5, 10, 15, 20].map(n => `<option ${n === SK.n ? 'selected' : ''}>${n}</option>`).join('')}</select></label><button class="btn primary big" id="skGo">Start the drill</button></div><p class="small muted" style="margin:10px 0 0">Most questions ask you to work it out and type the answer. Numbers are accepted if they’re within rounding of the correct value.</p>`
+    : SK.done ? (() => { const c = nOK(), p = Math.round(c / it.length * 100);
+      return `<div class="sk-done"><h3>${c} of ${it.length} correct · ${p}%</h3><p class="muted">${p >= 80 ? 'Strong. Try another set to make sure it sticks.' : p >= 60 ? 'Getting there. Read the worked answers for the ones you missed, then go again.' : 'Review the method above and the worked answers, then try a new set.'}</p><div class="row"><button class="btn primary" id="skAgain">New set of questions</button><a class="btn" href="#skills">All topics</a></div>
+        <ol class="sk-rev">${it.map((q, i) => { const ans = SK.ans[i], ok = ans && ans.ok; return `<li class="${ok ? 'ok' : 'no'}"><div>${F(q.stem)}</div><div class="small">${ok ? '✓' : '✕'} Your answer: ${skAnsText(q, ans)}${ok ? '' : ` · Correct: <b>${skKeyText(q)}</b>`}</div><div class="small muted">${F(q.expl)}</div></li>`; }).join('')}</ol></div>`; })()
+    : `<div class="sk-q"><div class="sk-qh"><span class="small muted">Question ${SK.i + 1} of ${it.length}</span><span class="sk-kind">${cur.kind === 'mc' ? 'Choose one' : cur.layout === 'eq' ? 'Enter coefficients' : cur.layout === 'punnett' ? 'Fill in the square' : cur.layout === 'path' ? 'Label the diagram' : cur.fields.every(f => f.t === 'sel') ? 'Choose from the lists' : 'Work it out'}</span></div>${skItemHTML(cur, a)}
+      ${!a && cur.kind === 'in' ? `<div class="row" style="margin-top:14px"><button class="btn primary" id="skChk">Check my answer</button><button class="btn link" id="skSkip">I don’t know: show me</button></div>` : ''}
+      ${a ? `<div class="rat"><div class="rat-h">${a.ok ? '✓ Correct' : '✕ Not quite'}</div>${a.res && a.res.note ? `<p><b>${esc(a.res.note)}</b></p>` : ''}${!a.ok && cur.kind === 'in' && cur.layout === 'eq' ? '' : ''}<p>${F(cur.expl)}</p></div><div class="row"><button class="btn primary" id="skNext">${SK.i + 1 < it.length ? 'Next question' : 'See my score'}</button></div>` : ''}</div>`;
+  $('#hub').innerHTML = nav('skills') + `<div class="page" style="max-width:880px"><div class="crumb"><a href="#skills">Skill Builder</a> / ${esc(T.subj.name)}</div>${pageHead(T.subj.name, T.name, '')}
     <section class="card sk-how"><h3>How to do it</h3><p>${T.how}</p></section>
     <section class="card" style="margin-top:16px" id="skRun">${runner}</section>
     ${tch ? `<section class="card sk-print" style="margin-top:16px"><div class="card-h sm"><h3>${SVG(IC.print)} Printable quiz (teachers)</h3></div>
       <div class="row"><label class="small">Questions <select id="skPN">${[5, 10, 15, 20, 25].map(n => `<option ${n === SK.pn ? 'selected' : ''}>${n}</option>`).join('')}</select></label><label class="chk small"><input type="checkbox" id="skPK" ${SK.key ? 'checked' : ''}> Include the answer key</label>${pdfBtn('skPdf', 'Quiz (PDF)')}${docxBtn('skDoc', 'Quiz (Word)')}${paperSel()}</div>
-      <p class="small muted" style="margin:6px 0 0">Every download makes a new set of questions, so you can hand out different versions.</p></section>` : ''}
+      <p class="small muted" style="margin:6px 0 0">Every download makes a new set of questions, so you can hand out different versions. Diagrams print with the quiz.</p></section>` : ''}
     ${foot()}</div>`;
   bindNav();
-  if ($('#skGo')) $('#skGo').onclick = () => { SK.n = +$('#skN').value; SK.items = skDraw(id, SK.n); SK.i = 0; SK.ans = []; SK.done = false; renderSkillTopic(id); };
-  $$('[data-ska]').forEach(b => b.onclick = () => { SK.ans[SK.i] = +b.dataset.ska; renderSkillTopic(id); const el = $('#skRun'); if (el) el.scrollIntoView({ block: 'nearest' }); });
-  if ($('#skNext')) $('#skNext').onclick = () => { if (SK.i + 1 < SK.items.length) SK.i++; else { SK.done = true; const c = SK.items.filter((q, i) => SK.ans[i] != null && q.correct.includes(SK.ans[i])).length, p = Math.round(c / SK.items.length * 100), st = LS.get(skKey(), {}); st[id] = { best: Math.max(p, (st[id] || {}).best || 0), n: ((st[id] || {}).n || 0) + 1, last: p }; LS.set(skKey(), st); } renderSkillTopic(id); };
-  if ($('#skAgain')) $('#skAgain').onclick = () => { SK.items = skDraw(id, SK.n); SK.i = 0; SK.ans = []; SK.done = false; renderSkillTopic(id); };
+  const fresh = () => { SK.items = skDraw(id, SK.n); SK.i = 0; SK.ans = []; SK.done = false; renderSkillTopic(id); };
+  if ($('#skGo')) $('#skGo').onclick = () => { SK.n = +$('#skN').value; fresh(); };
+  const keepView = () => { const el = $('#skRun'); if (el) el.scrollIntoView({ block: 'nearest' }); };
+  $$('[data-ska]').forEach(b => b.onclick = () => { const j = +b.dataset.ska; SK.ans[SK.i] = { v: j, ok: cur.correct.includes(j) }; renderSkillTopic(id); keepView(); });
+  const check = blank => { const vals = blank ? cur.fields.map(() => '') : $$('[data-skf]').sort((x, y) => x.dataset.skf - y.dataset.skf).map(e => e.value);
+    if (!blank && vals.every(v => !String(v).trim())) { const f = $('[data-skf]'); if (f) f.focus(); return; }
+    const res = skGrade(cur, vals); SK.ans[SK.i] = { v: vals, ok: res.ok, res }; renderSkillTopic(id); keepView(); };
+  if ($('#skChk')) { $('#skChk').onclick = () => check(false); $('#skSkip').onclick = () => check(true); $$('input[data-skf]').forEach(e => e.onkeydown = ev => { if (ev.key === 'Enter') { ev.preventDefault(); check(false); } }); const f0 = $('input[data-skf],select[data-skf]'); if (f0 && !matchMedia('(pointer: coarse)').matches) f0.focus({ preventScroll: true }); }
+  if ($('#skNext')) $('#skNext').onclick = () => { if (SK.i + 1 < SK.items.length) SK.i++; else { SK.done = true; const p = Math.round(nOK() / SK.items.length * 100), st = LS.get(skKey(), {}); st[id] = { best: Math.max(p, (st[id] || {}).best || 0), n: ((st[id] || {}).n || 0) + 1, last: p, at: new Date().toISOString() }; LS.set(skKey(), st); } renderSkillTopic(id); };
+  if ($('#skAgain')) $('#skAgain').onclick = fresh;
   if (tch) { const opts = () => { SK.pn = +$('#skPN').value; SK.key = $('#skPK').checked; return skQuizHTML(id, SK.pn, SK.key); };
     $('#skPdf').onclick = () => makePdf(opts(), fileSafe(T.name + ' quiz') + '.pdf', $('#skPdf')); $('#skDoc').onclick = () => makeDocx(opts(), fileSafe(T.name + ' quiz') + '.docx', $('#skDoc')); }
+}
+
+/* ── printing ── */
+const SK_BL = (w = 10) => `<span class="sk-bl">${'_'.repeat(w)}</span>`;
+function skPrintItem(q) {
+  const pst = (q.pstem || q.stem).replace(/\bType\b/g, 'Write').replace(/\btype\b/g, 'write');
+  let h = `<div class="pp-stem">${F(pst)}</div>${q.fig ? `<div class="sk-pfig">${q.fig}</div>` : ''}`;
+  if (q.kind === 'mc') return h + (q.imgs ? `<div class="sk-pimgs">${q.choices.map((c, j) => `<div><b>${LETTERS[j]}.</b> ${c}</div>`).join('')}</div>` : `<ol class="pp-ch">${q.choices.map((c, j) => `<li><b>${LETTERS[j]}.</b> ${F(c)}</li>`).join('')}</ol>`);
+  if (q.layout === 'eq') return h + `<p class="sk-peq">${q.eq.re.map(s => SK_BL(4) + ' ' + F('{' + s + '}')).join(' + ')} → ${q.eq.pr.map(s => SK_BL(4) + ' ' + F('{' + s + '}')).join(' + ')}</p>`;
+  if (q.layout === 'punnett') { const { a: A, b: B } = q.pn, l = q.fields[q.fields.length - 1];
+    return h + `<table class="sk-ppun"><tr><th></th><th>${B[0]}</th><th>${B[1]}</th></tr><tr><th>${A[0]}</th><td>&nbsp;</td><td>&nbsp;</td></tr><tr><th>${A[1]}</th><td>&nbsp;</td><td>&nbsp;</td></tr></table><p class="sk-pf">${F(l.lab)}: ${SK_BL(12)}</p>`; }
+  const sels = q.fields.filter(f => f.t === 'sel');
+  return h + (q.layout === 'path' ? `<p class="sk-pf small"><i>Choose from:</i> ${q.bank.map(esc).join(' · ')}</p>` : '') + q.fields.map(f => `<p class="sk-pf">${F(f.lab || 'Answer')}${/[?:]$/.test(f.lab || '') ? '' : ':'} ${f.pre || ''}${SK_BL(f.t === 'txt' ? Math.max(14, (f.w || 10) + 4) : 12)} ${f.unit ? F(f.unit) : ''}${f.t === 'sel' && q.layout !== 'path' && sels.length ? ` <span class="small">(${f.opts.map(esc).join(' / ')})</span>` : ''}</p>`).join('') + (q.kind === 'in' && q.layout === 'list' && q.fields.some(f => f.t !== 'sel') ? '<div class="sk-work">Work:</div>' : '');
 }
 function skQuizHTML(id, n, key) {
   const T = SK_TOPIC[id], items = skDraw(id, n);
   const head = k => `<header class="ws-h"><p class="ws-kicker">${esc(T.subj.name)} · Skill quiz${k ? ' · ANSWER KEY' : ''}</p><h1>${esc(T.name)}</h1>${k ? '' : '<div class="ws-fields"><div><span>Name</span><i></i></div><div><span>Date</span><i></i></div><div><span>Period</span><i></i></div></div>'}</header>`;
-  const quiz = `<div class="pp">${head(false)}<p class="pp-i">Choose the best answer. Show your work in the space provided where a calculation is needed.</p><ol class="pp-q">${items.map(q => `<li><div class="pp-stem">${F(q.stem)}</div><ol class="pp-ch">${q.choices.map((c, j) => `<li><b>${LETTERS[j]}.</b> ${F(c)}</li>`).join('')}</ol></li>`).join('')}</ol></div>`;
-  const ks = key ? `<div class="pp pb">${head(true)}<table class="pp-key"><thead><tr><th>#</th><th>Answer</th><th>Why</th></tr></thead><tbody>${items.map((q, i) => `<tr><td>${i + 1}</td><td class="ans">${q.correct.map(j => LETTERS[j]).join(', ')}</td><td>${F(q.expl)}</td></tr>`).join('')}</tbody></table></div>` : '';
+  const quiz = `<div class="pp">${head(false)}<p class="pp-i">Show your work. For multiple-choice questions, circle the letter. For the others, write your answer on the line with its units.</p><ol class="pp-q sk-pq">${items.map(q => `<li>${skPrintItem(q)}</li>`).join('')}</ol></div>`;
+  const ks = key ? `<div class="pp pb">${head(true)}<table class="pp-key"><thead><tr><th>#</th><th>Answer</th><th>Why</th></tr></thead><tbody>${items.map((q, i) => `<tr><td>${i + 1}</td><td class="ans">${q.kind === 'mc' ? LETTERS[q.correct[0]] : skKeyText(q)}</td><td>${F(q.expl)}</td></tr>`).join('')}</tbody></table></div>` : '';
   return quiz + ks;
 }
-const SK_CSS = `.sk-x{}`;
-window.__sk = { SK_TOPIC, SK_RXN, skBalanced, skDraw, parseOwnQuestions, htmlToDocx, docxLines, studyGuideHTML, skQuizHTML };
+const SK_CSS = `.sk-pfig{margin:6px 0 8px}.sk-pfig svg{max-width:100%;height:auto;color:#111}.sk-pimgs{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;margin:6px 0}.sk-pimgs>div{display:flex;gap:8px;align-items:center;color:#111}.sk-pimgs svg{max-width:100%;height:auto}
+.sk-pf{margin:6px 0 4px}.sk-bl{letter-spacing:0;color:#666}.sk-peq{font-size:1.06em;margin:8px 0;line-height:2}.sk-ppun{border-collapse:collapse;margin:6px 0}.sk-ppun th,.sk-ppun td{border:1px solid #444;width:62px;height:40px;text-align:center}.sk-ppun th{background:#f1f3f7}.sk-work{height:64px;color:#777;font-size:.85em}.sk-pq>li{break-inside:avoid;margin-bottom:16px}`;
+
+/* topics get the hands-on generators */
+(() => { const set = (id, gen) => { if (SK_TOPIC[id]) SK_TOPIC[id].gen = gen; SK_SUBJ.forEach(s => s.topics.forEach(t => { if (t.id === id) t.gen = gen; })); };
+  const mix = (p, a, b) => () => Math.random() < p ? a() : b();
+  set('lewis', genLewis2); set('balance', genBalance2); set('naming', mix(0.75, genNames2, genNames)); set('econfig', genConfig2); set('oxnum', genOx2); set('sigfigs', () => Math.random() < 0.7 ? genSigFigs2() : genSciNot());
+  set('dna', genDNA2); set('punnett', genPunnett2); set('fgroups', genFG2); set('vectors', genVectors2); set('circuits', genCircuit);
+  const oldG = id => SK_TOPIC[id].gen; [['krebs', 'krebs'], ['glycolysis', 'glycolysis'], ['photosyn', 'calvin'], ['etc', 'etc']].forEach(([id, k]) => { const g = oldG(id); set(id, () => Math.random() < 0.5 ? genPath(id === 'photosyn' && Math.random() < 0.5 ? 'light' : k) : g()); });
+})();
+window.__sk = { TESTS, utGenerate, utItems, SK_TOPIC, SK_RXN, SK_LEW, SK_MOL, skBalanced, skDraw, skGrade, skNum, skLewE, parseOwnQuestions, htmlToDocx, docxLines, studyGuideHTML, skQuizHTML, skPrintItem, skLewisSVG, skPathSVG, skVectorSVG, skCircuitSVG, skStructSVG, SK_FGS, genPath, skLewisVariants, SK_PATHS };
 
 try { route(); } catch (e) { window.__ppErr(e && e.stack || e); }
 initAuth().catch(e => { MODE = 'blocked'; BLOCK = 'host'; }).then(() => { try { if (MODE === 'owner' && PID && !me()) PID = null; route(); } catch (e) { window.__ppErr(e && e.stack || e); }
