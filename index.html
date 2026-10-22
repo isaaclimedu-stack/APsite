@@ -1376,6 +1376,42 @@ body.acc-big #exam .qtext, body.acc-big #exam .opt, body.acc-big #exam .stem { f
 .sk-pun td .sk-fix::before { content: ""; }
 .sk-fig.wide { justify-content: flex-start; } .sk-fig.wide svg { min-width: 540px; margin: 0 auto; }
 
+.tt-card h3 { display: flex; align-items: center; gap: 8px; }
+.tt-card h3 svg { width: 18px; height: 18px; color: var(--accent); }
+.tt-f { display: grid; gap: 6px; margin-top: 4px; }
+.tt-row { display: flex; gap: 8px; }
+.tt-row input { flex: 1; min-width: 0; font: inherit; font-family: var(--mono, monospace); letter-spacing: .04em; padding: 9px 11px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); }
+.tt-row input:focus { outline: none; border-color: var(--accent); }
+.tt-now { margin: 4px 0 8px; padding: 8px 10px; border-radius: 9px; background: var(--sunk); }
+.tt-note { margin: 2px 0 0; }
+.tt-f .err:empty { display: none; }
+.dev-h { margin: 26px 0 4px; font-size: 19px; }
+.dev-reset { display: grid; gap: 10px; }
+.dev-reset small { display: block; color: var(--muted); }
+.dev-t { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.dev-t th, .dev-t td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.dev-pill { display: inline-block; padding: 2px 8px; margin: 2px 0; border-radius: 99px; background: var(--sunk); font-size: 12.5px; white-space: nowrap; }
+.tt-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+.xs-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+@media (max-width: 1180px) { .xs-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+@media (max-width: 460px) { .xs-grid { grid-template-columns: minmax(0, 1fr) !important; } }
+.dev-tw { overflow-x: auto; max-width: 100%; } .dev-reset { min-width: 0; }
+.dev-tw { overflow-x: auto; max-width: 100%; } .dev-reset { min-width: 0; }
+
+.foot nav .foot-ta { opacity: .6; display: inline-flex; align-items: center; gap: 4px; font-size: .92em; }
+.foot nav .foot-ta svg { width: 12px; height: 12px; }
+.foot nav .foot-ta:hover { opacity: 1; }
+.take-ta { margin-top: 28px; opacity: .7; font-size: 12.5px; }
+.cl-pw { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 12px; padding: 12px 14px; margin: 0 0 14px; border: 1px dashed var(--line); border-radius: 12px; background: var(--sunk); }
+.cl-pw label { display: grid; gap: 4px; }
+.cl-pw input { font: inherit; font-family: var(--mono, monospace); padding: 7px 10px; border: 1.5px solid var(--line); border-radius: 9px; background: var(--surface); color: var(--ink); width: 14ch; }
+.cl-pw .muted { flex: 1 1 260px; }
+.cl-ta { display: inline-flex; align-items: center; gap: 4px; opacity: .75; }
+.cl-ta svg { width: 12px; height: 12px; }
+.cl-tanote { margin-top: 6px; padding: 8px 10px; border-radius: 9px; background: var(--sunk); font-family: var(--sans, inherit); font-size: 12.5px; white-space: normal; max-width: 300px; line-height: 1.45; }
+.cl-tanote b { font-family: var(--mono, monospace); font-size: 13.5px; }
+.cl-tanote, .cl-ta { font-family: var(--font-ui); } .cl-tanote b { font-family: var(--font-mono); } .cl-pw input { font-family: var(--font-mono); }
+
 </style>
 </head><body>
 <div id="app">
@@ -11519,7 +11555,7 @@ let PREF_MODE = 'practice';
 function navKey(active) {
   if (/^defs/.test(active)) return 'defs';
   if (/^skill/.test(active)) return 'skills';
-  if (BY_ID[active] || /^subj-/.test(active)) { const ar = BY_ID[active] ? BY_ID[active].area : active.slice(5), g = SUBJ_GROUPS.find(o => o.areas.includes(ar)); if (g) return 'topic-' + g.k; }
+  if (BY_ID[active]) return 'subj-' + BY_ID[active].area;
   if (active === 'review' && RV.tab === 'cards' && RV.via === 'flashcards') return 'flashcards';
   if (active === 'review' && RV.via === 'formulas') return 'formulas';
   if (active === 'admin') return ADM.tab === 'teachers' ? 'admin-teachers' : 'admin';
@@ -11549,9 +11585,11 @@ function notes() {
 }
 /* subject groups in the sidebar: each band is a dropdown; the one holding the current page opens by itself */
 function sideGroups(cur) {
-  const open = LS.get('ap.ui.sideopen', null), isOpen = /^topic-/.test(cur) || !(open && open.subjects === false);
-  return `<div class="side-grp${isOpen ? ' open' : ''}"><button class="side-gh side-h-btn" data-sg="subjects" aria-expanded="${isOpen}" aria-controls="sg-subjects"><span>Subjects</span>${SVG(IC.down, 'sg-ch')}</button>
-    <nav class="side-nav subjnav" id="sg-subjects" aria-label="Subjects" ${isOpen ? '' : 'hidden'}>${SUBJ_GROUPS.filter(g => groupTests(g).length).map(g => `<a href="#topic-${g.k}" class="acc-${g.accent}" ${cur === 'topic-' + g.k ? 'aria-current="page"' : ''}><span class="s-ic">${SVG(IC[g.ic])}</span><span>${esc(g.name)}</span></a>`).join('')}</nav></div>`;
+  const curA = /^subj-/.test(cur) ? AREA[cur.slice(5)] : null, open = LS.get('ap.ui.sideopen', null) || {};
+  return `<div class="side-h">Courses</div>` + BANDS.map(b => { const as = AREAS.filter(a => a.band === b.k && TESTS.some(t => t.area === a.k)); if (!as.length) return '';
+    const isOpen = curA ? curA.band === b.k || open[b.k] === true : open[b.k] != null ? open[b.k] : b.k === getTrack();
+    return `<div class="side-grp${isOpen ? ' open' : ''}"><button class="side-gh" data-sg="${b.k}" aria-expanded="${isOpen}" aria-controls="sg-${b.k}"><span>${esc(b.name)}</span>${SVG(IC.down, 'sg-ch')}</button>
+      <nav class="side-nav subjnav" id="sg-${b.k}" aria-label="${esc(b.name)}" ${isOpen ? '' : 'hidden'}>${as.map(a => `<a href="#subj-${a.k}" class="acc-${a.accent}" ${cur === 'subj-' + a.k ? 'aria-current="page"' : ''}><span class="s-ic">${SVG(IC[SUBJ_IC[a.k]])}</span><span>${esc(a.nav)}</span></a>`).join('')}</nav></div>`; }).join('');
 }
 function nav(active) {
   if (TEST_ONLY && MODE === 'gate') return `<header class="topbar tonly"><a class="tb-brand" href="#take">${SVG(IC.cap)} ${BRAND}</a><span class="spacer"></span><a class="btn quiet sm" href="#take">Test code</a><a class="btn quiet sm" href="#home">Sign in</a></header>`;
@@ -11579,7 +11617,7 @@ function testSummary(x) {
 const DISCLAIMER = 'AP® is a trademark registered by the College Board, and NGSS is a registered trademark of WestEd; neither is affiliated with, or endorses, this site. Every question here is original.';
 function foot() {
   return `<footer class="foot"><div><p>${esc(DISCLAIMER)}</p><p>Scores and AP score estimates are practice estimates, not official scores. © ${new Date().getFullYear()} ${BRAND}.</p></div>
-    <nav aria-label="Footer"><a href="#about">About</a><a href="#faq">FAQ</a><a href="#review">Resources</a></nav></footer>`;
+    <nav aria-label="Footer"><a href="#about">About</a><a href="#faq">FAQ</a><a href="#review">Resources</a><a href="#device" class="foot-ta">${SVG(IC.lock)}Teacher access</a></nav></footer>`;
 }
 function bindNav() {
   const b = $('#whoBtn'); if (b) b.onclick = openProfileMenu; const f = $('#fbBtn'); if (f) f.onclick = () => openReport(null);
@@ -11713,20 +11751,19 @@ const SUBJ_ART = {
 };
 /* subjects for everyone: each groups its courses at every level (middle school, high school, AP) */
 const SUBJ_GROUPS = [
-  { k: 'biology', name: 'Biology', ic: 'leaf', accent: 'bio', areas: ['mlife', 'hbio', 'bio'], blurb: 'Cells, genetics, evolution, and ecosystems, from life science to AP.' },
-  { k: 'chemistry', name: 'Chemistry', ic: 'flask', accent: 'chem', areas: ['mphys', 'hchem', 'chem'], blurb: 'Atoms, bonding, reactions, and stoichiometry, from basics to exam-ready.' },
-  { k: 'physics', name: 'Physics', ic: 'atom', accent: 'phys', areas: ['mphys', 'hphys', 'phys'], blurb: 'Motion, forces, energy, electricity, and waves, step by step.' },
+  { k: 'biology', name: 'Biology', ic: 'leaf', accent: 'bio', areas: ['mlife', 'hbio'], blurb: 'Cells, genetics, evolution, and ecosystems for middle and high school.' },
+  { k: 'chemistry', name: 'Chemistry', ic: 'flask', accent: 'chem', areas: ['mphys', 'hchem'], blurb: 'Atoms, bonding, reactions, and stoichiometry, step by step.' },
+  { k: 'physics', name: 'Physics', ic: 'atom', accent: 'phys', areas: ['mphys', 'hphys'], blurb: 'Motion, forces, energy, electricity, and waves.' },
   { k: 'earth', name: 'Earth & Space', ic: 'globe', accent: 'earth', areas: ['mearth'], blurb: 'The solar system, plate tectonics, weather, and climate.' },
-  { k: 'economics', name: 'Economics', ic: 'chart', accent: 'econ', areas: ['econ'], blurb: 'Markets, money, and policy, with graphs and real calculations.' },
-  { k: 'statistics', name: 'Statistics', ic: 'target', accent: 'stats', areas: ['stats'], blurb: 'Data, probability, and inference to make sense of the world.' },
-  { k: 'psychology', name: 'Psychology', ic: 'bulb', accent: 'psych', areas: ['psych'], blurb: 'How we think, learn, feel, and connect with others.' },
 ];
+/* AP courses stay separate from the subject pages; they get their own progress row on the dashboard */
+const AP_ROW = { k: 'ap', name: 'AP Courses', ic: 'cap', accent: 'chem', areas: AREAS.filter(a => a.band === 'ap').map(a => a.k) };
 const SG = Object.fromEntries(SUBJ_GROUPS.map(g => [g.k, g]));
 const groupTests = g => g.areas.flatMap(k => testsIn(k)).filter((x, i, a) => a.indexOf(x) === i);
 function renderSubjectGroup(k) {
   const g = SG[k]; if (!g) return renderHome();
   setAccent({ accent: g.accent }); show('hub');
-  const lv = [['ms', 'Middle School'], ['hs', 'High School'], ['ap', 'AP (Advanced Placement)']].map(([b, l]) => [l, groupTests(g).filter(x => x.band === b)]).filter(r => r[1].length);
+  const lv = [['ms', 'Middle School'], ['hs', 'High School']].map(([b, l]) => [l, groupTests(g).filter(x => x.band === b)]).filter(r => r[1].length);
   $('#hub').innerHTML = nav('topic-' + k) + `<div class="page">${pageHead('Subjects', `<span class="sg-hi acc-${g.accent}">${SVG(IC[g.ic])}</span> ${esc(g.name)}`, esc(g.blurb))}
     ${lv.map(([l, xs]) => `<section class="tgroup"><h2 class="bandh">${esc(l)}</h2><div class="tcards">${xs.map(testCard).join('')}</div></section>`).join('')}
     <section class="card sg-more"><h3>Keep practicing</h3><div class="row"><a class="btn" href="#skills">${SVG(IC.target)} Skill Builder</a><a class="btn" href="#flashcards">${SVG(IC.cards)} Flashcards</a><a class="btn" href="#defs">${SVG(IC.vocab)} Definitions</a></div></section>
@@ -11758,14 +11795,17 @@ function renderHome() {
   const tch = isTeacher(), groups = SUBJ_GROUPS.filter(g => groupTests(g).length);
   /* progress by subject (all levels) */
   const gStat = g => { const r = all.filter(h => h.n && g.areas.includes(h.x.area)).slice(0, 12); const c = r.reduce((t, h) => t + h.correct, 0), n = r.reduce((t, h) => t + h.n, 0); return { c, n, p: n ? Math.round(c / n * 100) : null }; };
-  const rows = groups.map(g => ({ g, s: gStat(g) })), tot = rows.reduce((t, r) => t + r.s.n, 0), cor = rows.reduce((t, r) => t + r.s.c, 0), ov = tot ? Math.round(cor / tot * 100) : null;
+  const rows = groups.concat(TESTS.some(isAP) ? [AP_ROW] : []).map(g => ({ g, s: gStat(g) })), tot = rows.reduce((t, r) => t + r.s.n, 0), cor = rows.reduce((t, r) => t + r.s.c, 0), ov = tot ? Math.round(cor / tot * 100) : null;
   let sec = 0, secDone = 0; TESTS.forEach(x => { const h = LS.get(KEY(x).hist, []); if (!h.length) return; const agg = catStats(x, h, 99); srCatsOf(x).forEach(c => { sec++; if (agg[c.k] && agg[c.k][1]) secDone++; }); });
   const status = ov == null ? ['Not started yet', 'muted'] : ov >= 70 ? ['On track', 'good'] : ov >= 55 ? ['Getting there', 'mid'] : ['Needs focus', 'bad'];
   const ring = (p, sz = 92) => { const r = sz / 2 - 8, c = 2 * Math.PI * r; return `<svg class="hp-ring" viewBox="0 0 ${sz} ${sz}" width="${sz}" height="${sz}" role="img" aria-label="${p == null ? 'No data yet' : p + ' percent'}"><circle cx="${sz / 2}" cy="${sz / 2}" r="${r}" fill="none" stroke="var(--sunk)" stroke-width="8"/><circle cx="${sz / 2}" cy="${sz / 2}" r="${r}" fill="none" stroke="var(--good)" stroke-width="8" stroke-linecap="round" stroke-dasharray="${c * (p || 0) / 100} ${c}" transform="rotate(-90 ${sz / 2} ${sz / 2})"/><text x="50%" y="50%" dy=".35em" text-anchor="middle" font-size="${sz / 4.6}" font-weight="800" fill="var(--ink)">${p == null ? '—' : p + '%'}</text></svg>`; };
   const skSt = typeof skKey === 'function' ? LS.get(skKey(), {}) : {};
-  const gOf = x => SUBJ_GROUPS.find(g => g.areas.includes(x.area)) || SUBJ_GROUPS[0];
+  const utMine = PID ? LS.get(utResKey(), []) : [], utNow = PID ? LS.get(utCurKey(), null) : null;
+  const gOf = x => (isAP(x) ? null : SUBJ_GROUPS.find(g => g.areas.includes(x.area))) || { ic: SUBJ_IC[x.area] || 'file', accent: x.accent };
   const acts = inProg.map(o => ({ d: new Date().toISOString(), ic: gOf(o.x).ic, acc: gOf(o.x).accent, t: `${o.x.subject} · in progress`, s: `${o.c.ans.filter(a => a.length).length} of ${o.c.items.length} answered · tap to resume`, href: '#' + o.x.id, now: 1 }))
     .concat(all.slice(0, 6).map(h => ({ d: h.date, ic: gOf(h.x).ic, acc: gOf(h.x).accent, t: recTitle(h), s: h.cr && !h.crDone && !h.n ? 'Free response not scored yet' : `Scored ${h.pct}% on ${h.n} questions`, href: '#' + h.x.id })))
+    .concat(utMine.map(r => ({ d: r.date, ic: 'check', acc: (BY_ID[r.testId] || {}).accent || 'chem', t: r.ut.n, s: `Teacher test · ${r.pct}% multiple choice${r.sent ? '' : ' · not sent yet'}`, href: '#unit-tests' })))
+    .concat(utNow && utNow.unit ? [{ d: new Date().toISOString(), ic: 'check', acc: 'chem', t: utNow.title, s: 'Teacher test in progress · tap to resume', href: '#take', now: 1 }] : [])
     .concat(Object.entries(skSt).filter(([id, v]) => v.at && typeof SK_TOPIC !== 'undefined' && SK_TOPIC[id]).map(([id, v]) => ({ d: v.at, ic: 'target', acc: SK_TOPIC[id].subj.accent, t: 'Skill Builder · ' + SK_TOPIC[id].name, s: `Last drill ${v.last}%`, href: '#skill-' + id })))
     .sort((a, b) => (b.now || 0) - (a.now || 0) || (a.d < b.d ? 1 : -1)).slice(0, 4);
   const quick = tch ? [['ut-new', 'Create Unit Test', 'plus'], ['ut-check', 'Check Results', 'check'], ['grades', 'Gradebook', 'grade'], ['skills', 'Skill Builder', 'target'], ['tests', 'Practice Tests', 'play']]
@@ -11789,6 +11829,10 @@ function renderHome() {
         ${foot()}
       </div>
       <aside class="d2-rail">
+        ${tch ? '' : `<section class="card tt-card"><div class="card-h sm"><h3>${SVG(IC.check)} Test from your teacher</h3>${utMine.length ? `<a class="more" href="#unit-tests">My results (${utMine.length}) ${SVG(IC.arrow)}</a>` : ''}</div>
+          ${utNow && utNow.unit ? `<p class="small tt-now"><b>In progress:</b> ${esc(utNow.title)} <a href="#take">Resume ${SVG(IC.arrow)}</a></p>` : ''}
+          <form id="ttF" class="tt-f" autocomplete="off"><label class="small" for="ttIn">Enter the test code your teacher gave you</label><div class="tt-row"><input id="ttIn" maxlength="40000" placeholder="XXXX-XXXX-XXXX" spellcheck="false" autocapitalize="characters"><button class="btn primary" type="submit">Start ${SVG(IC.arrow)}</button></div><p class="err small" id="ttErr" role="alert"></p></form>
+          <p class="small muted tt-note">Your answers and results are saved in this browser under your account.</p></section>`}
         <section class="card hp"><div class="card-h sm"><h3>Your Progress</h3><a class="more" href="#analytics">View details ${SVG(IC.arrow)}</a></div>
           <div class="hp-top">${ring(ov)}<div><b>Overall progress</b><span class="hp-st ${status[1]}">${status[1] === 'good' ? SVG(IC.check) : ''}${status[0]}</span><small>${sec ? `${secDone} / ${sec} units practiced` : 'Practice any unit to start tracking'}</small></div></div>
           <ul class="hp-bars">${rows.map(r => `<li class="acc-${r.g.accent}"><i></i><span>${esc(r.g.name)}</span><span class="hp-bar"><em style="width:${r.s.p || 0}%"></em></span><b>${r.s.p == null ? '—' : r.s.p + '%'}</b></li>`).join('')}</ul></section>
@@ -11799,6 +11843,13 @@ function renderHome() {
   const q = $('#hxQ'), res = $('#hxR'); let hits = [], sel = -1;
   const draw = () => { hits = homeSearch(q.value); sel = hits.length ? 0 : -1; res.hidden = !q.value.trim();
     res.innerHTML = hits.length ? hits.map((o, i) => `<a href="${o.h}" role="option" class="${i === sel ? 'on' : ''}" aria-selected="${i === sel}"><span class="hr-ic">${SVG(IC[o.ic] || IC.file)}</span><span><b>${esc(o.t)}</b><small>${esc(o.s)}</small></span></a>`).join('') : `<p class="hr-none">No matches. Try a subject (“chemistry”), a topic (“ICE tables”), or a tool (“flashcards”).</p>`; };
+  if ($('#ttF')) $('#ttF').onsubmit = e => { e.preventDefault(); const v = $('#ttIn').value.trim(), er = m => { $('#ttErr').textContent = m; $('#ttIn').focus(); };
+    if (!v) return er('Enter the test code first.');
+    const sc = utShortParse(v); if (sc && sc.stale) return er('This code is from an older version of the question bank. Ask your teacher for a new one.');
+    const p = utParse(v); if (!p) return er('That code doesn’t look right. Check each letter and number.');
+    const nm = (LS.get(`ap.${PID}.ut.name`, '') || meName() || '').trim().replace(/\s+/g, ' '), em = normEmail(myEmail() || ''), to = normEmail((LS.get(`ap.${PID}.teacher`, null) || {}).e || p.ut.e || '');
+    if (nm.split(' ').length < 2 || !isEmail(em) || !isEmail(to)) { TK_PREFILL = v; go('take'); return; }
+    LS.set(`ap.${PID}.ut.name`, nm); LS.set(`ap.${PID}.teacher`, { e: to, r: '' }); go('ut-' + p.code); };
   q.oninput = draw;
   q.onkeydown = e => { if (!hits.length) return; if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); sel = (sel + (e.key === 'ArrowDown' ? 1 : hits.length - 1)) % hits.length; $$('#hxR a').forEach((a, i) => { a.classList.toggle('on', i === sel); a.setAttribute('aria-selected', i === sel); }); } if (e.key === 'Escape') res.hidden = true; };
   $('#hxF').onsubmit = e => { e.preventDefault(); if (hits[sel]) location.hash = hits[sel].h.slice(1); };
@@ -12044,6 +12095,7 @@ function createProfile(raw) {
 }
 function wipeProfileData(pid) {
   const keep = PID; PID = pid;
+  if (typeof vaultSnap === 'function') vaultSnap(TESTS, 'Reset all tests');
   TESTS.forEach(x => Object.values(KEY(x)).forEach(k => LS.del(k)));
   PID = keep;
 }
@@ -12085,10 +12137,10 @@ function resetPick() {
   $$('[data-rpk]').forEach(c => c.onchange = () => { const n = picked().length; $('#rpkGo').disabled = !n; $('#rpkGo').textContent = n ? `Reset ${n} test${n > 1 ? 's' : ''}` : 'Reset selected'; });
   if ($('#rpkGo')) $('#rpkGo').onclick = () => { const xs = picked(); if (!xs.length) return;
     confirmBox(`Reset ${xs.length} test${xs.length > 1 ? 's' : ''}?`, `This clears your history for ${xs.map(x => x.subject).join(', ')}. It cannot be undone.`, 'Reset', () => {
-      xs.forEach(x => Object.values(KEY(x)).forEach(k => LS.del(k))); syncProgress(); go('home'); }); };
+      vaultSnap(xs, 'Reset selected tests'); xs.forEach(x => Object.values(KEY(x)).forEach(k => LS.del(k))); syncProgress(); go('home'); }); };
 }
 /* remove only practice-mode results (exam simulations and timed drills stay) */
-function clearPractice(xs) { let n = 0; xs.forEach(x => { const k = KEY(x), h = LS.get(k.hist, []), keep = h.filter(r => !r.practice); n += h.length - keep.length; if (keep.length !== h.length) LS.set(k.hist, keep); const cur = LS.get(k.cur, null); if (cur && cur.practice) LS.del(k.cur); }); syncProgress(); return n; }
+function clearPractice(xs) { vaultSnap(xs, 'Cleared practice scores', true); let n = 0; xs.forEach(x => { const k = KEY(x), h = LS.get(k.hist, []), keep = h.filter(r => !r.practice); n += h.length - keep.length; if (keep.length !== h.length) LS.set(k.hist, keep); const cur = LS.get(k.cur, null); if (cur && cur.practice) LS.del(k.cur); }); syncProgress(); return n; }
 function resetPractice() {
   const n = TESTS.reduce((s, x) => s + LS.get(KEY(x).hist, []).filter(r => r.practice).length, 0);
   if (!n) { confirmBox('No practice scores', 'You have no practice results to clear. Exam simulations are kept separately.', 'OK', () => {}); return; }
@@ -12371,12 +12423,12 @@ function renderExam() {
       <div class="numentry"><input id="numIn" inputmode="decimal" autocomplete="off" aria-label="Your answer" value="${esc(sel[0] || '')}">${q.unit ? `<span class="unit">${F(q.unit)}</span>` : ''}</div>
       <p class="numhint">Type a number. Fractions such as 3/4, negative numbers, and 1.2e-5 are accepted.</p>
       <div class="qnav"><button class="btn" id="backB2" ${pos === 0 ? 'disabled' : ''}>← Back</button><button class="btn primary" id="nextB2">${lastLbl}</button></div>
-      <p class="kbd">Keyboard: ← → to move when the answer box is not selected · M to mark</p></div>`;
+      ${strictKeys() ? '' : `<p class="kbd">Keyboard: ← → to move when the answer box is not selected · M to mark</p>`}</div>`;
     else body = `<div class="qcol"><div class="qmeta">${T.marked[T.cur] ? '<span class="flag">● Marked for review</span>' : ''}</div>
       <div class="stem">${F(q.stem)}</div>
       <div class="choices" role="${multi ? 'group' : 'radiogroup'}">${(() => { const drop = T.acc && T.acc.r3 && !T.practice && typeof spDropIdx === 'function' ? spDropIdx(q) : -1; let n2 = 0; return q.choices.map((c, i) => i === drop ? '' : `<button class="choice ${multi ? 'multi' : ''}" role="${multi ? 'checkbox' : 'radio'}" aria-checked="${sel.includes(i)}" data-ch="${i}"><span class="ov"></span><span><span class="ltr">${LETTERS[drop < 0 ? i : n2++]}.</span> ${F(c)}</span></button>`).join(''); })()}</div>
       <div class="qnav"><button class="btn" id="backB2" ${pos === 0 ? 'disabled' : ''}>← Back</button><button class="btn primary" id="nextB2">${lastLbl}</button></div>
-      <p class="kbd">Keyboard: 1–${q.choices.length} or A–${LETTERS[q.choices.length - 1]} to choose · ← → to move · M to mark</p></div>`;
+      ${strictKeys() ? '' : `<p class="kbd">Keyboard: 1–${q.choices.length} or A–${LETTERS[q.choices.length - 1]} to choose · ← → to move · M to mark</p>`}</div>`;
     if (q.psg && PASSAGES[q.psg]) body = `<div class="psplit">${psgHTML(PASSAGES[q.psg], !!(T.practice && T.checked[T.cur]))}${body}</div>`;
   }
   $('#exam').innerHTML = bar + `<div class="xbody">${body}</div>`; updateTimer();
@@ -12401,7 +12453,7 @@ function renderExam() {
     bindCaseTabs();
     const ci = $('#crIn'); if (ci) ci.oninput = () => { const v = ci.value; T.ans[T.cur] = v.trim() ? [v] : []; const wc = v.trim() ? v.trim().split(/\s+/).length : 0; $('#crWc').textContent = wc + (wc === 1 ? ' word' : ' words'); if (Date.now() - lastSave > 1500) { save(); lastSave = Date.now(); } $('.progress i').style.width = (idx.filter(i => T.ans[i].length).length / n * 100) + '%'; };
     if (ci) ci.onblur = save;
-    const ni = $('#numIn'); if (ni) { ni.oninput = () => { const v = ni.value.trim(); T.ans[T.cur] = v ? [v] : []; save(); $('.progress i').style.width = (idx.filter(i => T.ans[i].length).length / n * 100) + '%'; }; ni.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); $('#nextB2').click(); } }; }
+    const ni = $('#numIn'); if (ni) { ni.oninput = () => { const v = ni.value.trim(); T.ans[T.cur] = v ? [v] : []; save(); $('.progress i').style.width = (idx.filter(i => T.ans[i].length).length / n * 100) + '%'; }; ni.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); if (!strictKeys()) $('#nextB2').click(); } }; }
     const back = () => goQ(T.cur - 1), next = () => T.cur === r1 - 1 ? (T.screen = 'review', save(), renderExam()) : goQ(T.cur + 1);
     $('#backB').onclick = back; $('#backB2').onclick = back; $('#nextB').onclick = next; $('#nextB2').onclick = next;
   }
@@ -12448,8 +12500,11 @@ function choose(i) {
   { const [r0, r1] = secRange(); let a = 0; for (let k = r0; k < r1; k++) if (T.ans[k].length) a++; $('.progress i').style.width = (a / (r1 - r0) * 100) + '%'; }
 }
 function toggleMark() { T.marked[T.cur] = !T.marked[T.cur]; save(); renderExam(); }
+/* like the official digital exams, exam simulations and teacher-given tests have no answer or navigation shortcuts */
+const strictKeys = () => !!T && !T.practice && !!(T.unit || T.assign || T.mode === 'full' || T.mode === 'half');
 document.addEventListener('keydown', e => {
   if (!inExam || !T || T.screen !== 'q' || $('#modal-root').innerHTML || e.metaKey || e.ctrlKey || e.altKey || /^(SELECT|INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+  if (strictKeys()) return;
   const q = T.items[T.cur], k = e.key.toLowerCase(), li = 'abcdefg'.indexOf(k);
   if (T.practice) { if (e.key === 'Enter' && (!/^(BUTTON|A)$/.test(e.target.tagName) || e.target.dataset.ch != null)) { e.preventDefault(); T.checked[T.cur] ? pNext() : pCheck(); return; }
     if (e.key === 'ArrowLeft') { goQ(T.cur - 1); return; } if (e.key === 'ArrowRight' && T.checked[T.cur]) { pNext(); return; } if (k === 'm') return; }
@@ -12486,6 +12541,7 @@ function finish(auto) { ttsStop(); spStop(); pzOff(); lkStop(); lkExitFull(); do
   if (T.practice) rec.practice = true;
   if (T.assign) { rec.assign = T.assign; rec.studentName = T.studentName; if (T.lk) rec.lk = lkPack(T.lk); if (T.acc && T.acc.log && T.acc.log.length) rec.acc = T.acc.log; if (T.pz) rec.pz = [T.pz.n, T.pz.secs]; }
   if (crIdx.length) { rec.cr = { idx: crIdx, sc: {}, ck: {}, w: X.cr.weight }; rec.crDone = false; }
+  if (rec.assign && typeof vaultAdd === 'function') vaultAdd({ kind: 'ex', r: rec, xid: X.id });
   const hist = LS.get(k.hist, []); hist.push(rec);
   hist.forEach((h, i) => { if (i < hist.length - 10) { delete h.items; delete h.ans; delete h.marked; } });
   if (!LS.set(k.hist, hist) && PERSIST) { hist.forEach(h => { if (h !== rec) { delete h.items; delete h.ans; delete h.marked; } }); LS.set(k.hist, hist); }
@@ -13747,7 +13803,6 @@ function renderUnitTests(err) {
     ${cur ? `<div class="resume card"><p><b>Unit test in progress:</b> ${esc(cur.title)} · ${cur.ans.filter(a => a.length).length} of ${cur.items.length} answered${cur.untimed ? '' : ` · <span class="mono">${fmtT(cur.remaining)}</span> left`}</p><div class="row"><button class="btn primary" id="utResume">Resume</button></div></div>` : ''}
     <section class="card"><form id="utOpenF" class="field" autocomplete="off"><input id="utCodeIn2" placeholder="Type the test code or paste the link from your teacher" aria-label="Test link or code"><button class="btn primary" type="submit">Open test</button></form><div class="err" id="utOpenErr" role="alert">${err ? esc(err) : ''}</div></section>
     <section class="card" style="margin-top:18px"><h3 class="ch">Your submitted unit tests</h3>${res.length ? `<div class="tablewrap"><table class="hist"><thead><tr><th>Test</th><th>Submitted</th><th>Score</th><th>Results</th><th></th></tr></thead><tbody>${res.map((r, i) => [r, i]).reverse().map(([r, i]) => `<tr><td><b>${esc(r.ut.n)}</b><br><small class="muted">${esc((BY_ID[r.testId] || {}).subject || '')}</small></td><td>${fmtDate(r.date)}</td><td class="mono">${r.n ? r.correct + '/' + r.n + ' · <b>' + r.pct + '%</b>' : '—'}${r.items.some(q => q.type === 'cr') ? '<br><small class="muted">+ free response</small>' : ''}</td><td>${r.sent ? '<span class="st-on">Sent</span>' : '<span class="st-off">Not sent</span>'}</td><td><button class="linkbtn" data-utr="${i}">${r.sent ? 'View' : 'Send results'}</button></td></tr>`).join('')}</tbody></table></div>` : '<p class="empty">No unit tests yet.</p>'}</section>
-    <p class="small muted" style="margin-top:14px"><a href="#device">Teacher access</a> (results saved on this device)</p>
     ${foot()}</div>`;
   $('#utOpenF').onsubmit = e => { e.preventDefault(); const p = utParse($('#utCodeIn2').value); if (!p) { $('#utOpenErr').textContent = 'That doesn’t look like a test link or code. Copy the whole link or code from your teacher and try again.'; return; } go('ut-' + p.code); };
   formFix('#utOpenF');
@@ -13768,6 +13823,7 @@ const dueText = ut => ut.due ? new Date(ut.due + 'T12:00:00').toLocaleDateString
 function renderUtIntro(code) {
   const p = utParse(code); if (!p) return renderUnitTests('This test link is incomplete or damaged. Ask your teacher to send it again.');
   const { ut } = p, x = BY_ID[ut.t], exam = ut.k === 'exam';
+  if (ut.kh) { const ks = LS.get('ap.dev.keys', []); if (!ks.some(k => k.kh === ut.kh)) { ks.push({ kh: ut.kh, s: ut.s }); LS.set('ap.dev.keys', ks.slice(-20)); } }
   const items = exam ? [] : utItems(ut), mc = exam ? x.nSR : utMcq(items).filter(q => !q.def).length, dfn = exam ? 0 : utMcq(items).length - mc, fr = exam ? (x.crCat ? x.crCat.n : 0) : items.length - mc - dfn, miss = exam ? 0 : utMissing(ut);
   if (PID && ut.e) LS.set(`ap.${PID}.teacher`, { e: ut.e, r: ut.r || '' });
   setAccent(x); show('hub');
@@ -13822,7 +13878,7 @@ function utFinish(auto) {
   const nSR = utMcq(items).length, prev = LS.get(utResKey(), []);
   const rec = { code: T.unit.code, ut: T.unit.ut, testId: x.id, name: T.studentName, email: myEmail(), date: new Date().toISOString(), started: T.started, used: T.spent || 0, auto,
     n: nSR, correct, pct: nSR ? Math.round(correct / nSR * 100) : 0, byCat, items, ans: T.ans, attempt: prev.filter(r => r.code === T.unit.code).length + 1, sent: null, ...(T.lk ? { lk: lkPack(T.lk) } : {}), ...(T.acc && T.acc.log && T.acc.log.length ? { acc: T.acc.log } : {}), ...(T.pz ? { pz: [T.pz.n, T.pz.secs] } : {}) };
-  prev.push(rec); LS.set(utResKey(), prev.slice(-40)); LS.del(utCurKey()); T = null;
+  prev.push(rec); LS.set(utResKey(), prev.slice(-40)); vaultAdd({ kind: 'ut', r: rec }); LS.del(utCurKey()); T = null;
   go('unit-tests'); renderUtResult(LS.get(utResKey(), []).length - 1, true);
 }
 /* the signed data block lets the teacher recompute the score from the answers, so an edited score is caught */
@@ -14101,10 +14157,11 @@ function renderClass() {
       <textarea id="clIn" class="crin" style="min-height:90px" placeholder="jenny.park@school.org&#10;sam.lee@school.org"></textarea>
       <div class="row" style="margin-top:10px"><button class="btn primary" id="clAdd">Add students</button><span class="small" id="clMsg" role="status" style="color:var(--good);font-weight:600">${esc(CL.msg)}</span></div></section>
     <section class="panel cl-box" style="margin-top:16px"><h2>Your class · ${list.length}</h2>
+      <form class="cl-pw" id="clPwF" autocomplete="off"><label class="small"><b>Teacher access password</b><input id="clPw" maxlength="40" value="${esc(teacherPw())}" spellcheck="false" autocomplete="off"></label><button class="btn" type="submit">Save</button><span class="small muted">The same password your tests use (default ad31). It unlocks tests, accommodations, and Teacher access on a student’s device. Keep it from students.</span></form>
       ${list.length ? `<div class="mail-bar"><label class="chk"><input type="checkbox" id="clAll" ${allSel ? 'checked' : ''}> Select all</label><button class="btn primary" id="clMail" ${nSel ? '' : 'disabled'}>✉ Email codes to selected (${nSel})</button><a class="btn" href="#assign">${SVG(IC.assign)} Assign a test</a><span class="small muted">Sent this month: ${list.filter(s => sent[s.email]).length} of ${list.length}</span></div>
       <div class="tablewrap"><table class="adm"><thead><tr><th class="cbx"><span class="sr">Select</span></th><th>Student email</th><th>${esc(monthName(mk))} code</th>${late ? `<th>${esc(monthName(nk))} code</th>` : ''}<th></th></tr></thead><tbody>
       ${list.map(s => `<tr><td class="cbx"><input type="checkbox" data-cls="${esc(s.email)}" ${CL.sel.has(s.email) ? 'checked' : ''} aria-label="Select ${esc(s.email)}"></td><td><b>${esc(s.email)}</b><br><small class="muted">added ${fmtDate(s.added).split(',')[0]}</small>${sent[s.email] ? '<br><span class="st-on small">✓ code emailed</span>' : ''}</td>
-        <td class="mono" data-l="${esc(monthName(mk))}"><b>${esc(CL.codes[s.email + mk] || '…')}</b> <button class="linkbtn sm" data-clc="${esc(CL.codes[s.email + mk] || '')}">Copy</button></td>${late ? `<td class="mono" data-l="${esc(monthName(nk))}">${esc(CL.codes[s.email + nk] || '…')} <button class="linkbtn sm" data-clc="${esc(CL.codes[s.email + nk] || '')}">Copy</button></td>` : ''}
+        <td class="mono" data-l="${esc(monthName(mk))}"><b>${esc(CL.codes[s.email + mk] || '…')}</b> <button class="linkbtn sm" data-clc="${esc(CL.codes[s.email + mk] || '')}">Copy</button> <button class="linkbtn sm cl-ta" data-clta="${esc(s.email)}" aria-expanded="${CL.ta === s.email}">${SVG(IC.lock)}Teacher access</button>${CL.ta === s.email ? `<div class="cl-tanote">Password: <b>${esc(teacherPw())}</b><br><span>On this student’s device, scroll to the bottom of any page and choose <i>Teacher access</i> to see their tests, including anything they reset or deleted.</span></div>` : ''}</td>${late ? `<td class="mono" data-l="${esc(monthName(nk))}">${esc(CL.codes[s.email + nk] || '…')} <button class="linkbtn sm" data-clc="${esc(CL.codes[s.email + nk] || '')}">Copy</button></td>` : ''}
         <td><div class="row" style="gap:6px"><button class="btn" data-clm="${esc(s.email)}">✉ Email</button><button class="btn danger" data-clr="${esc(s.email)}">Remove</button></div></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">No students yet. Add their emails above.</div>'}
       <p class="small muted">${DB && !GUEST ? 'Students on your list can sign in on this Claude page and on your website.' : 'Students on your list sign in on your website with their email and code.'} Removing a student takes them off your list; their code keeps working until the end of the month.</p></section>
     ${foot()}</div>`;
@@ -14119,6 +14176,8 @@ function renderClass() {
   if ($('#clMail')) $('#clMail').onclick = () => openCodeMail(list.filter(s => CL.sel.has(s.email)).map(s => s.email));
   $$('[data-clm]').forEach(b => b.onclick = () => openCodeMail([b.dataset.clm]));
   $$('[data-clc]').forEach(b => b.onclick = () => copyText(b.dataset.clc, '#clMsg', 'Copied ' + b.dataset.clc));
+  $$('[data-clta]').forEach(b => b.onclick = () => { CL.ta = CL.ta === b.dataset.clta ? null : b.dataset.clta; redo(); });
+  $('#clPwF').onsubmit = e => { e.preventDefault(); const v = $('#clPw').value.trim(); if (v.length < 4) { CL.msg = 'The teacher password needs at least 4 characters.'; return redo(); } LS.set('ap.lk.pw', v); CL.msg = 'Teacher password saved. Tests you make from now on use it; older tests keep the password they were made with.'; redo(); setTimeout(() => { CL.msg = ''; }, 5000); };
   $$('[data-clr]').forEach(b => b.onclick = () => confirmBox(`Remove ${b.dataset.clr}?`, 'They are taken off your class list. Their current code keeps working until the end of the month.', 'Remove', async () => { const l = classList().filter(s => s.email !== b.dataset.clr); LS.set(classKey(), l); CL.sel.delete(b.dataset.clr); await classSync(l); redo(); }));
 }
 
@@ -14510,8 +14569,9 @@ function dfListHTML(x, units) {
 }
 
 /* ── test-only entry: students take a teacher's test with a short code or link, without an Educator Hub account ── */
+let TK_PREFILL = '';
 function renderTake(err, val) {
-  setAccent(null); show('hub');
+  setAccent(null); show('hub'); if (!val && TK_PREFILL) { val = TK_PREFILL; TK_PREFILL = ''; }
   const res = PID ? LS.get(utResKey(), []) : [], cur = PID ? LS.get(utCurKey(), null) : null;
   $('#hub').innerHTML = nav('take') + `<div class="page take-page"><div class="gate-brand">${SVG(IC.cap)}<span>${BRAND}</span></div><h1 class="display">Take a test</h1>
     <p class="lead">Enter your name, your email, and your teacher’s email, then the test code your teacher gave you.</p>
@@ -14523,7 +14583,7 @@ function renderTake(err, val) {
       <button class="btn primary big" type="submit">Open test</button><div class="err" id="tkErr" role="alert">${err ? esc(err) : ''}</div></form></section>
     ${res.length ? `<p class="small"><a href="#unit-tests">Your submitted tests on this device (${res.length})</a></p>` : ''}
     ${MODE === 'gate' ? `<p class="small muted">Have an Educator Hub account? <a href="#home">Sign in</a> to practice, see your history, and more.</p>` : ''}
-    <p class="small muted"><a href="#device">Teacher access</a></p></div>`;
+    <p class="small muted take-ta"><a href="#device">Teacher access</a></p></div>`;
   $('#tkF').onsubmit = e => { e.preventDefault(); const v = $('#tkIn').value.trim(), nm = $('#tkName').value.trim().replace(/\s+/g, ' '), em = normEmail($('#tkMail').value);
     const bad = (m, el) => { $('#tkErr').textContent = m; $(el).focus(); };
     if (nm.length < 3 || !/\s/.test(nm)) return bad('Enter your first and last name so your teacher can match your results.', '#tkName');
@@ -14550,7 +14610,17 @@ function renderTestOnly(h) {
 
 /* ── Teacher access on a student's device: every finished or unfinished teacher test saved in this browser,
    behind the teacher password, so results can still reach the teacher if a student never sent them ── */
-let DEV = { pw: null, list: null };
+let DEV = { pw: null, list: null, resets: [] };
+/* a second copy of every finished teacher test and assigned exam, plus a summary of anything a student resets or clears,
+   kept in this browser apart from the student's own history. Resetting inside the site doesn't remove it (clearing the
+   browser's site data does), so the teacher can still see results on this device with the teacher password. */
+const VAULT = 'ap.vault.v1';
+function vaultAdd(e) { try { const v = LS.get(VAULT, []); v.push({ ...e, pid: PID, vt: new Date().toISOString() }); while (v.length > 40) v.shift(); if (!LS.set(VAULT, v)) { v.splice(0, Math.ceil(v.length / 2)); LS.set(VAULT, v); } } catch (er) { console.error(er); } }
+function vaultSnap(xs, why, onlyPractice) {
+  const m = typeof me === 'function' ? me() : null;
+  const rows = xs.map(x => { const h = LS.get(KEY(x).hist, []).filter(r => !onlyPractice || r.practice); return h.length ? { t: x.id, n: h.length, p: h.filter(r => r.practice).length, ex: h.filter(r => !r.practice).length, last: h.slice(-12).map(r => ({ d: r.date, ti: r.title || '', pct: r.pct, n: r.n, a: r.assign ? 1 : 0, pr: r.practice ? 1 : 0 })) } : null; }).filter(Boolean);
+  if (rows.length) vaultAdd({ kind: 'reset', why, name: (typeof meName === 'function' && meName()) || (m ? m.name : ''), email: typeof myEmail === 'function' ? myEmail() || '' : '', rows });
+}
 function lsAllKeys() { const ks = new Set(MEM.keys()); try { for (let i = 0; i < localStorage.length; i++) ks.add(localStorage.key(i)); } catch (e) {} return [...ks]; }
 async function devScan(pw) {
   const out = [];
@@ -14561,24 +14631,34 @@ async function devScan(pw) {
     else if ((m = k.match(/^ap\.(.+)\.([a-z0-9]+)\.history\.v1$/))) { const x = TESTS.find(t => t.store === m[2]); if (x) LS.get(k, []).forEach((h, i) => { if (h.assign) out.push({ kind: 'ex', key: k, i, r: h, x, ut: h.assign.ut, name: h.studentName, title: h.assign.ut.n, date: h.date, score: `${h.correct}/${h.n} MC`, sent: h.sent }); }); }
     else if ((m = k.match(/^ap\.(.+)\.([a-z0-9]+)\.current\.v1$/))) { const x = TESTS.find(t => t.store === m[2]), c = LS.get(k, null); if (x && c && c.assign) out.push({ kind: 'excur', key: k, c, x, ut: c.assign.ut, name: c.studentName, title: c.title, date: c.started, score: `${c.ans.filter(a => a.length).length} of ${c.items.length} answered` }); }
   }
+  /* copies kept in the vault whose originals are gone (reset, cleared, or deleted) */
+  const live = new Set(out.map(o => (o.r && o.r.date) || ''));
+  for (const e of LS.get(VAULT, [])) { const r = e.r; if (!r || live.has(r.date)) continue; live.add(r.date);
+    if (e.kind === 'ut' && r.ut) out.push({ kind: 'ut', key: null, r, ut: r.ut, name: r.name, title: r.ut.n, date: r.date, score: `${r.correct}/${r.n} MC`, sent: r.sent, gone: 1 });
+    else if (e.kind === 'ex' && r.assign && BY_ID[e.xid]) out.push({ kind: 'ex', key: null, r, x: BY_ID[e.xid], ut: r.assign.ut, name: r.studentName, title: r.assign.ut.n, date: r.date, score: `${r.correct}/${r.n} MC`, sent: r.sent, gone: 1 }); }
   const mine = []; for (const o of out) if (await keyOK(o.ut, pw)) mine.push(o);
-  return mine.sort((a, b) => (a.date || '') < (b.date || '') ? 1 : -1);
+  let ok = mine.length > 0 || String(pw).trim().toLowerCase() === LK_DEFAULT;
+  if (!ok) for (const u of LS.get('ap.dev.keys', [])) if (await keyOK(u, pw)) { ok = true; break; }
+  return { list: mine.sort((a, b) => (a.date || '') < (b.date || '') ? 1 : -1), resets: ok ? LS.get(VAULT, []).filter(e => e.kind === 'reset').reverse() : [] };
 }
 async function renderDevice(err) {
   setAccent(null); show('hub');
   const head = `<div class="page dev-page"><div class="gate-brand">${SVG(IC.cap)}<span>${BRAND}</span></div><h1 class="display">Teacher access</h1>
-    <p class="lead">Tests taken on this device, including results that were never emailed and tests that were closed before they were finished.</p>`;
+    <p class="lead">Everything taken on this device: teacher tests and assignments (sent or not, finished or not), plus history a student reset or cleared.</p>`;
   if (!DEV.list) {
-    $('#hub').innerHTML = nav('device') + head + `<section class="panel"><form id="devF" autocomplete="off"><label>Teacher password<input id="devPw" type="password" autocomplete="off" placeholder="Teacher password"></label><button class="btn primary" type="submit">Show saved tests</button><p class="err" id="devErr" role="alert">${err ? esc(err) : ''}</p></form></section>
-      <p class="small muted">Only tests made with this password are shown. Students: this page is for your teacher.</p></div>`;
-    $('#devF').onsubmit = async e => { e.preventDefault(); const pw = $('#devPw').value; $('#devErr').textContent = 'Checking…'; const list = await devScan(pw);
-      if (!list.length) { $('#devErr').textContent = 'No tests on this device match that password.'; return; } DEV = { pw, list }; renderDevice(); bindNav(); };
+    $('#hub').innerHTML = nav('device') + head + `<section class="panel"><form id="devF" autocomplete="off"><label>Teacher password<input id="devPw" type="password" autocomplete="off" placeholder="Teacher password"></label><button class="btn primary" type="submit">Enter</button><p class="err" id="devErr" role="alert">${err ? esc(err) : ''}</p></form></section>
+      <p class="small muted">Use the teacher access password from My Students (the same one your tests use). This page is for teachers.</p></div>`;
+    $('#devF').onsubmit = async e => { e.preventDefault(); const pw = $('#devPw').value; $('#devErr').textContent = 'Checking…'; const { list, resets } = await devScan(pw);
+      if (!list.length && !resets.length) { $('#devErr').textContent = 'That password doesn’t match anything on this device.'; return; } DEV = { pw, list, resets }; renderDevice(); bindNav(); };
     formFix('#devF'); $('#devPw').focus(); return;
   }
-  const to0 = (LS.get('ap.dev.to', '') || DEV.list[0].ut.e || '');
+  const to0 = (LS.get('ap.dev.to', '') || (DEV.list[0] && DEV.list[0].ut.e) || '');
   $('#hub').innerHTML = nav('device') + head + `<section class="card"><div class="row" style="align-items:flex-end"><label class="dev-to">Send results to<input id="devTo" type="email" value="${esc(to0)}" placeholder="you@school.org"></label><span style="flex:1"></span><button class="btn quiet" id="devLock">${SVG(IC.lock)} Lock this page</button></div></section>
-    <div class="dev-list">${DEV.list.map((o, n) => `<section class="card dev-item"><div><b>${esc(o.name || 'Unknown student')}</b><small>${esc(o.title)} · ${o.date ? fmtDate(o.date) : ''}</small><span class="small">${esc(o.score)} · ${/cur$/.test(o.kind) ? '<span class="st-off">not finished</span>' : o.sent ? '<span class="st-on">student confirmed sending</span>' : '<span class="st-off">not sent</span>'}</span></div>
+    <div class="dev-list">${DEV.list.map((o, n) => `<section class="card dev-item"><div><b>${esc(o.name || 'Unknown student')}</b><small>${esc(o.title)} · ${o.date ? fmtDate(o.date) : ''}</small><span class="small">${esc(o.score)} · ${/cur$/.test(o.kind) ? '<span class="st-off">not finished</span>' : o.sent ? '<span class="st-on">student confirmed sending</span>' : '<span class="st-off">not sent</span>'}${o.gone ? ' · <span class="st-off">removed from the student’s history</span>' : ''}</span></div>
       <div class="row">${/cur$/.test(o.kind) ? `<button class="btn primary sm" data-devsub="${n}">Submit it now</button>` : `<button class="btn primary sm" data-devgm="${n}">Open in Gmail</button><button class="btn sm" data-devml="${n}">Email app</button><button class="btn quiet sm" data-devcp="${n}">Copy results</button>`}</div></section>`).join('')}</div>
+    ${DEV.resets && DEV.resets.length ? `<h2 class="dev-h">Cleared by the student</h2><p class="small muted">Practice and exam history that was reset or cleared on this device. These are summaries kept when the history was removed.</p>
+      <div class="dev-list">${DEV.resets.map(e => `<section class="card dev-reset"><div><b>${esc(e.name || 'Student')}</b><small>${esc(e.why)} · ${fmtDate(e.vt)}${e.email ? ' · ' + esc(e.email) : ''}</small></div>
+        <div class="dev-tw"><div class="dev-tw"><table class="dev-t"><thead><tr><th>Course</th><th>Cleared</th><th>Recent results</th></tr></thead><tbody>${e.rows.map(r => `<tr><td>${esc((BY_ID[r.t] || {}).subject || r.t)}</td><td>${r.n} (${r.ex} test${r.ex === 1 ? '' : 's'}, ${r.p} practice)</td><td>${r.last.slice().reverse().map(h => `<span class="dev-pill" title="${esc(h.ti)}">${h.d ? esc(fmtDate(h.d)) + ': ' : ''}${h.pct}%${h.a ? ' (assigned)' : h.pr ? ' (practice)' : ''}</span>`).join(' ')}</td></tr>`).join('')}</tbody></table></div></section>`).join('')}</div>` : ''}
     <p class="small" id="devMsg" role="status"></p>
     <p class="small muted">Paste the email (or the copied results) into Check Results to verify the score, score written answers, and add it to your gradebook.</p></div>`;
   const mail = async o => { const to = normEmail($('#devTo').value); LS.set('ap.dev.to', to); return o.kind === 'ut' ? { ...(await utMail({ ...o.r, to })), to } : { ...(await examMail(o.r, o.x, to)), to }; };
@@ -16554,7 +16634,7 @@ const SK_CSS = `.sk-pfig{margin:6px 0 8px}.sk-pfig svg{max-width:100%;height:aut
   set('dna', genDNA2); set('punnett', genPunnett2); set('fgroups', genFG2); set('vectors', genVectors2); set('circuits', genCircuit);
   const oldG = id => SK_TOPIC[id].gen; [['krebs', 'krebs'], ['glycolysis', 'glycolysis'], ['photosyn', 'calvin'], ['etc', 'etc']].forEach(([id, k]) => { const g = oldG(id); set(id, () => Math.random() < 0.5 ? genPath(id === 'photosyn' && Math.random() < 0.5 ? 'light' : k) : g()); });
 })();
-window.__sk = { TESTS, utGenerate, utItems, SK_TOPIC, SK_RXN, SK_LEW, SK_MOL, skBalanced, skDraw, skGrade, skNum, skLewE, parseOwnQuestions, htmlToDocx, docxLines, studyGuideHTML, skQuizHTML, skPrintItem, skLewisSVG, skPathSVG, skVectorSVG, skCircuitSVG, skStructSVG, SK_FGS, genPath, skLewisVariants, SK_PATHS };
+window.__sk = { TESTS, utGenerate, utItems, SK_TOPIC, SK_RXN, SK_LEW, SK_MOL, skBalanced, skDraw, skGrade, skNum, skLewE, parseOwnQuestions, htmlToDocx, docxLines, studyGuideHTML, skQuizHTML, skPrintItem, skLewisSVG, skPathSVG, skVectorSVG, skCircuitSVG, skStructSVG, SK_FGS, genPath, skLewisVariants, SK_PATHS, pid: () => PID };
 
 try { route(); } catch (e) { window.__ppErr(e && e.stack || e); }
 initAuth().catch(e => { MODE = 'blocked'; BLOCK = 'host'; }).then(() => { try { if (MODE === 'owner' && PID && !me()) PID = null; route(); } catch (e) { window.__ppErr(e && e.stack || e); }
