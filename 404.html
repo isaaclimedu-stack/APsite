@@ -1157,6 +1157,15 @@ body.acc-big #exam .qtext, body.acc-big #exam .opt, body.acc-big #exam .stem { f
 .dev-item { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
 .dev-item > div:first-child { display: grid; gap: 2px; }
 .dev-item small { color: var(--muted); }
+/* My students: full-width class table */
+.cl-box { max-width: none; }
+.cl-box .tablewrap { overflow-x: auto; }
+.cl-box table.adm { width: 100%; }
+.cl-box table.adm td, .cl-box table.adm th { vertical-align: middle; }
+.cl-box table.adm td.mono { white-space: nowrap; }
+.cl-box table.adm td:last-child { width: 1%; white-space: nowrap; }
+.cl-box table.adm td:last-child .row { flex-wrap: nowrap; justify-content: flex-end; }
+@media (max-width: 640px) { .cl-box table.adm thead { display: none; } .cl-box .tablewrap > table.adm, .cl-box table.adm tbody { display: block; min-width: 0; } .cl-box table.adm tr { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; padding: 12px 0; border-bottom: 1px solid var(--line); } .cl-box table.adm td { display: block; border: 0; padding: 0; } .cl-box table.adm td.cbx { grid-row: span 4; } .cl-box table.adm td:last-child { width: auto; } .cl-box table.adm td:last-child .row { justify-content: flex-start; margin-top: 4px; } .cl-box .tablewrap { overflow: visible; } .cl-box td.mono[data-l]::before { content: attr(data-l) " · "; font: 600 11px/1 var(--sans, inherit); color: var(--muted); } }
 
 </style>
 </head><body>
@@ -9845,7 +9854,7 @@ function renderResults(rec, fresh) {
         ${rec.ap ? `<div class="apline">${apBadge(rec.ap.score, 'lg')}<div><b>Estimated AP score: ${rec.ap.score}</b><span class="small muted">${AP_WORD[rec.ap.score]} · composite ${rec.ap.comp}% · a rough estimate, not an official score</span></div></div>` : rec.mode === 'full' && !rec.practice && t && !t.done ? '<p class="small notice" style="margin:0 0 10px">Score your free-response answers below to see your estimated AP score (1–5).</p>' : ''}
         <p class="muted" style="margin:0 0 14px">${rec.practice ? 'Practice mode · ' : ''}Time ${rec.practice ? 'spent' : 'used'}: <span class="mono">${fmtDur(rec.used)}</span>. ${msg}</p>
         ${rec.practice ? sumSW() : ''}
-        <div class="row"><button class="btn primary" id="againB">${rec.mode === 'calc' ? 'New calculation set' : rec.practice ? 'New practice set' : rec.mode === 'full' ? 'Take a new simulation' : 'Same unit again'}</button>${weakest ? `<button class="btn" id="drillW">Practice Unit ${weakest.k}: ${esc(weakest.short)}</button>` : ''}<a class="btn" href="#${x.id}">Back to ${esc(x.subject)}</a><button class="btn quiet" id="scPdf">${SVG(IC.dl)} Score card (PDF)</button>${paperSel()}</div></div>`;
+        <div class="row"><button class="btn primary" id="againB">${rec.mode === 'calc' ? 'New calculation set' : rec.practice ? 'New practice set' : rec.mode === 'full' ? 'Take a new simulation' : 'Same unit again'}</button>${weakest ? `<button class="btn" id="drillW">Practice Unit ${weakest.k}: ${esc(weakest.short)}</button>` : ''}<a class="btn" href="#${x.id}">Back to ${esc(x.subject)}</a>${isTeacher() ? `<button class="btn quiet" id="scPdf">${SVG(IC.dl)} Score card (PDF)</button>${paperSel()}` : ''}</div></div>`;
   };
   const icon = (q, i) => { if (isCR(q)) { const v = rec.cr && rec.cr.sc[i]; return `<span class="ic cr ${v == null ? 'un' : ''}">${v == null ? '?' : v}</span>`; }
     const a = rec.ans[i]; return !a.length ? '<span class="ic skip">○</span>' : isRight(q, a) ? '<span class="ic ok">✓</span>' : '<span class="ic no">✕</span>'; };
@@ -11093,12 +11102,12 @@ async function renderUtResult(idx, fresh) {
     <div class="crumb"><a href="#unit-tests">Unit Tests</a> / ${esc(r.ut.n)}</div>
     <section class="panel score">${ring(r.pct)}<div><div class="eyebrow">${esc(r.ut.n)} · ${fmtDate(r.date)}${r.auto ? ' · time ran out' : ''}</div><h1>Multiple choice: ${r.correct} of ${r.n} correct</h1>
       <p class="muted" style="margin:0 0 10px">${fr ? `Your ${fr} free-response answer${fr > 1 ? 's are' : ' is'} scored by your teacher. ` : ''}Time used: <span class="mono">${fmtDur(r.used)}</span>.</p>
-      <div class="row">${pdfBtn('utScPdf', 'Download score card (PDF)')}${paperSel()}</div></div></section>
+      ${isTeacher() ? `<div class="row">${pdfBtn('utScPdf', 'Download score card (PDF)')}${paperSel()}</div>` : ''}</div></section>
     <section class="card sendbox ${r.sent ? 'done' : ''}" id="sendBox" style="margin-top:18px">${sendBoxHTML({ to: m.to, editable: !r.ut.e, mail: m, sent: r.sent, auto: r.autoSt, site: r.site, relay: r.ut.r, unlock: r.ut.a === 'send' ? 'Your answers and explanations unlock after you confirm.' : '' })}</section>
     <section style="margin-top:18px">${reveal() ? `<h2 class="ch">Answers and explanations</h2>${utReviewHTML(r)}` : r.sent ? '<div class="card empty">Your teacher will go over the answers in class.</div>' : `<div class="card empty">${r.ut.a === 'send' ? 'Answers and explanations unlock after you send your results.' : 'Your teacher will go over the answers in class after everyone has taken the test.'}</div>`}</section>
     ${foot()}</div>`;
     bindNav(); bindCaseTabs();
-    $('#utScPdf').onclick = () => makePdf(utScorecard(r, false), fileSafe(r.ut.n + ' ' + r.name) + '-score-card.pdf', $('#utScPdf'));
+    if ($('#utScPdf')) $('#utScPdf').onclick = () => makePdf(utScorecard(r, false), fileSafe(r.ut.n + ' ' + r.name) + '-score-card.pdf', $('#utScPdf'));
     bindSendBox($('#sendBox'), { to: m.to, mail: m, relay: r.ut.r }, {
       onTo: v => { persist({ to: v }); LS.set(`ap.${PID}.teacher`, { e: v, r: '' }); renderUtResult(idx, false); },
       onSent: via => { persist({ sent: { at: new Date().toISOString(), via } }); draw(); },
@@ -11299,11 +11308,11 @@ function renderClass() {
     <section class="panel"><h2>Add students</h2><p class="small muted" style="margin-top:0">Paste one or more student emails (one per line, or separated by commas). Each student gets their own access code. Codes change on the 1st of every month (Korea time); last month’s code keeps working through the 3rd.</p>
       <textarea id="clIn" class="crin" style="min-height:90px" placeholder="jenny.park@school.org&#10;sam.lee@school.org"></textarea>
       <div class="row" style="margin-top:10px"><button class="btn primary" id="clAdd">Add students</button><span class="small" id="clMsg" role="status" style="color:var(--good);font-weight:600">${esc(CL.msg)}</span></div></section>
-    <section class="panel acc-box" style="margin-top:16px"><h2>Your class · ${list.length}</h2>
+    <section class="panel cl-box" style="margin-top:16px"><h2>Your class · ${list.length}</h2>
       ${list.length ? `<div class="mail-bar"><label class="chk"><input type="checkbox" id="clAll" ${allSel ? 'checked' : ''}> Select all</label><button class="btn primary" id="clMail" ${nSel ? '' : 'disabled'}>✉ Email codes to selected (${nSel})</button><a class="btn" href="#assign">${SVG(IC.assign)} Assign a test</a><span class="small muted">Sent this month: ${list.filter(s => sent[s.email]).length} of ${list.length}</span></div>
       <div class="tablewrap"><table class="adm"><thead><tr><th class="cbx"><span class="sr">Select</span></th><th>Student email</th><th>${esc(monthName(mk))} code</th>${late ? `<th>${esc(monthName(nk))} code</th>` : ''}<th></th></tr></thead><tbody>
       ${list.map(s => `<tr><td class="cbx"><input type="checkbox" data-cls="${esc(s.email)}" ${CL.sel.has(s.email) ? 'checked' : ''} aria-label="Select ${esc(s.email)}"></td><td><b>${esc(s.email)}</b><br><small class="muted">added ${fmtDate(s.added).split(',')[0]}</small>${sent[s.email] ? '<br><span class="st-on small">✓ code emailed</span>' : ''}</td>
-        <td class="mono"><b>${esc(CL.codes[s.email + mk] || '…')}</b> <button class="linkbtn sm" data-clc="${esc(CL.codes[s.email + mk] || '')}">Copy</button></td>${late ? `<td class="mono">${esc(CL.codes[s.email + nk] || '…')} <button class="linkbtn sm" data-clc="${esc(CL.codes[s.email + nk] || '')}">Copy</button></td>` : ''}
+        <td class="mono" data-l="${esc(monthName(mk))}"><b>${esc(CL.codes[s.email + mk] || '…')}</b> <button class="linkbtn sm" data-clc="${esc(CL.codes[s.email + mk] || '')}">Copy</button></td>${late ? `<td class="mono" data-l="${esc(monthName(nk))}">${esc(CL.codes[s.email + nk] || '…')} <button class="linkbtn sm" data-clc="${esc(CL.codes[s.email + nk] || '')}">Copy</button></td>` : ''}
         <td><div class="row" style="gap:6px"><button class="btn" data-clm="${esc(s.email)}">✉ Email</button><button class="btn danger" data-clr="${esc(s.email)}">Remove</button></div></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">No students yet. Add their emails above.</div>'}
       <p class="small muted">${DB && !GUEST ? 'Students on your list can sign in on this Claude page and on your website.' : 'Students on your list sign in on your website with their email and code.'} Removing a student takes them off your list; their code keeps working until the end of the month.</p></section>
     ${foot()}</div>`;
@@ -11504,7 +11513,7 @@ function renderCalc() {
       <div class="row2"><label>Problems<select id="cpN">${[5, 10, 15, 20].map(n => `<option ${n === CP.n ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
         <label>Calculator<select id="cpCalc"><option value="off" ${CP.nocalc ? 'selected' : ''}>Off: work by hand</option><option value="on" ${CP.nocalc ? '' : 'selected'}>On: built-in calculator allowed</option></select></label></div>
       <p class="small muted" style="margin:0">Type just the number. Answers within 2% count, so normal rounding is fine. Scientific notation works: 2.3e-5 or 2.3 × 10^-5. The unit is shown next to the answer box. Reference sheets stay available.</p>
-      <div class="row"><button class="btn primary big" id="cpGo" ${units.length ? '' : 'disabled'}>${SVG(IC.calc)} Start practice</button>${units.length ? pdfBtn('cpPdf', 'Worksheet + key (PDF)') + paperSel() : ''}</div><div class="err" id="cpErr" role="alert"></div>
+      <div class="row"><button class="btn primary big" id="cpGo" ${units.length ? '' : 'disabled'}>${SVG(IC.calc)} Start practice</button>${units.length && isTeacher() ? pdfBtn('cpPdf', 'Worksheet + key (PDF)') + paperSel() : ''}</div><div class="err" id="cpErr" role="alert"></div>
     </section>
     <section class="card"><h3 class="ch">How to practice by hand</h3><ol class="small" style="line-height:1.7;padding-left:18px;margin:0">
       <li>Write the given values with units, and the quantity you need.</li><li>Pick the equation from the reference sheet and solve for the unknown <i>before</i> plugging in numbers.</li><li>Substitute with units, and cancel units as you go.</li><li>Estimate first (powers of ten), then calculate. Does the size and sign make sense?</li><li>Round to the right number of significant figures at the end only.</li></ol>
@@ -11522,7 +11531,7 @@ function renderCalc() {
       ans: items.map(() => []), marked: items.map(() => false), visited: items.map(() => false), cur: 0, screen: 'q', remaining: 0, total: 0, spent: 0, started: new Date().toISOString(), practice: true, checked: items.map(() => false), elapsed: 0, nocalc: CP.nocalc };
       save(); enterExam(); };
     if (loadCur(x)) confirmBox('Start a new set?', `You have a ${x.subject} attempt in progress. Starting this one will discard it.`, 'Start', go2); else go2(); };
-  $('#cpPdf').onclick = () => { const items = calcDraw(x, CP.u, CP.n); if (!items.length) return;
+  if ($('#cpPdf')) $('#cpPdf').onclick = () => { const items = calcDraw(x, CP.u, CP.n); if (!items.length) return;
     const head = `<header class="ws-h"><p class="ws-kicker">Hand calculation worksheet</p><h1>${esc(x.subject)}</h1><p class="ws-units">${CP.u.map(k => 'Unit ' + k + ': ' + esc(x.CAT[k].short)).join(' · ')}</p>
       <div class="ws-fields"><div><span>Name</span><i></i></div><div><span>Date</span><i></i></div><div><span>Period</span><i></i></div></div></header>`;
     const sheet = `<div class="pp">${head}<p class="pp-i">Show your work in each box: given values with units, the equation, substitution, and the answer with units and correct significant figures. ${CP.nocalc ? 'Work these by hand, without a calculator.' : 'A calculator is allowed.'}</p>
@@ -11597,10 +11606,10 @@ function renderDefs(arg) {
       <fieldset><legend>Practice</legend><div class="df-modes" role="radiogroup" aria-label="Practice type">${DF_MODES.map(([k, l, d]) => `<label class="df-mode"><input type="radio" name="dfm" value="${k}" ${DF.mode === k ? 'checked' : ''}><span><b>${l}</b><small>${d}</small></span></label>`).join('')}</div>
         <label class="df-sel">Terms<select id="dfN">${[10, 15, 20, 30, 0].map(n => `<option value="${n}" ${n === DF.n ? 'selected' : ''}>${n || 'All (' + list.length + ')'}</option>`).join('')}</select></label>
         <div class="row"><button class="btn primary big" id="dfGo">${SVG(IC.vocab)} Start practice</button>${missed.length ? `<button class="btn" id="dfMiss">Practice missed terms (${missed.length})</button>` : ''}</div></fieldset>
-      <fieldset><legend>Printable definition test</legend>
+      ${isTeacher() ? `<fieldset><legend>Printable definition test</legend>
         <label class="df-sel">Format<select id="dfF">${DF_FMTS.map(([k, l]) => `<option value="${k}" ${DF.fmt === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
         <div class="row">${pdfBtn('dfPdf', 'Test + answer key (PDF)')}${pdfBtn('dfList', 'Study list (PDF)')}${paperSel()}</div>
-        <p class="small muted" style="margin:0">Uses the units and number of terms chosen above. Every download picks and shuffles terms again, so you can print different versions.</p></fieldset>
+        <p class="small muted" style="margin:0">Uses the units and number of terms chosen above. Every download picks and shuffles terms again, so you can print different versions.</p></fieldset>` : ''}
     </section>
     <section class="card df-terms"><div class="card-h sm"><h3>Terms in ${DF.u.length === 1 ? 'Unit ' + esc(DF.u[0]) : DF.u.length + ' units'}</h3><span class="small muted">${list.length} terms</span></div>
       <dl class="df-dl">${list.map(o => `<div><dt>${esc(o.term)}${DF.u.length > 1 ? ` <span class="muted small">· Unit ${esc(o.unit)}</span>` : ''}</dt><dd>${esc(o.def)}</dd></div>`).join('')}</dl></section></div>
@@ -11610,12 +11619,12 @@ function renderDefs(arg) {
   $$('[data-dfu]').forEach(c => c.onchange = () => { const k = c.dataset.dfu; DF.u = c.checked ? [...new Set(DF.u.concat(k))] : DF.u.filter(u => u !== k); redo(); });
   $('#dfAll').onclick = () => { DF.u = units.map(c => c.k); redo(); }; $('#dfOne').onclick = () => { DF.u = [units[0].k]; redo(); };
   $$('[name="dfm"]').forEach(r => r.onchange = () => { DF.mode = r.value; });
-  $('#dfN').onchange = () => { DF.n = +$('#dfN').value; }; $('#dfF').onchange = () => { DF.fmt = $('#dfF').value; };
+  $('#dfN').onchange = () => { DF.n = +$('#dfN').value; };  if ($('#dfF')) $('#dfF').onchange = () => { DF.fmt = $('#dfF').value; };
   const pick = () => { const all = R.shuf(defList(x, DF.u)); return DF.n ? all.slice(0, DF.n) : all; };
   $('#dfGo').onclick = () => dfStart(x, pick());
   if ($('#dfMiss')) $('#dfMiss').onclick = () => { const all = defList(x, units.map(c => c.k)); dfStart(x, R.shuf(all.filter(o => missed.includes(o.term)))); };
-  $('#dfPdf').onclick = () => { const items = pick(); if (items.length) makePdf(dfTestHTML(x, items, DF.fmt), fileSafe(x.subject + ' definitions test') + '.pdf', $('#dfPdf')); };
-  $('#dfList').onclick = () => makePdf(dfListHTML(x, DF.u), fileSafe(x.subject + ' definitions study list') + '.pdf', $('#dfList'));
+  if ($('#dfPdf')) $('#dfPdf').onclick = () => { const items = pick(); if (items.length) makePdf(dfTestHTML(x, items, DF.fmt), fileSafe(x.subject + ' definitions test') + '.pdf', $('#dfPdf')); };
+  if ($('#dfList')) $('#dfList').onclick = () => makePdf(dfListHTML(x, DF.u), fileSafe(x.subject + ' definitions study list') + '.pdf', $('#dfList'));
 }
 function dfRunner(x) {
   const r = DF.run, it = r.items[r.i], mode = DF_MODES.find(m => m[0] === r.mode);
