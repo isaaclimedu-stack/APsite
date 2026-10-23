@@ -1412,6 +1412,18 @@ body.acc-big #exam .qtext, body.acc-big #exam .opt, body.acc-big #exam .stem { f
 .cl-tanote b { font-family: var(--mono, monospace); font-size: 13.5px; }
 .cl-tanote, .cl-ta { font-family: var(--font-ui); } .cl-tanote b { font-family: var(--font-mono); } .cl-pw input { font-family: var(--font-mono); }
 
+/* sign-in page: the New here? card (shown when the sign-up service is connected) */
+.gate-new { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; margin-top: 16px; border-color: color-mix(in srgb, var(--accent) 28%, var(--line)); background: color-mix(in srgb, var(--accent) 5%, var(--surface)); }
+.gate-new[hidden] { display: none; }
+.gate-new > div { display: grid; gap: 2px; min-width: 0; }
+.gate-new b { font-size: 15.5px; }
+.gate-new .gn-ic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: color-mix(in srgb, var(--accent) 14%, var(--surface)); color: var(--accent); }
+.gate-new .gn-ic svg { width: 22px; height: 22px; }
+.gate-new .btn { min-width: 112px; }
+@media (max-width: 460px) { .gate-new { grid-template-columns: auto minmax(0, 1fr); } .gate-new .btn { grid-column: 1 / -1; width: 100%; } }
+.gate-help { line-height: 1.65; margin: 14px 2px 0; }
+.nowrap { white-space: nowrap; }
+
 </style>
 </head><body>
 <div id="app">
@@ -12829,7 +12841,8 @@ function renderGate(err) {
       <p class="small muted" style="margin:-4px 0 0">Your browser can save and fill in your code next time.</p>
       <button class="btn primary" type="submit" id="gGo">Sign in</button>
       <div class="err" id="gErr" role="alert">${err ? esc(err) : ''}</div></form></section>
-    <p class="small muted"><button class="linkbtn sm" id="gForgot">Forgot your code?</button> · Don't have a code? Ask the site owner (${OWNER_EMAIL}).</p>
+    <section class="panel gate-new" data-su-box hidden><span class="gn-ic" aria-hidden="true">${SVG(IC.users)}</span><div><b>New here?</b><span class="small muted">Sign up and we’ll email your access code.</span></div><button type="button" class="btn primary" id="suOpen" data-native="1">Sign up</button></section>
+    <p class="small muted gate-help"><button class="linkbtn sm" id="gForgot">Forgot your code?</button><br>Don't have a code? <span data-su-show hidden>Sign up above, or email</span><span data-su-hide>Ask the site owner:</span> <span class="nowrap">${OWNER_EMAIL}</span>.</p>
     <section class="panel take-cta"><div><b>Taking a test from your teacher?</b><span class="small muted">You don’t need an account. Enter the test code.</span></div><a class="btn" href="#take">Enter a test code ${SVG(IC.arrow)}</a></section></div>`;
   $('#gForm').onsubmit = async e => {
     e.preventDefault(); const email = !GUEST && ACCT_EMAIL ? ACCT_EMAIL : normEmail($('#gName').value), code = $('#gCode').value;
