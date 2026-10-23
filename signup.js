@@ -80,7 +80,7 @@ const SIGNUP_ENDPOINT = 'https://script.google.com/macros/s/AKfycby1jWaTEgqIqPZG
   const place = () => {
     /* a site that has its own New here? card (Educator Hub): just switch it on and connect its button */
     const nat = document.querySelector('#suOpen[data-native]');
-    if (nat) { if (!nat.dataset.bound) { nat.dataset.bound = '1'; nat.onclick = open; const b = nat.closest('[data-su-box]'); if (b) b.hidden = false;
+    if (nat) { window.SIGNUP = { endpoint: SIGNUP_ENDPOINT, site: SITE }; if (!nat.dataset.bound) { nat.dataset.bound = '1'; const b = nat.closest('[data-su-box]'); if (b) b.hidden = false;
       document.querySelectorAll('[data-su-show]').forEach(e => { e.hidden = false; }); document.querySelectorAll('[data-su-hide]').forEach(e => { e.hidden = true; }); } return; }
     const f = document.getElementById('gForgot'); if (!f || document.getElementById('suOpen')) return;
     const p = f.closest('p') || f; const box = document.createElement('div'); box.className = 'su-cta';

@@ -1423,6 +1423,32 @@ body.acc-big #exam .qtext, body.acc-big #exam .opt, body.acc-big #exam .stem { f
 @media (max-width: 460px) { .gate-new { grid-template-columns: auto minmax(0, 1fr); } .gate-new .btn { grid-column: 1 / -1; width: 100%; } }
 .gate-help { line-height: 1.65; margin: 14px 2px 0; }
 .nowrap { white-space: nowrap; }
+/* sign-up form (website) */
+.su2 { width: min(520px, 100%); }
+.su2-f { display: grid; gap: 14px; }
+.su2-f label { display: grid; gap: 6px; font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.su2-f label .muted { font-weight: 400; }
+.su2-f input:not([type=checkbox]) { font: inherit; font-size: 15px; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); width: 100%; min-width: 0; box-sizing: border-box; }
+.su2-f input:not([type=checkbox]):focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+.su2-role { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.su2-role button { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 10px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--muted); font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
+.su2-role button svg { width: 18px; height: 18px; }
+.su2-role button[aria-checked="true"] { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+.su2-lead { margin: -2px 0 0; line-height: 1.5; }
+.su2-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 480px) { .su2-two { grid-template-columns: minmax(0, 1fr); } }
+.su2-f .su2-opt { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; font-size: 13px; line-height: 1.5; color: var(--muted); cursor: pointer; padding: 10px 12px; border-radius: 10px; background: var(--sunk); }
+.su2-opt input { margin-top: 2px; width: 17px; height: 17px; flex: none; accent-color: var(--accent); }
+.su2-msg { margin: 0; min-height: 0; font-size: 13.5px; font-weight: 600; color: var(--good); }
+.su2-msg:empty { display: none; }
+.su2-msg.bad { color: var(--bad); }
+.su2-act { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+.su2-note { margin: 0; line-height: 1.5; }
+.su2-done { display: grid; justify-items: center; text-align: center; gap: 8px; padding-bottom: 22px; }
+.su2-done p { margin: 0; max-width: 40ch; }
+.su2-big { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--good) 14%, var(--surface)); color: var(--good); }
+.su2-big svg { width: 26px; height: 26px; }
+.su-hp { position: absolute !important; left: -9999px !important; width: 1px; height: 1px; opacity: 0; }
 
 </style>
 </head><body>
@@ -12841,8 +12867,8 @@ function renderGate(err) {
       <p class="small muted" style="margin:-4px 0 0">Your browser can save and fill in your code next time.</p>
       <button class="btn primary" type="submit" id="gGo">Sign in</button>
       <div class="err" id="gErr" role="alert">${err ? esc(err) : ''}</div></form></section>
-    <section class="panel gate-new" data-su-box hidden><span class="gn-ic" aria-hidden="true">${SVG(IC.users)}</span><div><b>New here?</b><span class="small muted">Sign up and we’ll email your access code.</span></div><button type="button" class="btn primary" id="suOpen" data-native="1">Sign up</button></section>
-    <p class="small muted gate-help"><button class="linkbtn sm" id="gForgot">Forgot your code?</button><br>Don't have a code? <span data-su-show hidden>Sign up above, or email</span><span data-su-hide>Ask the site owner:</span> <span class="nowrap">${OWNER_EMAIL}</span>.</p>
+    <section class="panel gate-new" data-su-box ${window.SIGNUP ? '' : 'hidden'}><span class="gn-ic" aria-hidden="true">${SVG(IC.users)}</span><div><b>New here?</b><span class="small muted">Students and teachers: sign up and we’ll email your access code.</span></div><button type="button" class="btn primary" id="suOpen" data-native="1">Sign up</button></section>
+    <p class="small muted gate-help"><button class="linkbtn sm" id="gForgot">Forgot your code?</button><br>Don't have a code? <span data-su-show ${window.SIGNUP ? '' : 'hidden'}>Sign up above, or email</span><span data-su-hide ${window.SIGNUP ? 'hidden' : ''}>Ask the site owner:</span> <span class="nowrap">${OWNER_EMAIL}</span>.</p>
     <section class="panel take-cta"><div><b>Taking a test from your teacher?</b><span class="small muted">You don’t need an account. Enter the test code.</span></div><a class="btn" href="#take">Enter a test code ${SVG(IC.arrow)}</a></section></div>`;
   $('#gForm').onsubmit = async e => {
     e.preventDefault(); const email = !GUEST && ACCT_EMAIL ? ACCT_EMAIL : normEmail($('#gName').value), code = $('#gCode').value;
@@ -12865,6 +12891,7 @@ function renderGate(err) {
   formFix('#gForm'); (!GUEST && ACCT_EMAIL ? $('#gCode') : $('#gName')).focus();
   $('#gShow').onclick = () => { const v = $('#gCode').type === 'password'; $('#gCode').type = v ? 'text' : 'password'; $('#gShow').textContent = v ? 'Hide' : 'Show'; $('#gShow').setAttribute('aria-pressed', v); };
   $('#gForgot').onclick = () => openForgot($('#gName').value);
+  $('#suOpen').onclick = () => openSignup();
   /* ask the browser's password manager for a saved code (Chrome/Edge); other browsers fill the fields themselves */
   try { if (window.PasswordCredential && navigator.credentials && GUEST) navigator.credentials.get({ password: true, mediation: 'optional' }).then(c => { if (c && c.password && $('#gCode') && !$('#gCode').value) { if (!$('#gName').readOnly) $('#gName').value = c.id; $('#gCode').value = c.password; } }).catch(() => {}); } catch (e) {}
 }
@@ -14683,6 +14710,62 @@ async function renderDevice(err) {
   $$('[data-devsub]').forEach(b => b.onclick = () => { const o = DEV.list[+b.dataset.devsub];
     confirmBox('Submit this test now?', `${o.name || 'The student'}’s answers so far are scored and saved. Unanswered questions count as wrong.`, 'Submit', () => {
       LS.del(o.key); T = o.c; X = o.x || BY_ID[T.testId]; DEV = { pw: DEV.pw, list: null }; inExam = false; if (T.lk) T.lk.off = true; finish(false); }); });
+}
+
+/* ═════ SIGN UP (website only) ═════
+   signup.js (loaded only on scholarlab.net) connects the sign-up service and sets window.SIGNUP = { endpoint, site }.
+   The form itself is drawn here, in the site's own design. Students and teachers both sign up here; teacher
+   requests always wait for the owner's approval in the sign-up script. */
+const SU_OPT = { student: 'Email me news about new products from Comma, the team behind Educator Hub. Optional. If you’re under 14, ask a parent first. You can unsubscribe anytime.',
+  teacher: 'Email me about new Comma products, teaching resources, and updates. Optional. You can unsubscribe anytime.' };
+let SU = { role: 'student' };
+function openSignup() {
+  const cfg = window.SIGNUP; if (!cfg || !cfg.endpoint) return;
+  const keep = {}; const grab = () => $$('.su2 input[id]').forEach(i => { keep[i.id] = i.type === 'checkbox' ? i.checked : i.value; });
+  const draw = (msg, bad) => {
+    const t = SU.role === 'teacher', v = id => esc(keep[id] != null ? keep[id] : '');
+    $('#modal-root').innerHTML = `<div class="scrim" id="scrim"><div class="modal sm su2" role="dialog" aria-modal="true" aria-labelledby="suT"><div class="mhead"><h3 id="suT">Sign up for ${BRAND}</h3><button class="btn" id="suX">Close</button></div>
+      <form class="mbody su2-f" id="suF" novalidate>
+        <div class="su2-role" role="radiogroup" aria-label="I am a">${[['student', 'I’m a student', 'cap'], ['teacher', 'I’m a teacher', 'teacher']].map(([k, l, ic]) => `<button type="button" role="radio" aria-checked="${SU.role === k}" data-surole="${k}">${SVG(IC[ic] || IC.users)}<span>${l}</span></button>`).join('')}</div>
+        <p class="small muted su2-lead">${t ? 'Teacher accounts unlock answer keys, Create Unit Test, and Teacher access, so each one is approved by the site owner. You’ll get your teacher code by email.' : 'Free practice for AP, high school, and middle school courses. We’ll email your access code.'}</p>
+        <label>Full name<input id="suName" autocomplete="name" maxlength="60" placeholder="First and last name" value="${v('suName')}"></label>
+        <label>${t ? 'School email' : 'Email'}<input id="suEmail" type="email" autocomplete="email" maxlength="80" placeholder="${t ? 'you@school.org' : 'you@example.com'}" value="${v('suEmail')}"></label>
+        ${t ? `<label>School<input id="suSchool" maxlength="80" placeholder="e.g. Seoul International School" value="${v('suSchool')}"></label>
+          <label><span>What you teach <span class="muted">(optional)</span></span><input id="suSubj" maxlength="80" placeholder="e.g. AP Chemistry, Biology 9" value="${v('suSubj')}"></label>`
+        : `<div class="su2-two"><label><span>Class code <span class="muted">(if you have one)</span></span><input id="suJoin" maxlength="40" placeholder="e.g. BIO-P2" autocapitalize="characters" value="${v('suJoin')}"></label>
+          <label><span>Teacher’s email <span class="muted">(optional)</span></span><input id="suTch" type="email" maxlength="80" placeholder="teacher@school.org" value="${v('suTch')}"></label></div>`}
+        <input class="su-hp" id="suHp" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <label class="su2-opt"><input type="checkbox" id="suOpt" ${keep.suOpt ? 'checked' : ''}><span>${SU_OPT[SU.role]}</span></label>
+        <p class="su2-msg ${bad ? 'bad' : ''}" id="suMsg" role="status">${msg ? esc(msg) : ''}</p>
+        <div class="su2-act"><button type="button" class="btn" id="suCancel">Cancel</button><button type="submit" class="btn primary" id="suGo">${t ? 'Request teacher access' : 'Sign up'}</button></div>
+        <p class="small muted su2-note">We use your email only to send your ${t ? 'teacher code' : 'access code'} and, if you tick the box, product news. Questions: <span class="nowrap">${OWNER_EMAIL}</span></p>
+      </form></div></div>`;
+    const close = () => closeModal();
+    $('#suX').onclick = close; $('#suCancel').onclick = close; $('#scrim').onclick = e => { if (e.target.id === 'scrim') close(); };
+    $$('[data-surole]').forEach(b => b.onclick = () => { grab(); SU.role = b.dataset.surole; draw(); const f = $(`[data-surole="${SU.role}"]`); if (f) f.focus(); });
+    $$('#suF input').forEach(i => i.addEventListener('input', () => { const m = $('#suMsg'); if (m && m.classList.contains('bad')) { m.textContent = ''; m.className = 'su2-msg'; } }));
+    $('#suF').onsubmit = async e => {
+      e.preventDefault(); grab();
+      const say = (m, isBad) => { $('#suMsg').textContent = m; $('#suMsg').className = 'su2-msg' + (isBad ? ' bad' : ''); };
+      const name = $('#suName').value.trim().replace(/\s+/g, ' '), email = normEmail($('#suEmail').value);
+      if (name.length < 2 || (t && !/\s/.test(name))) { say(t ? 'Please enter your first and last name.' : 'Please enter your name.', true); return $('#suName').focus(); }
+      if (!isEmail(email)) { say('Please enter a valid email address.', true); return $('#suEmail').focus(); }
+      if (t && !$('#suSchool').value.trim()) { say('Please enter your school.', true); return $('#suSchool').focus(); }
+      const val = id => ($('#' + id) ? $('#' + id).value.trim() : '');
+      const details = t ? ['School: ' + val('suSchool'), val('suSubj') && 'Teaches: ' + val('suSubj')].filter(Boolean).join(' · ') : [val('suTch') && 'Teacher: ' + val('suTch'), val('suJoin') && 'Class code: ' + val('suJoin')].filter(Boolean).join(' · ');
+      $('#suGo').disabled = true; say('Sending…');
+      try {
+        const r = await fetch(cfg.endpoint, { method: 'POST', body: JSON.stringify({ site: cfg.site || 'scholarlab', role: SU.role, name, email, join: val('suJoin'), details, optIn: $('#suOpt').checked, optInText: SU_OPT[SU.role], hp: $('#suHp').value }) });
+        const d = await r.json();
+        if (!d.ok) { say(d.msg || 'Something went wrong. Please try again.', true); $('#suGo').disabled = false; return; }
+        $('.su2').innerHTML = `<div class="mhead"><h3>${d.status === 'sent' ? 'Check your email' : 'Request sent'}</h3><button class="btn" id="suX2">Close</button></div>
+          <div class="mbody su2-done"><span class="su2-big" aria-hidden="true">${SVG(d.status === 'sent' ? IC.check : IC.clock || IC.check)}</span><p>${esc(d.msg)}</p><p class="small muted">Don’t see it in a few minutes? Check your spam folder.</p><button class="btn primary" id="suOk">OK</button></div>`;
+        $('#suX2').onclick = close; $('#suOk').onclick = close; $('#suOk').focus(); SU = { role: 'student' };
+      } catch (er) { say('Couldn’t reach the sign-up service. Check your connection, or email ' + OWNER_EMAIL + '.', true); $('#suGo').disabled = false; }
+    };
+  };
+  const g = $('#gName'); if (g && isEmail(normEmail(g.value)) && keep.suEmail == null) keep.suEmail = g.value.trim();
+  draw(); const n = $('#suName'); if (n) n.focus();
 }
 
 /* Unit formulas for the hand-calculation worksheet: the equations and constants each unit uses,
