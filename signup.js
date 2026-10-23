@@ -8,10 +8,11 @@ const SIGNUP_ENDPOINT = 'https://script.google.com/macros/s/AKfycby1jWaTEgqIqPZG
   const me = document.currentScript, host = location.hostname.replace(/^www\./, '');
   const SITE = (me && me.dataset.site) || (/scholarlab/.test(host) ? 'scholarlab' : /comma/.test(host) ? 'comma' : '');
   if (!ok || !SITE) return; /* nothing shows until the script's address is pasted above */
+  window.SIGNUP = { endpoint: SIGNUP_ENDPOINT, site: SITE }; window.dispatchEvent(new Event('signup-ready')); /* the site uses this for its own sign-up form and live access checks */
   const T = {
-    comma: { title: 'Get your Comma access code', lead: 'Comma is free practice for teacher certification exams. Tell us who you are and we’ll email your access code.',
+    comma: { contact: 'admin@comma-ltd.com', title: 'Get your Comma access code', lead: 'Comma is free practice for teacher certification exams. Tell us who you are and we’ll email your access code.',
       extra: ['School or organization (optional)', 'suOrg', 'e.g. Lincoln High School'], opt: 'Email me about new Comma products, practice tests, and updates. Optional. You can unsubscribe anytime.' },
-    scholarlab: { title: 'Sign up for Educator Hub', lead: 'Free practice for AP, high school, and middle school courses. Tell us who you are and we’ll email your access code.',
+    scholarlab: { contact: 'admin@scholarlab.net', title: 'Sign up for Educator Hub', lead: 'Free practice for AP, high school, and middle school courses. Tell us who you are and we’ll email your access code.',
       extra: ['Class code (if your teacher gave you one)', 'suJoin', 'e.g. BIO-P2'], extra2: ['Your teacher’s email (optional)', 'suTeacher', 'teacher@school.org'],
       opt: 'Email me news about new products from Comma, the team behind Educator Hub. Optional. If you’re under 14, ask a parent first. You can unsubscribe anytime.' },
   }[SITE];
@@ -52,7 +53,7 @@ const SIGNUP_ENDPOINT = 'https://script.google.com/macros/s/AKfycby1jWaTEgqIqPZG
       <label class="su-opt"><input type="checkbox" id="suOpt"><span>${esc(T.opt)}</span></label>
       <p class="su-msg" id="suMsg" role="status"></p>
       <div class="su-row"><button type="button" id="suX">Cancel</button><button type="submit" class="su-go" id="suGo">Sign up</button></div>
-      <p class="su-small">We use your email only to send your access code and, if you tick the box, product news. Questions: admin@comma-ltd.com</p></form></div>`;
+      <p class="su-small">We use your email only to send your access code and, if you tick the box, product news. Questions: ${T.contact}</p></form></div>`;
     document.body.appendChild(ov);
     const $ = s => ov.querySelector(s), close = () => { ov.remove(); document.removeEventListener('keydown', onKey); };
     const onKey = e => { if (e.key === 'Escape') close(); }; document.addEventListener('keydown', onKey);
@@ -73,7 +74,7 @@ const SIGNUP_ENDPOINT = 'https://script.google.com/macros/s/AKfycby1jWaTEgqIqPZG
         if (!d.ok) { msg(d.msg || 'Something went wrong. Please try again.', 'bad'); $('#suGo').disabled = false; return; }
         $('.su-card').innerHTML = `<div class="su-done"><div class="su-ic">${d.status === 'sent' ? '✉️' : '⏳'}</div><h2>${d.status === 'sent' ? 'Check your email' : 'Request sent'}</h2><p class="su-lead">${esc(d.msg)}</p><p class="su-small">Don’t see it in a few minutes? Check your spam folder.</p><div class="su-row" style="justify-content:center"><button type="button" class="su-go" id="suOk">OK</button></div></div>`;
         $('#suOk').onclick = close; $('#suOk').focus();
-      } catch (er) { msg('Couldn’t reach the sign-up service. Check your connection, or email admin@comma-ltd.com.', 'bad'); $('#suGo').disabled = false; }
+      } catch (er) { msg('Couldn’t reach the sign-up service. Check your connection, or email ' + T.contact + '.', 'bad'); $('#suGo').disabled = false; }
     };
   }
   /* put the Sign up button on the sign-in page whenever it appears */

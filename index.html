@@ -1145,7 +1145,7 @@ body.locked #exam textarea, body.locked #exam input { -webkit-user-select: text;
 .pw-box .ico { width: 16px; height: 16px; flex: none; color: var(--mark); }
 .lk-key { display: flex; gap: 8px; justify-content: center; margin: 6px 0 4px; }
 .lk-key input { flex: 1; min-width: 0; max-width: 240px; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; font-size: 16px; }
-.acc-box { max-width: 560px; text-align: left; }
+.acc-box { max-width: none; text-align: left; }
 .acc-box h2 { text-align: center; }
 .acc-sec { display: grid; gap: 8px; padding: 10px 0; border-top: 1px solid var(--line); }
 .acc-btns { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -12786,7 +12786,7 @@ async function enterGuestGate() {
   GUEST = true; DB = null; WRITE_OK = false;
   const local = LS.get('ap.member.' + memberKey(), null);
   if (LS.get('ap.signedout.' + memberKey(), false)) { MODE = 'gate'; return; }
-  if (local && local.email && !EMBED_REVOKED.includes(await sha256hex('rev|' + normEmail(local.email))) && !(EMBED_ACCESS && (EMBED_ACCESS.off || []).includes(await emHash(local.email))) && await sessionOK(local)) { MEMBER = local; enterMember(); return; }
+  if (local && local.email && !EMBED_REVOKED.includes(await sha256hex('rev|' + normEmail(local.email))) && !(EMBED_ACCESS && (EMBED_ACCESS.off || []).includes(await emHash(local.email))) && await sessionOK(local)) { MEMBER = local; enterMember(); setTimeout(liveRecheck, 0); return; }
   if (local && local.email) GATE_MSG = 'Access codes change every month. Enter this month\'s code from the site owner to keep practicing — your scores are still here.';
   MODE = 'gate';
 }
@@ -12877,8 +12877,9 @@ function renderGate(err) {
     if (normCode(code).length < 4) return fail('Enter your access code.');
     $('#gGo').disabled = true;
     const asTeacher = async () => { MEMBER = { name: email, email, role: 'teacher', ck: await ckOf(email, code), joinedAt: new Date().toISOString() }; GATE_MSG = ''; saveCred(email, code); enterMember(); go(ROUTE || 'home'); };
-    if (GUEST) { if (await teacherOK(email, code)) return asTeacher();
+    if (GUEST) { if (await teacherOK(email, code)) { if (await liveAccess(email, 'teacher', true) === false) return fail(OFF_MSG()); return asTeacher(); }
       if (!(await guestValid(email, code))) return fail('That email and access code don\'t match. Monthly codes change on the 1st, so check you have the latest one, or use "Forgot your code?" below.');
+      if (await liveAccess(email, 'student', true) === false) return fail(OFF_MSG());
       MEMBER = { name: email, email, ck: await ckOf(email, code), joinedAt: new Date().toISOString() }; GATE_MSG = ''; saveCred(email, code); enterMember(); go(ROUTE || 'home'); return; }
     await loadAccess();
     if (await teacherOK(email, code)) return asTeacher();
@@ -14766,6 +14767,29 @@ function openSignup() {
   };
   const g = $('#gName'); if (g && isEmail(normEmail(g.value)) && keep.suEmail == null) keep.suEmail = g.value.trim();
   draw(); const n = $('#suName'); if (n) n.focus();
+}
+/* live access check (website only): the sign-up Sheet can turn someone off without rebuilding the site.
+   Only "Removed" or "Declined" there locks a person out; if the service can't be reached, the person stays in. */
+/* signup.js is a deferred script, so it has run by the time the page finishes loading */
+const signupReady = async () => { if (document.readyState === 'loading') await new Promise(r => document.addEventListener('DOMContentLoaded', r, { once: true })); return window.SIGNUP || null; };
+async function liveAccess(email, role, fresh) {
+  const cfg = await signupReady(); if (!cfg || !cfg.endpoint || !email) return null;
+  const k = 'ap.live.' + hashStr(normEmail(email) + '|' + (role || 'student')), c = LS.get(k, null);
+  if (!fresh && c && c.on && Date.now() - c.t < 6 * 3600e3) return true;
+  try {
+    const ac = new AbortController(), tm = setTimeout(() => ac.abort(), 6000);
+    const r = await fetch(`${cfg.endpoint}?a=status&site=${encodeURIComponent(cfg.site || 'scholarlab')}&r=${role === 'teacher' ? 'teacher' : 'student'}&e=${encodeURIComponent(normEmail(email))}`, { signal: ac.signal });
+    clearTimeout(tm); const d = await r.json(); if (!d || !d.ok) return null;
+    LS.set(k, { on: !!d.on, t: Date.now() }); return !!d.on;
+  } catch (e) { return null; }
+}
+const OFF_MSG = () => `Your access has been turned off. If you think this is a mistake, email ${OWNER_EMAIL}.`;
+/* after a remembered sign-in, check quietly in the background */
+function liveRecheck() {
+  if (!GUEST || !MEMBER || !MEMBER.email) return; const m = MEMBER;
+  liveAccess(m.email, m.role).then(on => { if (on !== false || MEMBER !== m) return;
+    leaveExam(); const s = LS.get('ap.member.' + memberKey(), null); if (s) { delete s.ck; delete s.exp; LS.set('ap.member.' + memberKey(), s); }
+    MEMBER = null; PID = null; MODE = 'gate'; GATE_MSG = OFF_MSG(); go('home'); route(); });
 }
 
 /* Unit formulas for the hand-calculation worksheet: the equations and constants each unit uses,
@@ -16730,7 +16754,7 @@ const SK_CSS = `.sk-pfig{margin:6px 0 8px}.sk-pfig svg{max-width:100%;height:aut
   set('dna', genDNA2); set('punnett', genPunnett2); set('fgroups', genFG2); set('vectors', genVectors2); set('circuits', genCircuit);
   const oldG = id => SK_TOPIC[id].gen; [['krebs', 'krebs'], ['glycolysis', 'glycolysis'], ['photosyn', 'calvin'], ['etc', 'etc']].forEach(([id, k]) => { const g = oldG(id); set(id, () => Math.random() < 0.5 ? genPath(id === 'photosyn' && Math.random() < 0.5 ? 'light' : k) : g()); });
 })();
-window.__sk = { TESTS, utGenerate, utItems, SK_TOPIC, SK_RXN, SK_LEW, SK_MOL, skBalanced, skDraw, skGrade, skNum, skLewE, parseOwnQuestions, htmlToDocx, docxLines, studyGuideHTML, skQuizHTML, skPrintItem, skLewisSVG, skPathSVG, skVectorSVG, skCircuitSVG, skStructSVG, SK_FGS, genPath, skLewisVariants, SK_PATHS, pid: () => PID };
+window.__sk = { TESTS, utGenerate, utItems, SK_TOPIC, SK_RXN, SK_LEW, SK_MOL, skBalanced, skDraw, skGrade, skNum, skLewE, parseOwnQuestions, htmlToDocx, docxLines, studyGuideHTML, skQuizHTML, skPrintItem, skLewisSVG, skPathSVG, skVectorSVG, skCircuitSVG, skStructSVG, SK_FGS, genPath, skLewisVariants, SK_PATHS, pid: () => PID, dbg: () => ({ GUEST, MODE, m: MEMBER && MEMBER.email }) };
 
 try { route(); } catch (e) { window.__ppErr(e && e.stack || e); }
 initAuth().catch(e => { MODE = 'blocked'; BLOCK = 'host'; }).then(() => { try { if (MODE === 'owner' && PID && !me()) PID = null; route(); } catch (e) { window.__ppErr(e && e.stack || e); }
